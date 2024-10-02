@@ -1,0 +1,47 @@
+import React from "react";
+import DarkModeSwitcher from "./DarkModeSwitcher";
+import DropdownUser from "./DropdownUser";
+import { CiSearch } from "react-icons/ci";
+import { FaBars } from "react-icons/fa6";
+
+const Header = (props) => {
+  return (
+    <header className="header bg-white sticky top-0 z-30 flex w-full drop-shadow-md dark:bg-boxdark dark:drop-shadow-none">
+      <div className="header-container flex flex-grow items-center justify-between px-4 py-4 md:px-6 2xl:px-11">
+        <div className="bar-btn block lg:hidden">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              props.setSidebarOpen(true);
+            }}
+            className="rounded-sm border border-stroke text-boxdark p-2 text-lg dark:border-strokedark dark:text-white"
+          >
+            <FaBars />
+          </button>
+        </div>
+        <div className="search hidden sm:block text-lg">
+          <form action="">
+            <div className="flex pl-5">
+              <button>
+                <CiSearch className="fill-body stroke-[1] dark:fill-bodydark text-xl hover:fill-primary dark:hover:fill-primary" />
+              </button>
+              <input
+                type="text"
+                className="w-full bg-transparent focus:outline-none text-black dark:text-white pl-5 pr-4"
+                placeholder="Type to search..."
+              />
+            </div>
+          </form>
+        </div>
+        <div className="user-interactions">
+          <ul className="flex gap-4 items-center lg:gap-9">
+            <DarkModeSwitcher />
+            <DropdownUser />
+          </ul>
+        </div>
+      </div>
+    </header>
+  );
+};
+
+export default Header;
