@@ -4,6 +4,7 @@ import DarkModeSwitcher from "../../components/Admin/Header/DarkModeSwitcher";
 import { Toast } from "primereact/toast"; // PrimeReact Toast
 import { useNavigate } from "react-router-dom"; // For redirection
 import Cookies from 'js-cookie';
+import axios from 'axios'; // Importing axios
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -16,45 +17,28 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
-
-    if (!email || !password) {
-      setError("Please fill out all fields.");
-      toast.current.show({ severity: "error", summary: "Error", detail: "Please fill out all fields", life: 3000 });
-      return;
-    }
-
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:5000/api/v1/users/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
+      const response = await axios.post("http://localhost:5000/api/v1/users/login", {
+        email,
+        password,
       });
 
-      const data = await response.json();
       setLoading(false);
+      const data = response.data;
 
-      if (response.ok) {
-        // Login successful
-        Cookies.set("authToken", data.data.token);
-        toast.current.show({ severity: "success", summary: "Success", detail: "Login successful", life: 3000 });
-        
-        // Redirect to home page after successful login
-        setTimeout(() => {
-          navigate("/"); // Change '/' to your home page route
-        }, 2000);
-      } else {
-        // Login failed
-        setError(data.message || "Login failed. Please check your credentials.");
-        toast.current.show({ severity: "error", summary: "Error", detail: data.message || "Login failed", life: 3000 });
-      }
+      // Login successful
+      Cookies.set("authToken", data.data.token);
+      toast.current.show({ severity: "success", summary: "Success", detail: data.message, life: 3000 });
+
+      // Redirect to home page after successful login
+      setTimeout(() => {
+        navigate("/"); // Change '/' to your home page route
+      }, 2000);
     } catch (err) {
       setLoading(false);
-      setError("An error occurred. Please try again later.");
-      toast.current.show({ severity: "error", summary: "Error", detail: "An error occurred. Please try again.", life: 3000 });
+      setError(err.response?.data.message || "Login failed. Please check your credentials.");
     }
   };
 
@@ -63,12 +47,11 @@ const Login = () => {
       <div className="absolute top-4 right-4">
         <DarkModeSwitcher />
       </div>
-      <Toast ref={toast} /> {/* PrimeReact Toast component */}
+      <Toast ref={toast} position="bottom-left" /> {/* PrimeReact Toast component */}
       <div className="w-full max-w-md p-8 space-y-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
         <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white">
           Log In to Shopfiy
         </h2>
-        {error && <div className="text-red-500 text-center">{error}</div>}
         <form onSubmit={handleLogin} className="space-y-4">
           {/* Email Field */}
           <div className="relative">
@@ -77,12 +60,11 @@ const Login = () => {
             </label>
             <input
               id="email"
-              type="email"
-              value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
-              required
-              className="w-full px-4 py-2 pl-10 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={`w-full px-4 py-2 pl-10 border ${
+                error ? "border-red-500" : "border-gray-300"
+              } dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500`}
             />
             <AiOutlineMail className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
           </div>
@@ -95,14 +77,15 @@ const Login = () => {
             <input
               id="password"
               type="password"
-              value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter your password"
-              required
-              className="w-full px-4 py-2 pl-10 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={`w-full px-4 py-2 pl-10 border ${
+                error ? "border-red-500" : "border-gray-300"
+              } dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500`}
             />
             <AiOutlineLock className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
           </div>
+          {error && <div className="text-red-500">{error}</div>} {/* Password error message */}
 
           {/* Submit Button */}
           <button
