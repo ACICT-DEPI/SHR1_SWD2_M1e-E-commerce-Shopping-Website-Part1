@@ -1,23 +1,60 @@
-import React, { useState } from "react";
-import { AiOutlineMail, AiOutlineLock } from "react-icons/ai"; // Icons for inputs
-import DarkModeSwitcher from "../../components/Admin/Header/DarkModeSwitcher"; // Adjust the path as necessary
+import React, { useState, useRef } from "react";
+import { AiOutlineMail, AiOutlineLock } from "react-icons/ai";
+import DarkModeSwitcher from "../../components/Admin/Header/DarkModeSwitcher";
+import { Toast } from "primereact/toast"; // PrimeReact Toast
+import { useNavigate } from "react-router-dom"; // For redirection
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const toast = useRef(null); // Toast reference
+  const navigate = useNavigate(); // Navigate for redirection
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
 
     if (!email || !password) {
       setError("Please fill out all fields.");
+      toast.current.show({ severity: "error", summary: "Error", detail: "Please fill out all fields", life: 3000 });
       return;
     }
 
-    // Perform login logic here
-    console.log({ email, password });
+    setLoading(true);
+
+    try {
+      const response = await fetch("http://localhost:5000/users/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+      setLoading(false);
+
+      if (response.ok) {
+        // Login successful
+        localStorage.setItem("authToken", data.token);
+        toast.current.show({ severity: "success", summary: "Success", detail: "Login successful", life: 3000 });
+        
+        // Redirect to home page after successful login
+        setTimeout(() => {
+          navigate("/"); // Change '/' to your home page route
+        }, 2000);
+      } else {
+        // Login failed
+        setError(data.message || "Login failed. Please check your credentials.");
+        toast.current.show({ severity: "error", summary: "Error", detail: data.message || "Login failed", life: 3000 });
+      }
+    } catch (err) {
+      setLoading(false);
+      setError("An error occurred. Please try again later.");
+      toast.current.show({ severity: "error", summary: "Error", detail: "An error occurred. Please try again.", life: 3000 });
+    }
   };
 
   return (
@@ -25,6 +62,7 @@ const Login = () => {
       <div className="absolute top-4 right-4">
         <DarkModeSwitcher />
       </div>
+      <Toast ref={toast} /> {/* PrimeReact Toast component */}
       <div className="w-full max-w-md p-8 space-y-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
         <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white">
           Log In to Shopfiy
@@ -69,8 +107,9 @@ const Login = () => {
           <button
             type="submit"
             className="w-full py-2 mt-4 text-white rounded-md bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={loading}
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </button>
 
           {/* Google Login */}

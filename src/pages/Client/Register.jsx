@@ -1,6 +1,8 @@
-import React, { useState } from "react";
-import { AiOutlineUser, AiOutlineMail, AiOutlineLock } from "react-icons/ai"; // Icons for inputs
-import DarkModeSwitcher from "../../components/Admin/Header/DarkModeSwitcher"; // Adjust the path as necessary
+import React, { useState, useRef } from "react";
+import { AiOutlineUser, AiOutlineMail, AiOutlinePhone, AiOutlineLock } from "react-icons/ai";
+import { useNavigate } from "react-router-dom";
+import DarkModeSwitcher from "../../components/Admin/Header/DarkModeSwitcher";
+import { Toast } from "primereact/toast"; // Import Toast from PrimeReact
 
 const Register = () => {
   const [firstName, setFirstName] = useState("");
@@ -8,30 +10,75 @@ const Register = () => {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState(""); // New state for confirm password
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const toast = useRef(null); // Reference for Toast
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
-    setError("");
+    setLoading(true);
 
+    // Check if passwords match
     if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+      toast.current.show({ severity: "warn", summary: "Warning", detail: "Passwords do not match.", life: 3000 });
+      setLoading(false);
       return;
     }
 
-    const phoneRegex = /^[0-9]{10}$/;
-    if (!phoneRegex.test(phone)) {
-      setError("Please enter a valid 10-digit phone number.");
-      return;
-    }
+    const userData = { firstName, lastName, email, password, phone };
 
-    // Perform registration logic here
-    console.log({ firstName, lastName, phone, email, password });
+    try {
+      const response = await fetch("http://localhost:5000/users/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(userData),
+      });
+
+      const data = await response.json();
+
+      // Check status code to show appropriate toast
+      if (response.status === 200) {
+        toast.current.show({ severity: "success", summary: "Success", detail: "Registration successful! Redirecting to login...", life: 3000 });
+        setFirstName("");
+        setLastName("");
+        setPhone("");
+        setEmail("");
+        setPassword("");
+        setConfirmPassword(""); // Clear confirm password
+        setTimeout(() => {
+          navigate("/login");
+        }, 2000);
+       // Handle 400 (Bad Request) errors
+      } else if (response.status === 400) {
+        const errorMessages = data.errors
+          .map((error) => {
+            const key = Object.keys(error)[0]; // Get the first key (e.g., "phone", "password")
+            return `${key}: ${error[key].message}`; // Create detailed error message
+          })
+          .join(", "); // Join messages into a single string
+
+        toast.current.show({
+          severity: "warn",
+          summary: "Warning",
+          detail: errorMessages || "Bad Request. Please check your inputs.",
+          life: 3000,
+        });
+      } else if (response.status === 500) {
+        toast.current.show({ severity: "error", summary: "Error", detail: data.message || "Internal Server Error. Please try again later.", life: 3000 });
+      }
+    } catch (err) {
+      toast.current.show({ severity: "error", summary: "Error", detail: "An error occurred. Please try again.", life: 3000 });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="flex items-center justify-center h-screen bg-gray-100 dark:bg-gray-900 relative">
+      <Toast ref={toast} />
       <div className="absolute top-4 right-4">
         <DarkModeSwitcher />
       </div>
@@ -39,11 +86,8 @@ const Register = () => {
         <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white">
           Register to Shopify
         </h2>
-        {error && <div className="text-red-500 text-center">{error}</div>}
         <form onSubmit={handleRegister} className="space-y-4">
-          {/* First Name and Last Name Fields */}
           <div className="flex space-x-2">
-            {/* First Name Field */}
             <div className="relative w-1/2">
               <label htmlFor="first-name" className="sr-only">
                 First Name
@@ -60,7 +104,6 @@ const Register = () => {
               <AiOutlineUser className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
             </div>
 
-            {/* Last Name Field */}
             <div className="relative w-1/2">
               <label htmlFor="last-name" className="sr-only">
                 Last Name
@@ -78,7 +121,22 @@ const Register = () => {
             </div>
           </div>
 
-          {/* Email Field */}
+          <div className="relative">
+            <label htmlFor="phone" className="sr-only">
+              Phone Number
+            </label>
+            <input
+              id="phone"
+              type="text"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="Phone Number"
+              required
+              className="w-full px-4 py-2 pl-10 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <AiOutlinePhone className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
+          </div>
+
           <div className="relative">
             <label htmlFor="email" className="sr-only">
               Email
@@ -95,7 +153,6 @@ const Register = () => {
             <AiOutlineMail className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
           </div>
 
-          {/* Password Field */}
           <div className="relative">
             <label htmlFor="password" className="sr-only">
               Password
@@ -112,52 +169,38 @@ const Register = () => {
             <AiOutlineLock className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
           </div>
 
-          {/* Confirm Password Field */}
           <div className="relative">
             <label htmlFor="confirm-password" className="sr-only">
-              Re-type Password
+              Confirm Password
             </label>
             <input
               id="confirm-password"
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Re-enter your password"
+              placeholder="Confirm your password"
               required
               className="w-full px-4 py-2 pl-10 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <AiOutlineLock className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
           </div>
 
-          {/* Submit Button */}
           <button
             type="submit"
             className="w-full py-2 mt-4 text-white rounded-md bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={loading}
           >
-            Create account
+            {loading ? "Creating account..." : "Create account"}
           </button>
 
-          {/* Google Sign-up */}
           <button
             type="button"
-            className="w-full py-2 mt-4 flex items-center justify-center bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-300 rounded-md border border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600"
+            className="w-full py-2 mt-4 flex items-center justify-center text-blue-500 hover:underline"
+            onClick={() => navigate("/login")}
           >
-            <img
-              src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-              alt="Google"
-              className="mr-2 h-5"
-            />
-            Sign up with Google
+            Already have an account? Log in
           </button>
         </form>
-
-        {/* Sign in Link */}
-        <div className="text-center text-gray-500 dark:text-gray-300 mt-4">
-          Already have an account?{" "}
-          <a href="/login" className="text-blue-500 dark:text-blue-400">
-            Log in
-          </a>
-        </div>
       </div>
     </div>
   );

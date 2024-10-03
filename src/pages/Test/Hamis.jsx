@@ -6,10 +6,10 @@ import Register from "../Client/Register";
 import Orders from "../Admin/Orders/Orders";
 import ContactPage from "../Client/ContactPage";
 import ForgotPassword from "../Client/ForgetPassword";
-
+import NotFoundPage from "../Client/NotFoundPage"
 const Hamis = () => {
   return (
-    <ContactPage />
+    <NotFoundPage />
     //<ForgotPassword />
   );
 };
