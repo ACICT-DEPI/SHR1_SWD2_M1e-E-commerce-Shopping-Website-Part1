@@ -3,6 +3,7 @@ import { AiOutlineMail, AiOutlineLock } from "react-icons/ai";
 import DarkModeSwitcher from "../../components/Admin/Header/DarkModeSwitcher";
 import { Toast } from "primereact/toast"; // PrimeReact Toast
 import { useNavigate } from "react-router-dom"; // For redirection
+import Cookies from 'js-cookie';
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -25,7 +26,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:5000/users/login", {
+      const response = await fetch("http://localhost:5000/api/v1/users/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -38,7 +39,7 @@ const Login = () => {
 
       if (response.ok) {
         // Login successful
-        localStorage.setItem("authToken", data.data.token);
+        Cookies.set("authToken", data.data.token);
         toast.current.show({ severity: "success", summary: "Success", detail: "Login successful", life: 3000 });
         
         // Redirect to home page after successful login
