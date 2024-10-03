@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "primeicons/primeicons.css";
 import { FilterMatchMode } from "primereact/api";
 import { DataTable } from "primereact/datatable";
@@ -10,50 +10,26 @@ import { IconField } from "primereact/iconfield";
 import { InputIcon } from "primereact/inputicon";
 import { Button } from "primereact/button";
 import { ConfirmPopup, confirmPopup } from "primereact/confirmpopup";
-import SingleOrderDetails from "./SingleOrderDetails";
-import EditOrderForm from "./EditOrderForm";
 import { DELETE_ORDER, EDIT_ORDER } from "../../../redux/Action";
 import { dataTabelStyle } from "../../../layout/dataTabelStyle";
 import { inputTextStyle } from "../../../layout/inputTextStyle";
 import GoBackButton from "../../../components/Admin/Buttons/GoBackButton";
 import { Toast } from "primereact/toast";
+import EditOrderForm from "./EditOrderForm";
 
 const Orders = () => {
   const dispatch = useDispatch();
   const allOrders = useSelector((state) => state.allOrders);
   const toast = useRef(null);
-
-  const testOrders = [
-    {
-      id: "12345",
-      customer: "John Doe",
-      paymentStatus: "Paid",
-      shippingStatus: "Shipped",
-      totalQuantity: 3,
-      total: 150.99,
-      date: "2024-09-30",
-    },
-    {
-      id: "67890",
-      customer: "Jane Smith",
-      paymentStatus: "Pending",
-      shippingStatus: "Processing",
-      totalQuantity: 5,
-      total: 250.49,
-      date: "2024-10-01",
-    },
-  ];
+  const navigate = useNavigate(); // Added useNavigate for programmatic navigation
 
   const [filter, setFilter] = useState({
     id: { value: null, matchMode: FilterMatchMode.CONTAINS },
   });
   const [globalFilterValue, setGlobalFilterValue] = useState("");
-  const [selectedOrder, setSelectedOrder] = useState(null);
-  const [showOrderDetails, setShowOrderDetails] = useState(false);
   const [editOrder, setEditOrder] = useState(null);
   const [showEditForm, setShowEditForm] = useState(false);
 
-  // Handle filter input changes
   const onGlobalFilterChange = (e) => {
     const value = e.target.value;
     setFilter({
@@ -61,16 +37,6 @@ const Orders = () => {
       id: { value, matchMode: FilterMatchMode.CONTAINS },
     });
     setGlobalFilterValue(value);
-  };
-
-  const handleOrderClick = (order) => {
-    setSelectedOrder(order);
-    setShowOrderDetails(true);
-  };
-
-  const handleBack = () => {
-    setShowOrderDetails(false);
-    resetOrderStates();
   };
 
   const handleDeleteOrder = (id) => {
@@ -97,7 +63,7 @@ const Orders = () => {
         toast.current.show({
           severity: "warn",
           summary: "Canceled",
-          detail: "Order deletion was canceled", // Custom message for cancellation
+          detail: "Order deletion was canceled",
           life: 2000,
         }),
     });
@@ -109,22 +75,15 @@ const Orders = () => {
   };
 
   const handleSaveOrder = (updatedOrder) => {
-    // Save edited order logic
     setShowEditForm(false);
     setEditOrder(null);
   };
 
   const handleCancelEdit = () => {
-    resetOrderStates();
-  };
-
-  const resetOrderStates = () => {
-    setSelectedOrder(null);
     setEditOrder(null);
     setShowEditForm(false);
   };
 
-  // Header for the DataTable
   const header = () => (
     <div className="flex flex-col justify-content-end">
       <IconField iconPosition="left" className="relative">
@@ -165,25 +124,24 @@ const Orders = () => {
 
   const idTemplate = (rowData) => (
     <Link
-      to={`/admin/orders/${rowData.id}`}
+      to={`/orders/${rowData.id}`} // Correct route path
       className="text-black dark:text-white font-semibold hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200"
-      onClick={(e) => {
-        e.preventDefault();
-        handleOrderClick(rowData);
-      }}
+      // Remove preventDefault to allow routing
     >
       {rowData.id}
     </Link>
   );
+  
 
   const nameTemplate = (rowData) => (
     <Link
-      to={`/admin/orders/${rowData.customer}`}
+      to={`/orders/${rowData.id}`} // Updated to use the order ID, not the customer name
       className="text-black dark:text-white font-semibold hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200"
     >
       {rowData.customer}
     </Link>
   );
+  
 
   const paymentStatusTemplate = (rowData) => (
     <span
@@ -210,7 +168,6 @@ const Orders = () => {
   );
 
   useEffect(() => {
-    // Customize pagination button text
     document.querySelector(".nextPageButton").innerHTML =
       "Next <i class='pi pi-angle-double-right ml-1'></i>";
     document.querySelector(".prevPageButton").innerHTML =
@@ -221,19 +178,16 @@ const Orders = () => {
     <div>
       <Toast ref={toast} position="bottom-right" />
 
-      {showOrderDetails && selectedOrder ? (
-        <SingleOrderDetails order={selectedOrder} onBack={handleBack} />
-      ) : showEditForm && editOrder ? (
+      {showEditForm && editOrder ? (
         <EditOrderForm
           order={editOrder}
           onSave={handleSaveOrder}
           onCancel={handleCancelEdit}
-          onBack={handleBack}
         />
       ) : (
         <Fragment>
           <div className="flex flex-nowrap justify-between mb-5">
-            <h1 className="text-3xl dark:text-whiten	">Orders</h1>
+            <h1 className="text-3xl dark:text-whiten">Orders</h1>
           </div>
           <div>
             <DataTable
@@ -280,7 +234,11 @@ const Orders = () => {
                 header="Items"
                 style={{ minWidth: "12rem" }}
               />
-              <Column field="total" header="Total" body={totalBodyTemplate} />
+              <Column
+                field="total"
+                header="Total"
+                body={totalBodyTemplate}
+              />
               <Column
                 field="date"
                 header="Date"

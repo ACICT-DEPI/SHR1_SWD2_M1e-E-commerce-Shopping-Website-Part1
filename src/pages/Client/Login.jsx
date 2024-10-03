@@ -38,7 +38,7 @@ const Login = () => {
 
       if (response.ok) {
         // Login successful
-        localStorage.setItem("authToken", data.token);
+        localStorage.setItem("authToken", data.data.token);
         toast.current.show({ severity: "success", summary: "Success", detail: "Login successful", life: 3000 });
         
         // Redirect to home page after successful login

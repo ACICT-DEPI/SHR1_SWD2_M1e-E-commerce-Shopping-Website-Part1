@@ -12,12 +12,14 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState(""); // New state for confirm password
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({}); // State for errors
   const navigate = useNavigate();
   const toast = useRef(null); // Reference for Toast
 
   const handleRegister = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setErrors({}); // Reset errors on new submit
 
     // Check if passwords match
     if (password !== confirmPassword) {
@@ -39,9 +41,9 @@ const Register = () => {
 
       const data = await response.json();
 
-      // Check status code to show appropriate toast
+      // Handle successful response
       if (response.status === 200) {
-        toast.current.show({ severity: "success", summary: "Success", detail: "Registration successful! Redirecting to login...", life: 3000 });
+        toast.current.show({ severity: "success", summary: "Success", detail: data.message, life: 3000 });
         setFirstName("");
         setLastName("");
         setPhone("");
@@ -51,21 +53,19 @@ const Register = () => {
         setTimeout(() => {
           navigate("/login");
         }, 2000);
-       // Handle 400 (Bad Request) errors
-      } else if (response.status === 400) {
-        const errorMessages = data.errors
-          .map((error) => {
-            const key = Object.keys(error)[0]; // Get the first key (e.g., "phone", "password")
-            return `${key}: ${error[key].message}`; // Create detailed error message
-          })
-          .join(", "); // Join messages into a single string
-
-        toast.current.show({
-          severity: "warn",
-          summary: "Warning",
-          detail: errorMessages || "Bad Request. Please check your inputs.",
-          life: 3000,
-        });
+      } 
+      // Handle validation errors (400 Bad Request)
+      else if (response.status === 400) {
+        if (data.errors) {
+          setErrors(data.errors); // Set error messages for each field
+        } else {
+          toast.current.show({
+            severity: "warn",
+            summary: "Warning",
+            detail: data.message || "Bad Request. Please check your inputs.",
+            life: 3000,
+          });
+        }
       } else if (response.status === 500) {
         toast.current.show({ severity: "error", summary: "Error", detail: data.message || "Internal Server Error. Please try again later.", life: 3000 });
       }
@@ -78,7 +78,7 @@ const Register = () => {
 
   return (
     <div className="flex items-center justify-center h-screen bg-gray-100 dark:bg-gray-900 relative">
-      <Toast ref={toast} />
+      <Toast ref={toast} position="bottom-left"/>
       <div className="absolute top-4 right-4">
         <DarkModeSwitcher />
       </div>
@@ -102,6 +102,7 @@ const Register = () => {
                 className="w-full px-4 py-2 pl-10 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <AiOutlineUser className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
+              {errors.firstName && <span className="text-red-500 text-sm">{errors.firstName.message}</span>}
             </div>
 
             <div className="relative w-1/2">
@@ -118,6 +119,7 @@ const Register = () => {
                 className="w-full px-4 py-2 pl-10 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <AiOutlineUser className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
+              {errors.lastName && <span className="text-red-500 text-sm">{errors.lastName.message}</span>}
             </div>
           </div>
 
@@ -135,6 +137,7 @@ const Register = () => {
               className="w-full px-4 py-2 pl-10 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <AiOutlinePhone className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
+            {errors.phone && <span className="text-red-500 text-sm">{errors.phone.message}</span>}
           </div>
 
           <div className="relative">
@@ -151,6 +154,7 @@ const Register = () => {
               className="w-full px-4 py-2 pl-10 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <AiOutlineMail className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
+            {errors.email && <span className="text-red-500 text-sm">{errors.email.message}</span>}
           </div>
 
           <div className="relative">
@@ -167,6 +171,7 @@ const Register = () => {
               className="w-full px-4 py-2 pl-10 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <AiOutlineLock className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
+            {errors.password && <span className="text-red-500 text-sm">{errors.password.message}</span>}
           </div>
 
           <div className="relative">
@@ -183,22 +188,15 @@ const Register = () => {
               className="w-full px-4 py-2 pl-10 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <AiOutlineLock className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
+            {errors.confirmPassword && <span className="text-red-500 text-sm">{errors.confirmPassword.message}</span>}
           </div>
 
           <button
             type="submit"
-            className="w-full py-2 mt-4 text-white rounded-md bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
             disabled={loading}
           >
-            {loading ? "Creating account..." : "Create account"}
-          </button>
-
-          <button
-            type="button"
-            className="w-full py-2 mt-4 flex items-center justify-center text-blue-500 hover:underline"
-            onClick={() => navigate("/login")}
-          >
-            Already have an account? Log in
+            {loading ? "Registering..." : "Register"}
           </button>
         </form>
       </div>
