@@ -19,10 +19,18 @@ const ClickOutside = ({ children, exceptionRef, onClick, className }) => {
       if (!clickedInside) onClick();
     };
 
+    const handleEscKeyPress = (event) => {
+      if (event.key === "Escape") {
+        onClick(); // Close the element when 'Escape' is pressed
+      }
+    };
+
     document.addEventListener("mousedown", handleClickListener);
+    document.addEventListener("keydown", handleEscKeyPress); // Listen for 'Escape' key press
 
     return () => {
       document.removeEventListener("mousedown", handleClickListener);
+      document.removeEventListener("keydown", handleEscKeyPress); // Cleanup event listener
     };
   }, [exceptionRef, onClick]);
 
