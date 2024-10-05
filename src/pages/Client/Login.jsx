@@ -4,7 +4,7 @@ import DarkModeSwitcher from "../../components/Admin/Header/DarkModeSwitcher";
 import { Toast } from "primereact/toast"; // PrimeReact Toast
 import { useNavigate } from "react-router-dom"; // For redirection
 //import Cookies from 'js-cookie';
-import axios from 'axios'; // Importing axios
+import axios from "axios"; // Importing axios
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -20,17 +20,26 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post("http://localhost:5000/api/v1/users/login", {
-        email,
-        password,
-      });
+      const response = await axios.post(
+        "http://localhost:5000/api/v1/users/login",
+        {
+          email,
+          password,
+        },
+        { withCredentials: true }
+      );
 
       setLoading(false);
       const data = response.data;
 
       // Login successful
       //Cookies.set("authToken", data.data.token);
-      toast.current.show({ severity: "success", summary: "Success", detail: data.message, life: 3000 });
+      toast.current.show({
+        severity: "success",
+        summary: "Success",
+        detail: data.message,
+        life: 3000,
+      });
 
       // Redirect to home page after successful login
       setTimeout(() => {
@@ -38,7 +47,10 @@ const Login = () => {
       }, 2000);
     } catch (err) {
       setLoading(false);
-      setError(err.response?.data.message || "Login failed. Please check your credentials.");
+      setError(
+        err.response?.data.message ||
+          "Login failed. Please check your credentials."
+      );
     }
   };
 
@@ -47,7 +59,8 @@ const Login = () => {
       <div className="absolute top-4 right-4">
         <DarkModeSwitcher />
       </div>
-      <Toast ref={toast} position="bottom-left" /> {/* PrimeReact Toast component */}
+      <Toast ref={toast} position="bottom-left" />{" "}
+      {/* PrimeReact Toast component */}
       <div className="w-full max-w-md p-8 space-y-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
         <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white">
           Log In to Shopfiy
@@ -68,7 +81,6 @@ const Login = () => {
             />
             <AiOutlineMail className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
           </div>
-
           {/* Password Field */}
           <div className="relative">
             <label htmlFor="password" className="sr-only">
@@ -85,8 +97,8 @@ const Login = () => {
             />
             <AiOutlineLock className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
           </div>
-          {error && <div className="text-red-500">{error}</div>} {/* Password error message */}
-
+          {error && <div className="text-red-500">{error}</div>}{" "}
+          {/* Password error message */}
           {/* Submit Button */}
           <button
             type="submit"
@@ -95,7 +107,6 @@ const Login = () => {
           >
             {loading ? "Logging in..." : "Login"}
           </button>
-
           {/* Google Login */}
           <button
             type="button"

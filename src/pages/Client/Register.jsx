@@ -1,5 +1,10 @@
 import React, { useState, useRef } from "react";
-import { AiOutlineUser, AiOutlineMail, AiOutlinePhone, AiOutlineLock } from "react-icons/ai";
+import {
+  AiOutlineUser,
+  AiOutlineMail,
+  AiOutlinePhone,
+  AiOutlineLock,
+} from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
 import DarkModeSwitcher from "../../components/Admin/Header/DarkModeSwitcher";
 import { Toast } from "primereact/toast";
@@ -23,7 +28,10 @@ const Register = () => {
     setErrorMessages({});
 
     if (password !== confirmPassword) {
-      setErrorMessages((prev) => ({ ...prev, confirmPassword: "Passwords do not match." }));
+      setErrorMessages((prev) => ({
+        ...prev,
+        confirmPassword: "Passwords do not match.",
+      }));
       setLoading(false);
       return;
     }
@@ -31,16 +39,26 @@ const Register = () => {
     const userData = { firstName, lastName, email, password, phone };
 
     try {
-      const response = await axios.post("http://localhost:5000/api/v1/users/register", userData, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await axios.post(
+        "http://localhost:5000/api/v1/users/register",
+        userData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        }
+      );
 
       const data = response.data; // Get data directly from the response
 
       if (response.status === 200) {
-        toast.current.show({ severity: "success", summary: "Success", detail: data.message, life: 3000 });
+        toast.current.show({
+          severity: "success",
+          summary: "Success",
+          detail: data.message,
+          life: 3000,
+        });
         // Clear form fields after successful registration
         setFirstName("");
         setLastName("");
@@ -66,7 +84,12 @@ const Register = () => {
       }));
 
       // Display generic error message
-      toast.current.show({ severity: "error", summary: "Error", detail: "An error occurred. Please try again.", life: 3000 });
+      toast.current.show({
+        severity: "error",
+        summary: "Error",
+        detail: "An error occurred. Please try again.",
+        life: 3000,
+      });
     } finally {
       setLoading(false);
     }
@@ -83,11 +106,15 @@ const Register = () => {
         <DarkModeSwitcher />
       </div>
       <div className="w-full max-w-xl p-10 space-y-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white">Register to Shopify</h2>
+        <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white">
+          Register to Shopify
+        </h2>
         <form onSubmit={handleRegister} className="space-y-4">
           {/* First Name */}
           <div className="relative">
-            <label htmlFor="first-name" className="sr-only">First Name</label>
+            <label htmlFor="first-name" className="sr-only">
+              First Name
+            </label>
             <input
               id="first-name"
               type="text"
@@ -95,15 +122,21 @@ const Register = () => {
               onChange={(e) => setFirstName(e.target.value)}
               onFocus={() => handleFocus("firstName")}
               placeholder="First Name"
-              className={`w-full px-4 py-3 pl-10 border ${errorMessages.firstName ? "border-red-500" : "border-gray-300"} dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              className={`w-full px-4 py-3 pl-10 border ${
+                errorMessages.firstName ? "border-red-500" : "border-gray-300"
+              } dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500`}
             />
             <AiOutlineUser className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
-            {errorMessages.firstName && <div className="text-red-500">{errorMessages.firstName}</div>}
+            {errorMessages.firstName && (
+              <div className="text-red-500">{errorMessages.firstName}</div>
+            )}
           </div>
 
           {/* Last Name */}
           <div className="relative">
-            <label htmlFor="last-name" className="sr-only">Last Name</label>
+            <label htmlFor="last-name" className="sr-only">
+              Last Name
+            </label>
             <input
               id="last-name"
               type="text"
@@ -111,15 +144,21 @@ const Register = () => {
               onChange={(e) => setLastName(e.target.value)}
               onFocus={() => handleFocus("lastName")}
               placeholder="Last Name"
-              className={`w-full px-4 py-3 pl-10 border ${errorMessages.lastName ? "border-red-500" : "border-gray-300"} dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              className={`w-full px-4 py-3 pl-10 border ${
+                errorMessages.lastName ? "border-red-500" : "border-gray-300"
+              } dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500`}
             />
             <AiOutlineUser className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
-            {errorMessages.lastName && <div className="text-red-500">{errorMessages.lastName}</div>}
+            {errorMessages.lastName && (
+              <div className="text-red-500">{errorMessages.lastName}</div>
+            )}
           </div>
 
           {/* Phone Number */}
           <div className="relative">
-            <label htmlFor="phone" className="sr-only">Phone Number</label>
+            <label htmlFor="phone" className="sr-only">
+              Phone Number
+            </label>
             <input
               id="phone"
               type="text"
@@ -127,30 +166,42 @@ const Register = () => {
               onChange={(e) => setPhone(e.target.value)}
               onFocus={() => handleFocus("phone")}
               placeholder="Phone Number"
-              className={`w-full px-4 py-3 pl-10 border ${errorMessages.phone ? "border-red-500" : "border-gray-300"} dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              className={`w-full px-4 py-3 pl-10 border ${
+                errorMessages.phone ? "border-red-500" : "border-gray-300"
+              } dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500`}
             />
             <AiOutlinePhone className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
-            {errorMessages.phone && <div className="text-red-500">{errorMessages.phone}</div>}
+            {errorMessages.phone && (
+              <div className="text-red-500">{errorMessages.phone}</div>
+            )}
           </div>
 
           {/* Email */}
           <div className="relative">
-            <label htmlFor="email" className="sr-only">Email</label>
+            <label htmlFor="email" className="sr-only">
+              Email
+            </label>
             <input
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               onFocus={() => handleFocus("email")}
               placeholder="Enter your email"
-              className={`w-full px-4 py-3 pl-10 border ${errorMessages.email ? "border-red-500" : "border-gray-300"} dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              className={`w-full px-4 py-3 pl-10 border ${
+                errorMessages.email ? "border-red-500" : "border-gray-300"
+              } dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500`}
             />
             <AiOutlineMail className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
-            {errorMessages.email && <div className="text-red-500">{errorMessages.email}</div>}
+            {errorMessages.email && (
+              <div className="text-red-500">{errorMessages.email}</div>
+            )}
           </div>
 
           {/* Password */}
           <div className="relative">
-            <label htmlFor="password" className="sr-only">Password</label>
+            <label htmlFor="password" className="sr-only">
+              Password
+            </label>
             <input
               id="password"
               type="password"
@@ -158,15 +209,21 @@ const Register = () => {
               onChange={(e) => setPassword(e.target.value)}
               onFocus={() => handleFocus("password")}
               placeholder="Enter your password"
-              className={`w-full px-4 py-3 pl-10 border ${errorMessages.password ? "border-red-500" : "border-gray-300"} dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              className={`w-full px-4 py-3 pl-10 border ${
+                errorMessages.password ? "border-red-500" : "border-gray-300"
+              } dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500`}
             />
             <AiOutlineLock className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
-            {errorMessages.password && <div className="text-red-500">{errorMessages.password}</div>}
+            {errorMessages.password && (
+              <div className="text-red-500">{errorMessages.password}</div>
+            )}
           </div>
 
           {/* Confirm Password */}
           <div className="relative">
-            <label htmlFor="confirm-password" className="sr-only">Confirm Password</label>
+            <label htmlFor="confirm-password" className="sr-only">
+              Confirm Password
+            </label>
             <input
               id="confirm-password"
               type="password"
@@ -174,16 +231,26 @@ const Register = () => {
               onChange={(e) => setConfirmPassword(e.target.value)}
               onFocus={() => handleFocus("confirmPassword")}
               placeholder="Confirm Password"
-              className={`w-full px-4 py-3 pl-10 border ${errorMessages.confirmPassword ? "border-red-500" : "border-gray-300"} dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              className={`w-full px-4 py-3 pl-10 border ${
+                errorMessages.confirmPassword
+                  ? "border-red-500"
+                  : "border-gray-300"
+              } dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500`}
             />
             <AiOutlineLock className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
-            {errorMessages.confirmPassword && <div className="text-red-500">{errorMessages.confirmPassword}</div>}
+            {errorMessages.confirmPassword && (
+              <div className="text-red-500">
+                {errorMessages.confirmPassword}
+              </div>
+            )}
           </div>
 
           {/* Register Button */}
           <button
             type="submit"
-            className={`w-full py-3 font-semibold text-white bg-blue-600 rounded-md ${loading ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"}`}
+            className={`w-full py-3 font-semibold text-white bg-blue-600 rounded-md ${
+              loading ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"
+            }`}
             disabled={loading}
           >
             {loading ? "Registering..." : "Register"}
@@ -193,7 +260,9 @@ const Register = () => {
         {/* Login Link */}
         <p className="text-sm text-center">
           Already have an account?{" "}
-          <a href="/login" className="text-blue-600 hover:underline">Log in</a>
+          <a href="/login" className="text-blue-600 hover:underline">
+            Log in
+          </a>
         </p>
       </div>
     </div>
