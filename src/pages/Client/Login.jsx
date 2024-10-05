@@ -3,7 +3,7 @@ import { AiOutlineMail, AiOutlineLock } from "react-icons/ai";
 import DarkModeSwitcher from "../../components/Admin/Header/DarkModeSwitcher";
 import { Toast } from "primereact/toast"; // PrimeReact Toast
 import { useNavigate } from "react-router-dom"; // For redirection
-import Cookies from 'js-cookie';
+//import Cookies from 'js-cookie';
 import axios from 'axios'; // Importing axios
 
 const Login = () => {
@@ -29,7 +29,7 @@ const Login = () => {
       const data = response.data;
 
       // Login successful
-      Cookies.set("authToken", data.data.token);
+      //Cookies.set("authToken", data.data.token);
       toast.current.show({ severity: "success", summary: "Success", detail: data.message, life: 3000 });
 
       // Redirect to home page after successful login
