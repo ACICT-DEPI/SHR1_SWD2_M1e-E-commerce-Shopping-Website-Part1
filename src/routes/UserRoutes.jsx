@@ -8,6 +8,7 @@ import ForgetPassword from "../pages/Client/ForgetPassword";
 import NotFoundPage from "../pages/Client/NotFoundPage";
 import ContactPage from "../pages/Client/ContactPage";
 import AllCollections from "../pages/Client/AllCollections";
+import ProfilePage from "../pages/Client/ProfilePage";
 function UserRoutes() {
   return (
     <Routes>
@@ -15,9 +16,11 @@ function UserRoutes() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/forget-passwrd" element={<ForgetPassword />} />
+      <Route path="/profile" element={<ProfilePage />} />
       <Route path="/product/:id" element={<ProductDetails />} />
       <Route path="/contact" element={<ContactPage />} />
       <Route path="/collections" element={<AllCollections />} />
+
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );

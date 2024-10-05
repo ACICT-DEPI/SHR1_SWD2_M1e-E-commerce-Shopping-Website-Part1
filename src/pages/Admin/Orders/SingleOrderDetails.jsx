@@ -1,7 +1,7 @@
 import React from "react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { deleteOrder, editOrder } from "../../../redux/Action"; // Add markAsPaid action
 import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css";
@@ -10,9 +10,17 @@ import ActionButton from "../../../components/Admin/Buttons/ActionButton";
 import { confirmPopup, ConfirmPopup } from "primereact/confirmpopup"; // Import confirmPopup and ConfirmPopup
 import GoBackButton from "../../../components/Admin/Buttons/GoBackButton"; // Ensure GoBackButton is imported
 import { dataTabelStyle } from "../../../layout/dataTabelStyle";
+import { useParams } from "react-router-dom";
 
-const SingleOrderDetails = ({ order, onBack }) => {
+const SingleOrderDetails = ({ onBack }) => {
   const dispatch = useDispatch();
+  const { id } = useParams(); // Get the order ID from URL
+
+  // Fetch order details from Redux state or API using the ID
+  const order = useSelector((state) =>
+    state.allOrders.find((order) => order.id === id)
+  );
+
 
   // Check if order is valid
   if (!order) {

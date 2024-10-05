@@ -7,10 +7,12 @@ import Orders from "../Admin/Orders/Orders";
 import ContactPage from "../Client/ContactPage";
 import ForgotPassword from "../Client/ForgetPassword";
 import NotFoundPage from "../Client/NotFoundPage"
+import ProfilePage from "../Client/ProfilePage";
 const Hamis = () => {
   return (
-    <NotFoundPage />
-    //<ForgotPassword />
+    //<NotFoundPage />
+   // <ForgotPassword />
+    <ProfilePage />
   );
 };
 

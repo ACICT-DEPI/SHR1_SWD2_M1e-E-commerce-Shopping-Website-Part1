@@ -2,8 +2,7 @@ import React, { useState, useRef } from "react";
 import { AiOutlineMail, AiOutlineLock } from "react-icons/ai";
 import DarkModeSwitcher from "../../components/Admin/Header/DarkModeSwitcher";
 import { Toast } from "primereact/toast"; // PrimeReact Toast
-import { useNavigate } from "react-router-dom"; // For redirection
-//import Cookies from 'js-cookie';
+import { useNavigate, Link } from "react-router-dom"; // For redirection and linking
 import axios from "axios"; // Importing axios
 
 const Login = () => {
@@ -26,14 +25,12 @@ const Login = () => {
           email,
           password,
         },
-        { withCredentials: true }
       );
 
       setLoading(false);
       const data = response.data;
 
       // Login successful
-      //Cookies.set("authToken", data.data.token);
       toast.current.show({
         severity: "success",
         summary: "Success",
@@ -121,12 +118,19 @@ const Login = () => {
           </button>
         </form>
 
+        {/* Forgot Password Link */}
+        <div className="text-center mt-4">
+          <Link to="/forget-passwrd" className="text-blue-500 dark:text-blue-400">
+            Forgot Password?
+          </Link>
+        </div>
+
         {/* Sign up Link */}
         <div className="text-center text-gray-500 dark:text-gray-300 mt-4">
           Don’t have an account?{" "}
-          <a href="/register" className="text-blue-500 dark:text-blue-400">
+          <Link to="/register" className="text-blue-500 dark:text-blue-400">
             Register
-          </a>
+          </Link>
         </div>
       </div>
     </div>

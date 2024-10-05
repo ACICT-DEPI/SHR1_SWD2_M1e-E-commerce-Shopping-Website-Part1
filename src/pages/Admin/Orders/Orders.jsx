@@ -124,13 +124,13 @@ const Orders = () => {
 
   const idTemplate = (rowData) => (
     <Link
-      to={`/orders/${rowData.id}`} // Correct route path
+      to={`/orders/${rowData.id}`} // Correct route path to the SingleOrderDetails component
       className="text-black dark:text-white font-semibold hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200"
-      // Remove preventDefault to allow routing
     >
-      {rowData.id}
+      {rowData.id} {/* This will display the order ID as a link */}
     </Link>
   );
+  
   
 
   const nameTemplate = (rowData) => (
