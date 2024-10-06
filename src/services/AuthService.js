@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "/api/auth/";
+const API_URL = "/api/v1/";
 
 // Register user
 const register = async (userData) => {
@@ -26,7 +26,7 @@ const logout = () => {
 const getCurrentUser = () => {
   return JSON.parse(localStorage.getItem("user"));
 };
-
+// jwt-decode      packge for jwt decode
 export default {
   register,
   login,

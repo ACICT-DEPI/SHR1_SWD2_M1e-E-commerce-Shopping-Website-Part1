@@ -4,6 +4,8 @@ import DefaultLayout from "../../layout/DefaultLayout";
 import OurCollectionSection from "../../components/Client/Collections/OurCollectionSection";
 import { useSelector } from "react-redux";
 import AllCollections from "../Client/AllCollections";
+import CollectionProduct from "../../components/Client/Collections/CollectionProduct";
+import Card from "../../components/Client/Card/Card";
 
 const Ahmed = () => {
   const collections = useSelector((state) => state.allCollections);
@@ -11,8 +13,9 @@ const Ahmed = () => {
   return (
     <Fragment>
       <main className="bg-white">
-        <OurCollectionSection data={collections} />
-        <AllCollections />
+        {/* <OurCollectionSection data={collections} /> */}
+        {/* <AllCollections /> */}
+        <CollectionProduct />
       </main>
     </Fragment>
   );

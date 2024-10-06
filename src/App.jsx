@@ -9,12 +9,18 @@ import Test from "./pages/Test/Test";
 // import PrimeReact
 import { PrimeReactProvider } from "primereact/api";
 import Tailwind from "primereact/passthrough/tailwind";
+import { ratingStyle } from "./layout/ratingStyle";
 
 function App() {
+  const rating = {
+    rating: ratingStyle,
+  };
   return (
     <div className="App">
       {/* Defined PrimeReact */}
-      <PrimeReactProvider value={{ unstyled: true, pt: Tailwind }}>
+      <PrimeReactProvider
+        value={{ unstyled: true, pt: { ...Tailwind, ...rating } }}
+      >
         <Routes>
           {/* Routes for users */}
           <Route path="/*" element={<UserRoutes />} />

@@ -46,8 +46,8 @@ const AddCollection = () => {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${Cookies.get("authToken")}`,
           },
+          withCredentials: true,
         }
       );
 
@@ -64,9 +64,7 @@ const AddCollection = () => {
             `http://localhost:5000/api/v1/categories/category-photo-upload/${collectionId}`,
             formData,
             {
-              headers: {
-                Authorization: `Bearer ${Cookies.get("authToken")}`,
-              },
+              withCredentials: true,
             }
           );
 
