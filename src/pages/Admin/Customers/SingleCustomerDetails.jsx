@@ -81,8 +81,8 @@ const SingleCustomerDetails = () => {
             </h1>
           </div>
         <div className="flex space-x-4">
-        <EditButton label={"Edit"} path={"/orders/update"} />
-          <ActionButton 
+        <EditButton label={"Edit"} path={`/admin/customers/edit/${customer.customer.name}`} />
+        <ActionButton 
             type="delete" 
             label="Delete" 
             onClick={handleConfirmClick} 

@@ -63,7 +63,7 @@ const Orders = () => {
   };
 
   const handleEditOrderClick = (order) => {
-    navigate(`/orders/update/${order.id}`); // Navigate to the edit form with the order ID
+    navigate(`/admin/orders/edit/${order.id}`); // Navigate to the edit form with the order ID
   };
 
   const header = () => (
@@ -106,7 +106,7 @@ const Orders = () => {
 
   const idTemplate = (rowData) => (
     <Link
-      to={`/orders/${rowData.id}`} // Correct route path to the SingleOrderDetails component
+      to={`/admin/orders/${rowData.id}`} // Correct route path to the SingleOrderDetails component
       className="text-black dark:text-white font-semibold hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200"
     >
       {rowData.id} {/* This will display the order ID as a link */}

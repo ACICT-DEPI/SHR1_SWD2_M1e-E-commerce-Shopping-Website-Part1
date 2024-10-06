@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import DarkModeSwitcher from "../../components/Admin/Header/DarkModeSwitcher";
 import ProfilePictureUpload from "../../components/Client/ProfilePictureUpload";
+import { Toast } from 'primereact/toast'; // Importing the Toast component
 
 const ProfilePage = () => {
   const { id } = useParams(); // Get the user ID from the URL
@@ -10,24 +11,30 @@ const ProfilePage = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState(""); // NEW STATE FOR PHONE NUMBER
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  
+  const toast = useRef(null); // Reference for Toast
 
   // Fetch user data based on the ID
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/v1/`); // Adjust the endpoint accordingly
-        const userData = response.data;
+        const response = await axios.get(`http://localhost:5000/api/v1/users/profile`,{ withCredentials: true });
+        console.log(response.data.data);
+        const userData = response.data.data;
 
         // Populate the state with user data
         setUser(userData);
         setFirstName(userData.firstName);
         setLastName(userData.lastName);
         setEmail(userData.email);
+        setPhone(userData.phone); // NEW - Set the phone data
       } catch (error) {
         console.error("Error fetching user data:", error);
+        toast.current.show({ severity: 'error', summary: 'Error', detail: 'Failed to fetch user data', life: 3000 });
       }
     };
 
@@ -38,22 +45,29 @@ const ProfilePage = () => {
     e.preventDefault(); // Prevent page refresh
     // Logic to save updated profile information goes here
     try {
-      await axios.put(`http://localhost:5000/api/v1//users/update`, {
-        firstName,
-        lastName,
-        email,
-        currentPassword,
-        newPassword,
-      });
-      alert("Profile updated successfully!");
+      await axios.put(
+        `http://localhost:5000/api/v1/users/update`,
+        {
+          firstName,
+          lastName,
+          email,
+          phone,
+          currentPassword,
+          newPassword,
+        }
+      );
+      toast.current.show({ severity: 'success', summary: 'Success', detail: 'Profile updated successfully!', life: 3000 });
     } catch (error) {
       console.error("Error updating profile:", error);
-      alert("Failed to update profile.");
+      toast.current.show({ severity: 'error', summary: 'Error', detail: 'Failed to update profile.', life: 3000 });
     }
   };
 
   return (
     <div className="bg-gray-100 dark:bg-gray-900 min-h-screen p-8 font-inter">
+      {/* Toast for Notifications */}
+      <Toast ref={toast} />
+
       {/* Dark Mode Switcher */}
       <div className="flex justify-end mb-4">
         <DarkModeSwitcher />
@@ -87,7 +101,7 @@ const ProfilePage = () => {
                   </label>
                   <input
                     type="text"
-                    value={firstName} // Bind the input value to state
+                    value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     className="w-full p-3 rounded-md border dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600"
                   />
@@ -99,8 +113,20 @@ const ProfilePage = () => {
                   </label>
                   <input
                     type="text"
-                    value={lastName} // Bind the input value to state
+                    value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
+                    className="w-full p-3 rounded-md border dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300">
+                    Phone number
+                  </label>
+                  <input
+                    type="text"
+                    value={phone} // Bind phone value to state
+                    onChange={(e) => setPhone(e.target.value)}
                     className="w-full p-3 rounded-md border dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600"
                   />
                 </div>
@@ -111,7 +137,7 @@ const ProfilePage = () => {
                   </label>
                   <input
                     type="email"
-                    value={email} // Bind the input value to state
+                    value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full p-3 rounded-md border dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600"
                   />

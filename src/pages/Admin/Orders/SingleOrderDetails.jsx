@@ -112,7 +112,7 @@ const SingleOrderDetails = () => {
 
           {/* Edit, Delete, and Mark as Paid Buttons next to the title */}
           <div className="flex space-x-4">
-          <EditButton label={"Edit"} path={`/update/:${id}`} />
+          <EditButton label={"Edit"} path={`/admin/orders/edit/${order.id}`} />
           <ActionButton
               type="delete"
               label="Delete"

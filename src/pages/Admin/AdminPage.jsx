@@ -13,6 +13,7 @@ import UpdateCollection from "./collections/UpdateCollection";
 import SingleOrderDetails from "./Orders/SingleOrderDetails";
 import SingleCustomerDetails from "./Customers/SingleCustomerDetails";
 import EditOrderForm from "./Orders/EditOrderForm";
+import EditCustomerForm from "./Customers/EditCustomerForm";
 
 const AdminPage = () => {
   const [loading, setLoading] = useState(true);
@@ -31,6 +32,7 @@ const AdminPage = () => {
         <Route path="/orders/:id" element={<SingleOrderDetails />} /> 
         <Route path="customers" element={<Customers />} />
         <Route path="customers/:name" element={<SingleCustomerDetails />} />
+        <Route path="customers/edit/:name" element={<EditCustomerForm />} />
         <Route path="reviews" element={<Reviews />} />
         <Route path="collections" element={<Collections />} />
         <Route path="collections/add" element={<AddCollection />} />

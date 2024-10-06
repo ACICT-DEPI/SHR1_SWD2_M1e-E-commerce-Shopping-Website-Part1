@@ -55,7 +55,7 @@ export const Customers = () => {
   };
 
   const handleEditCustomer = (customer) => {
-    console.log("edited");
+    navigate(`/admin/customers/edit/${customer.customer.name}`); // Navigate to the customer details page
   };
 
   const confirmDeleteCustomer = (event, id) => {

@@ -9,13 +9,17 @@ import NotFoundPage from "../pages/Client/NotFoundPage";
 import ContactPage from "../pages/Client/ContactPage";
 import AllCollections from "../pages/Client/AllCollections";
 import ProfilePage from "../pages/Client/ProfilePage";
+import ResetPassword from "../pages/Client/ResetPassword";
+import LogoutPage from "../pages/Client/LogoutPage";
 function UserRoutes() {
   return (
     <Routes>
       <Route path="/" element={<UserPage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/logout" element={<LogoutPage/>} />
       <Route path="/forget-passwrd" element={<ForgetPassword />} />
+      <Route path="/reset-passwrd" element={<ResetPassword />} />
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/product/:id" element={<ProductDetails />} />
       <Route path="/contact" element={<ContactPage />} />

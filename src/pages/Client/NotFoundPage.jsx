@@ -1,5 +1,6 @@
 import React from 'react';
 import { FiArrowLeft } from 'react-icons/fi';
+import GoBackButton from '../../components/Admin/Buttons/GoBackButton';
 
 const NotFoundPage = () => {
   return (
@@ -12,12 +13,7 @@ const NotFoundPage = () => {
 };
 
 const HomeButton = () => (
-  <a
-    href="/"
-    className="flex items-center px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-100 font-semibold rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 transition duration-150"
-  >
-    <FiArrowLeft className="mr-2" /> Go Back Home
-  </a>
+ <GoBackButton />
 );
 
 export default NotFoundPage;
