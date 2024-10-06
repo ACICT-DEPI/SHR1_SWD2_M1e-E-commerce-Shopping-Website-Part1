@@ -41,7 +41,7 @@ const CollectionsDataTabel = () => {
     return (
       <div className="flex flex-col justify-content-end">
         <IconField iconPosition="left" className="relative">
-          <InputIcon className="pi pi-search absolute top-4 -mt-0 left-3" />
+          <InputIcon className="pi pi-search absolute top-4 mt-0 left-3" />
           <InputText
             value={globalFilterValue}
             onChange={onGlobalFilterChange}
@@ -127,10 +127,9 @@ const CollectionsDataTabel = () => {
           sortable
         />
         <Column
-          field="status"
-          header="Status"
+          field="description"
+          header="description"
           style={{ minWidth: "12rem" }}
-          body={StatusTemplate}
           sortable
         />
         <Column
