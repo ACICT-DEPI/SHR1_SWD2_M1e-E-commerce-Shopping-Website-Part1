@@ -8,11 +8,13 @@ import ContactPage from "../Client/ContactPage";
 import ForgotPassword from "../Client/ForgetPassword";
 import NotFoundPage from "../Client/NotFoundPage"
 import ProfilePage from "../Client/ProfilePage";
+import ResetPassword from "../Client/ResetPassword";
 const Hamis = () => {
   return (
     //<NotFoundPage />
    // <ForgotPassword />
-    <ProfilePage />
+    //<ProfilePage />
+    <ResetPassword />
   );
 };
 

@@ -15,7 +15,6 @@ import { dataTabelStyle } from "../../../layout/dataTabelStyle";
 import { inputTextStyle } from "../../../layout/inputTextStyle";
 import GoBackButton from "../../../components/Admin/Buttons/GoBackButton";
 import { Toast } from "primereact/toast";
-import EditOrderForm from "./EditOrderForm";
 
 const Orders = () => {
   const dispatch = useDispatch();
@@ -27,8 +26,6 @@ const Orders = () => {
     id: { value: null, matchMode: FilterMatchMode.CONTAINS },
   });
   const [globalFilterValue, setGlobalFilterValue] = useState("");
-  const [editOrder, setEditOrder] = useState(null);
-  const [showEditForm, setShowEditForm] = useState(false);
 
   const onGlobalFilterChange = (e) => {
     const value = e.target.value;
@@ -49,10 +46,6 @@ const Orders = () => {
     });
   };
 
-  const handleEditOrder = (order) => {
-    dispatch({ type: EDIT_ORDER, payload: order });
-  };
-
   const confirmDeleteOrder = (event, id) => {
     confirmPopup({
       target: event.currentTarget,
@@ -70,18 +63,7 @@ const Orders = () => {
   };
 
   const handleEditOrderClick = (order) => {
-    setEditOrder(order);
-    setShowEditForm(true);
-  };
-
-  const handleSaveOrder = (updatedOrder) => {
-    setShowEditForm(false);
-    setEditOrder(null);
-  };
-
-  const handleCancelEdit = () => {
-    setEditOrder(null);
-    setShowEditForm(false);
+    navigate(`/orders/update/${order.id}`); // Navigate to the edit form with the order ID
   };
 
   const header = () => (
@@ -130,8 +112,6 @@ const Orders = () => {
       {rowData.id} {/* This will display the order ID as a link */}
     </Link>
   );
-  
-  
 
   const nameTemplate = (rowData) => (
     <Link
@@ -141,7 +121,6 @@ const Orders = () => {
       {rowData.customer}
     </Link>
   );
-  
 
   const paymentStatusTemplate = (rowData) => (
     <span
@@ -178,81 +157,73 @@ const Orders = () => {
     <div>
       <Toast ref={toast} position="bottom-right" />
 
-      {showEditForm && editOrder ? (
-        <EditOrderForm
-          order={editOrder}
-          onSave={handleSaveOrder}
-          onCancel={handleCancelEdit}
-        />
-      ) : (
-        <Fragment>
-          <div className="flex flex-nowrap justify-between mb-5">
-            <h1 className="text-3xl dark:text-whiten">Orders</h1>
-          </div>
-          <div>
-            <DataTable
-              value={allOrders}
-              rows={5}
-              size="small"
-              dataKey="id"
-              filters={filter}
-              filterDisplay="menu"
-              globalFilterFields={["id", "customer", "paymentStatus"]}
-              header={header}
-              paginator
-              paginatorTemplate="CurrentPageReport PrevPageLink NextPageLink"
-              currentPageReportTemplate="Showing {first} to {last} of {totalRecords} results"
-              className="custom-paginator"
-              pt={dataTabelStyle}
-            >
-              <Column
-                field="id"
-                header="#"
-                body={idTemplate}
-                style={{ minWidth: "12rem" }}
-              />
-              <Column
-                field="customer"
-                header="Customer"
-                body={nameTemplate}
-                style={{ minWidth: "12rem" }}
-              />
-              <Column
-                field="paymentStatus"
-                header="Payment Status"
-                body={paymentStatusTemplate}
-                style={{ minWidth: "12rem" }}
-              />
-              <Column
-                field="shippingStatus"
-                header="Shipping Status"
-                body={shippingStatusTemplate}
-                style={{ minWidth: "12rem" }}
-              />
-              <Column
-                field="totalQuantity"
-                header="Items"
-                style={{ minWidth: "12rem" }}
-              />
-              <Column
-                field="total"
-                header="Total"
-                body={totalBodyTemplate}
-              />
-              <Column
-                field="date"
-                header="Date"
-                style={{ minWidth: "12rem" }}
-              />
-              <Column
-                body={actionBodyTemplate}
-                header="Actions"
-                style={{ minWidth: "12rem" }}
-              />
-            </DataTable>
-          </div>
-        </Fragment>
-      )}
+      <Fragment>
+        <div className="flex flex-nowrap justify-between mb-5">
+          <h1 className="text-3xl dark:text-whiten">Orders</h1>
+        </div>
+        <div>
+          <DataTable
+            value={allOrders}
+            rows={5}
+            size="small"
+            dataKey="id"
+            filters={filter}
+            filterDisplay="menu"
+            globalFilterFields={["id", "customer", "paymentStatus"]}
+            header={header}
+            paginator
+            paginatorTemplate="CurrentPageReport PrevPageLink NextPageLink"
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} results"
+            className="custom-paginator"
+            pt={dataTabelStyle}
+          >
+            <Column
+              field="id"
+              header="#"
+              body={idTemplate}
+              style={{ minWidth: "12rem" }}
+            />
+            <Column
+              field="customer"
+              header="Customer"
+              body={nameTemplate}
+              style={{ minWidth: "12rem" }}
+            />
+            <Column
+              field="paymentStatus"
+              header="Payment Status"
+              body={paymentStatusTemplate}
+              style={{ minWidth: "12rem" }}
+            />
+            <Column
+              field="shippingStatus"
+              header="Shipping Status"
+              body={shippingStatusTemplate}
+              style={{ minWidth: "12rem" }}
+            />
+            <Column
+              field="totalQuantity"
+              header="Items"
+              style={{ minWidth: "12rem" }}
+            />
+            <Column
+              field="total"
+              header="Total"
+              body={totalBodyTemplate}
+            />
+            <Column
+              field="date"
+              header="Date"
+              style={{ minWidth: "12rem" }}
+            />
+            <Column
+              body={actionBodyTemplate}
+              header="Actions"
+              style={{ minWidth: "12rem" }}
+            />
+          </DataTable>
+        </div>
+      </Fragment>
       <ConfirmPopup />
     </div>
   );

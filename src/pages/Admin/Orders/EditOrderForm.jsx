@@ -8,7 +8,7 @@ import GoBackButton from "../../../components/Admin/Buttons/GoBackButton";
 import { inputTextStyle } from "../../../layout/inputTextStyle";
 import { buttonsStyle } from "../../../layout/buttonsStyle";
 
-const EditOrderForm = ({ order, onSave, onCancel }) => {
+const EditOrderForm = ({ order, onSave}) => {
   const [updatedOrder, setUpdatedOrder] = useState(order);
 
   // Check if order is undefined
@@ -22,6 +22,10 @@ const EditOrderForm = ({ order, onSave, onCancel }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    setUpdatedOrder({ ...updatedOrder, [name]: value });
+  };
+
+  const handleDropdownChange = (name, value) => {
     setUpdatedOrder({ ...updatedOrder, [name]: value });
   };
 
@@ -42,7 +46,7 @@ const EditOrderForm = ({ order, onSave, onCancel }) => {
 
   return (
     <div className="p-5">
-      <GoBackButton onBack={onCancel} />
+      <GoBackButton />
       <h2 className="text-2xl font-bold mb-4">Edit Order #{order.id}</h2>
 
       <div className="mb-4">
@@ -60,7 +64,7 @@ const EditOrderForm = ({ order, onSave, onCancel }) => {
         <label className="block mb-1">Customer Email:</label>
         <InputText
           name="customerEmail" // Add customer email field
-          value={updatedOrder.customer} // Update for nested object
+          value={updatedOrder.customerEmail} // Update to the correct field
           onChange={handleChange}
           placeholder="Enter customer email"
           className="w-full"
@@ -74,7 +78,7 @@ const EditOrderForm = ({ order, onSave, onCancel }) => {
           name="paymentStatus"
           value={updatedOrder.paymentStatus}
           options={paymentOptions}
-          onChange={handleChange}
+          onChange={(e) => handleDropdownChange('paymentStatus', e.value)} // Use handleDropdownChange
           placeholder="Select payment status"
           className="w-full"
         />
@@ -86,7 +90,7 @@ const EditOrderForm = ({ order, onSave, onCancel }) => {
           name="shippingStatus"
           value={updatedOrder.shippingStatus}
           options={shippingOptions}
-          onChange={handleChange}
+          onChange={(e) => handleDropdownChange('shippingStatus', e.value)} // Use handleDropdownChange
           placeholder="Select shipping status"
           className="w-full"
         />
@@ -114,7 +118,7 @@ const EditOrderForm = ({ order, onSave, onCancel }) => {
       <Button
         label="Cancel"
         icon="pi pi-times"
-        onClick={onCancel}
+       // onClick={onCancel}
         pt={buttonsStyle}
       />
 

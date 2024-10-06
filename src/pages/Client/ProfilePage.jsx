@@ -18,7 +18,7 @@ const ProfilePage = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/v1/${id}`); // Adjust the endpoint accordingly
+        const response = await axios.get(`http://localhost:5000/api/v1/`); // Adjust the endpoint accordingly
         const userData = response.data;
 
         // Populate the state with user data
@@ -38,7 +38,7 @@ const ProfilePage = () => {
     e.preventDefault(); // Prevent page refresh
     // Logic to save updated profile information goes here
     try {
-      await axios.put(`http://localhost:5000/api/v1/${id}`, {
+      await axios.put(`http://localhost:5000/api/v1//users/update`, {
         firstName,
         lastName,
         email,

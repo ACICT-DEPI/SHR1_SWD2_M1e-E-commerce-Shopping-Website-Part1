@@ -11,26 +11,18 @@ import { confirmPopup, ConfirmPopup } from "primereact/confirmpopup"; // Import 
 import GoBackButton from "../../../components/Admin/Buttons/GoBackButton"; // Ensure GoBackButton is imported
 import { dataTabelStyle } from "../../../layout/dataTabelStyle";
 import { useParams } from "react-router-dom";
+import EditButton from "../../../components/Admin/Buttons/EditButton";
 
-const SingleOrderDetails = ({ onBack }) => {
+const SingleOrderDetails = () => {
   const dispatch = useDispatch();
-  const { id } = useParams(); // Get the order ID from URL
-
-  // Fetch order details from Redux state or API using the ID
+  const { id } = useParams(); // Extract the order ID from the URL
   const order = useSelector((state) =>
-    state.allOrders.find((order) => order.id === id)
+    state.allOrders.find((order) => order.id === Number(id))
   );
-
-
-  // Check if order is valid
+  
   if (!order) {
-    return (
-      <div className="text-center text-red-500">
-        No order details available.
-      </div>
-    );
+    return <div>No order found for ID: {id}</div>;
   }
-
   // Table templates for product
   const productBodyTemplate = (rowData) => (
     <div className="flex items-center">
@@ -86,7 +78,6 @@ const SingleOrderDetails = ({ onBack }) => {
   const handleDelete = () => {
     console.log("Deleting order:", order.id); // Check order id
     dispatch(deleteOrder(order.id));
-    onBack();
   };
 
   // Handle confirm click for deletion
@@ -121,8 +112,8 @@ const SingleOrderDetails = ({ onBack }) => {
 
           {/* Edit, Delete, and Mark as Paid Buttons next to the title */}
           <div className="flex space-x-4">
-            <ActionButton type="edit" label="Edit" onClick={handleEdit} />
-            <ActionButton
+          <EditButton label={"Edit"} path={`/update/:${id}`} />
+          <ActionButton
               type="delete"
               label="Delete"
               onClick={handleConfirmClick} // Trigger confirmPopup here

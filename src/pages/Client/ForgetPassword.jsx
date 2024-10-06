@@ -1,17 +1,30 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
+import axios from "axios";
+import { Toast } from 'primereact/toast';
 import DarkModeSwitcher from "../../components/Admin/Header/DarkModeSwitcher";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
+  const toast = useRef(null);  // Reference for the Toast component
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Add your password reset logic here, such as sending a reset link to the user's email.
-    console.log("Password reset link sent to:", email);
+    try {
+      await axios.post("/api/password-reset", { email });
+
+      // Show success message
+      toast.current.show({ severity: 'success', summary: 'Success', detail: 'Password reset link sent successfully!', life: 3000 });
+    } catch (err) {
+      // Show error message
+      toast.current.show({ severity: 'error', summary: 'Error', detail: 'Failed to send password reset link. Please try again.', life: 3000 });
+    }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
+      {/* Toast for displaying messages */}
+      <Toast ref={toast} />
+
       {/* Dark mode switcher */}
       <div className="absolute top-4 right-4">
         <DarkModeSwitcher />

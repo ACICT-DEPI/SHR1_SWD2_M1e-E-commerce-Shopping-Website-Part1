@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 
-const ProfilePictureUpload = ({ onUpload, userName, userRole }) => {
+const ProfilePictureUpload = ({ userName, userRole }) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState('');
 
@@ -21,7 +22,15 @@ const ProfilePictureUpload = ({ onUpload, userName, userRole }) => {
     formData.append('profilePicture', selectedFile);
 
     try {
-      await onUpload(formData);
+      // Replace BASE_URL with your actual base URL
+      const response = await axios.post(`http://localhost:5000/api/v1/users/user-photo-upload`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      // Handle successful upload response
+      console.log('Upload response:', response.data);
       alert('Profile picture uploaded successfully!');
     } catch (error) {
       console.error('Error uploading profile picture:', error);
