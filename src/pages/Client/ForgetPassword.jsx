@@ -10,13 +10,25 @@ const ForgotPassword = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:5000/api/v1//users/password/forget-password", { email });
+     const response = await axios.post("http://localhost:5000/api/v1/users/password/forget-password", { email });
+     console.log(response)
+     
 
+     if (response.status === 200) {
+      toast.current.show({
+        severity: "success",
+        summary: "Success",
+        detail: response.data.message,
+        life: 3000,
+      });
+    }
       // Show success message
-      toast.current.show({ severity: 'success', summary: 'Success', detail: 'Password reset link sent successfully!', life: 3000 });
     } catch (err) {
+     // console.log(err.response.message)
+     const data = err.response?.data || {};
+
       // Show error message
-      toast.current.show({ severity: 'error', summary: 'Error', detail: 'Failed to send password reset link. Please try again.', life: 3000 });
+      toast.current.show({ severity: 'error', summary: 'Error', detail: data.message ||'Failed to send password reset link. Please try again.', life: 3000 });
     }
   };
 
@@ -53,11 +65,9 @@ const ForgotPassword = () => {
               Email
             </label>
             <input
-              type="email"
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              required
               placeholder="email@address.tld"
               className="mt-2 block w-full p-3 border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-200"
             />
