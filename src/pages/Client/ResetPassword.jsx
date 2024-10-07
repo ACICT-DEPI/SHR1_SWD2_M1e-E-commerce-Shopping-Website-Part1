@@ -1,17 +1,36 @@
 import React, { useState } from "react";
+import axios from "axios";
 import DarkModeSwitcher from "../../components/Admin/Header/DarkModeSwitcher";
 
 const ResetPassword = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Add your password reset logic here, such as confirming password change.
-    if (password === confirmPassword) {
-      console.log("Password reset successful:", password);
-    } else {
+    
+    if (password !== confirmPassword) {
       console.error("Passwords do not match");
+      alert("Passwords do not match!");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await axios.post('http://localhost:5000/api/v1/users/reset-password', {
+        password,
+        confirmPassword
+      });
+
+      console.log("Password reset successful:", response.data);
+      alert("Password reset successful!");
+    } catch (error) {
+      console.error("Error resetting password:", error.response ? error.response.data : error.message);
+      alert("Error resetting password. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -74,9 +93,10 @@ const ResetPassword = () => {
 
           <button
             type="submit"
-            className="w-full bg-blue-500 text-white font-bold py-3 rounded-md hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 transition duration-300"
+            className={`w-full bg-blue-500 text-white font-bold py-3 rounded-md hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 transition duration-300 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            disabled={loading}
           >
-            Reset Password
+            {loading ? 'Resetting...' : 'Reset Password'}
           </button>
         </form>
       </div>

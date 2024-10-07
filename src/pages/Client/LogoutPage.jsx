@@ -1,53 +1,75 @@
-import React, { useRef } from "react";
-import { useHistory } from "react-router-dom";
-import axios from "axios";
-import { Toast } from 'primereact/toast';  // Import Toast from PrimeReact
-import 'primereact/resources/primereact.min.css';
-import 'primereact/resources/themes/saga-blue/theme.css';
-import 'primeicons/primeicons.css';
-import DarkModeSwitcher from "../../components/Admin/Header/DarkModeSwitcher";
+import React from "react";
+import { Toast } from "primereact/toast"; // PrimeReact Toast
+import { useNavigate } from "react-router-dom"; // For redirection and linking
+import axios from "axios"; // Importing axios
+import DarkModeSwitcher from "../../components/Admin/Header/DarkModeSwitcher"; // Dark mode switcher
 
 const LogoutPage = () => {
-  const toast = useRef(null); // Create a reference for the Toast component
+  const toast = React.useRef(null); // Toast reference
+  const navigate = useNavigate(); // Navigate for redirection
 
   const handleLogout = async () => {
     try {
-      await axios.post(`http://localhost:5000/api/v1/users/logout`, {}, { withCredentials: true });
-      toast.current.show({ severity: 'success', summary: 'Success', detail: 'You have been logged out successfully.', life: 3000 });
-    
-    } catch (error) {
-      console.error("Error logging out:", error);
-      toast.current.show({ severity: 'error', summary: 'Error', detail: 'Failed to log out. Please try again.', life: 3000 });
+      // Make an API call to logout
+     const response = await axios.post(
+        "http://localhost:5000/api/v1/users/logout", // Your API logout route
+        {},
+        { withCredentials: true }
+      );
+
+      // Show success message
+      toast.current.show({
+        severity: "success",
+        summary: "Success",
+        detail: response.data.message,
+        life: 3000,
+      });
+
+      // Redirect to login page after successful logout
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
+    } catch (err) {
+      toast.current.show({
+        severity: "error",
+        summary: "Error",
+        detail: "Failed to log out. Please try again.",
+        life: 3000,
+      });
     }
   };
 
+  const handleCancel = () => {
+    // Redirect back to home page if user cancels logout
+    navigate("/");
+  };
+
   return (
-    <div className="bg-gray-100 dark:bg-gray-900 min-h-screen p-8 font-inter">
-      <Toast ref={toast} /> {/* Add Toast component */}
-      
-      {/* Dark Mode Switcher */}
-      <div className="flex justify-end mb-4">
+    <div className="flex items-center justify-center h-screen bg-gray-100 dark:bg-gray-900 relative">
+      <div className="absolute top-4 right-4">
         <DarkModeSwitcher />
       </div>
+      <Toast ref={toast} position="bottom-left" /> {/* PrimeReact Toast component */}
+      <div className="w-full max-w-md p-8 space-y-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+        <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white">
+          Are you sure you want to log out?
+        </h2>
+        <div className="space-y-4">
+          {/* Confirm Logout Button */}
+          <button
+            onClick={handleLogout}
+            className="w-full py-2 mt-4 text-white rounded-md bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+          >
+            Confirm Logout
+          </button>
 
-      <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg flex">
-        <div className="w-full text-center">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-            Logout
-          </h2>
-          <p className="text-gray-600 dark:text-gray-300 mb-6">
-            Are you sure you want to log out of your account?
-          </p>
-
-          <div className="flex justify-center space-x-4">
-            <button
-              onClick={handleLogout}
-              className="px-6 py-3 bg-blue-500 text-white rounded-md shadow hover:bg-blue-600"
-            >
-              Confirm Logout
-            </button>
-            
-          </div>
+          {/* Cancel Button */}
+          <button
+            onClick={handleCancel}
+            className="w-full py-2 mt-4 text-white rounded-md bg-gray-500 hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+          >
+            Cancel
+          </button>
         </div>
       </div>
     </div>

@@ -23,7 +23,6 @@ const ProfilePage = () => {
     const fetchUserData = async () => {
       try {
         const response = await axios.get(`http://localhost:5000/api/v1/users/profile`,{ withCredentials: true });
-        console.log(response.data.data);
         const userData = response.data.data;
 
         // Populate the state with user data
@@ -42,31 +41,44 @@ const ProfilePage = () => {
   }, [id]);
 
   const handleSaveProfile = async (e) => {
-    e.preventDefault(); // Prevent page refresh
-    // Logic to save updated profile information goes here
+    e.preventDefault();
+  
+    if (newPassword && newPassword !== confirmPassword) {
+      toast.current.show({ severity: 'error', summary: 'Error', detail: 'Passwords do not match.', life: 3000 });
+      return;
+    }
+  
     try {
-      await axios.put(
+      const response = await axios.patch(
         `http://localhost:5000/api/v1/users/update`,
         {
           firstName,
           lastName,
           email,
           phone,
-          currentPassword,
-          newPassword,
-        }
+          currentPassword: currentPassword || undefined,
+          newPassword: newPassword || undefined,
+        },
+        { withCredentials: true }
       );
-      toast.current.show({ severity: 'success', summary: 'Success', detail: 'Profile updated successfully!', life: 3000 });
+  
+      toast.current.show({ severity: 'success', summary: 'Success', detail: response.data.message, life: 3000 });
     } catch (error) {
-      console.error("Error updating profile:", error);
-      toast.current.show({ severity: 'error', summary: 'Error', detail: 'Failed to update profile.', life: 3000 });
+      console.error("Error updating profile:", error.response ? error.response.data : error.message);
+      toast.current.show({
+        severity: 'error',
+        summary: 'Error',
+        detail: error.response ? error.response.data.message : 'Failed to update profile.',
+        life: 3000,
+      });
     }
   };
+  
 
   return (
     <div className="bg-gray-100 dark:bg-gray-900 min-h-screen p-8 font-inter">
       {/* Toast for Notifications */}
-      <Toast ref={toast} />
+      <Toast ref={toast} position="bottom-left" />
 
       {/* Dark Mode Switcher */}
       <div className="flex justify-end mb-4">

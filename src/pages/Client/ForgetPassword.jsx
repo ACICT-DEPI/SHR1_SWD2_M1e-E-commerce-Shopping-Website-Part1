@@ -10,7 +10,7 @@ const ForgotPassword = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("/api/password-reset", { email });
+      await axios.post("http://localhost:5000/api/v1//users/password/forget-password", { email });
 
       // Show success message
       toast.current.show({ severity: 'success', summary: 'Success', detail: 'Password reset link sent successfully!', life: 3000 });

@@ -2,40 +2,51 @@ import React, { useState } from 'react';
 import axios from 'axios';
 
 const ProfilePictureUpload = ({ userName, userRole }) => {
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState('');
+  const [previewUrl, setPreviewUrl] = useState(''); // For the image preview
+  const [loading, setLoading] = useState(false); // To show loading state
+  const [error, setError] = useState(''); // For error messages
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    setSelectedFile(file);
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0]; // Get the first file
+    if (!file) return;
 
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setPreviewUrl(url);
+    // Check if the selected file is an image
+    if (!file.type.startsWith('image/')) {
+      setError('Please select a valid image file.');
+      return;
     }
-  };
 
-  const handleUpload = async () => {
-    if (!selectedFile) return;
+    // Preview the selected image before upload
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
 
     const formData = new FormData();
-    formData.append('profilePicture', selectedFile);
+    formData.append('profilePicture', file); // Use the correct key for a single upload
+
+    setLoading(true);
+    setError(''); // Reset error state before upload
 
     try {
-      const response = await axios.post(`http://localhost:5000/api/v1/users/user-photo-upload`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await axios.patch(
+        'http://localhost:5000/api/v1/users/user-photo-upload',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+          withCredentials: true, // To support cross-site credentials if needed
+        }
+      );
 
       console.log('Upload response:', response.data);
-      alert('Profile picture uploaded successfully!');
-      // Reset the preview URL and selected file after successful upload
+      alert('Profile picture updated successfully!');
+      // Reset the preview URL on successful upload
       setPreviewUrl('');
-      setSelectedFile(null);
-    } catch (error) {
-      console.error('Error uploading profile picture:', error);
-      alert('Error uploading profile picture. Please try again.');
+    } catch (err) {
+      console.error('Error uploading profile picture:', err.response?.data || err.message);
+      setError(err.response?.data?.message || 'Error updating profile picture. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -46,19 +57,22 @@ const ProfilePictureUpload = ({ userName, userRole }) => {
           type="file"
           accept="image/*"
           onChange={handleFileChange}
-          className="hidden" // Hide the default file input
-          onClick={(e) => { e.target.value = null; }} // Clear file input on re-click
-          onBlur={handleUpload} // Trigger upload on blur
+          className="hidden"
         />
         <img
-          src={previewUrl || 'https://via.placeholder.com/150'} // Placeholder for profile picture
+          src={previewUrl || 'https://via.placeholder.com/150'}
           alt="Profile"
-          className="w-32 h-32 md:w-48 md:h-48 rounded-full object-cover border-4 border-gray-300 dark:border-gray-600 transition-transform duration-200 cursor-pointer hover:scale-105 hover:shadow-lg"
-          onClick={() => document.querySelector('input[type="file"]').click()} // Trigger file input click
+          className={`w-32 h-32 md:w-48 md:h-48 rounded-full object-cover border-4 border-gray-300 dark:border-gray-600 transition-transform duration-200 cursor-pointer hover:scale-105 hover:shadow-lg ${loading ? 'opacity-50' : ''}`}
+          onClick={() => document.querySelector('input[type="file"]').click()}
         />
+        {loading && (
+          <div className="absolute inset-0 flex justify-center items-center">
+            <div className="loader"></div>
+          </div>
+        )}
       </div>
-      <h2 className="mt-2 text-lg font-semibold text-gray-900 dark:text-white">{userName}</h2>
-      <p className="text-sm text-gray-600 dark:text-gray-400">{userRole}</p>
+      
+      {error && <p className="text-red-500 mt-2">{error}</p>}
     </div>
   );
 };
