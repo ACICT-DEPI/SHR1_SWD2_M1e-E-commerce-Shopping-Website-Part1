@@ -15,14 +15,15 @@ const ProfilePage = () => {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  
+  const [errorMessages, setErrorMessages] = useState({});
+
   const toast = useRef(null); // Reference for Toast
 
   // Fetch user data based on the ID
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/v1/users/profile`,{ withCredentials: true });
+        const response = await axios.get(`http://localhost:5000/api/v1/users/profile`, { withCredentials: true });
         const userData = response.data.data;
 
         // Populate the state with user data
@@ -40,40 +41,80 @@ const ProfilePage = () => {
     fetchUserData();
   }, [id]);
 
+  // Function to handle profile information update
   const handleSaveProfile = async (e) => {
     e.preventDefault();
-  
-    if (newPassword && newPassword !== confirmPassword) {
-      toast.current.show({ severity: 'error', summary: 'Error', detail: 'Passwords do not match.', life: 3000 });
-      return;
-    }
-  
+    setErrorMessages({});
+
     try {
       const response = await axios.patch(
         `http://localhost:5000/api/v1/users/update`,
-        {
-          firstName,
-          lastName,
-          email,
-          phone,
-          currentPassword: currentPassword || undefined,
-          newPassword: newPassword || undefined,
-        },
+        { firstName, lastName, email, phone },
         { withCredentials: true }
       );
   
       toast.current.show({ severity: 'success', summary: 'Success', detail: response.data.message, life: 3000 });
     } catch (error) {
-      console.error("Error updating profile:", error.response ? error.response.data : error.message);
+      const data = error.response?.data || {};
+      setErrorMessages((prev) => ({
+        ...prev,
+        firstName: data.errors?.firstName?.message || "",
+        lastName: data.errors?.lastName?.message || "",
+        email: data.errors?.email?.message || "",
+        phone: data.errors?.phone?.message || "",
+      }));
+
+      // Display generic error message
       toast.current.show({
-        severity: 'error',
-        summary: 'Error',
-        detail: error.response ? error.response.data.message : 'Failed to update profile.',
+        severity: "error",
+        summary: "Error",
+        detail: "An error occurred. Please try again.",
         life: 3000,
       });
     }
   };
-  
+
+  // Function to handle password change
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    setErrorMessages({});
+
+    if (newPassword && newPassword !== confirmPassword) {
+      setErrorMessages((prev) => ({
+        ...prev,
+        confirmPassword: "Passwords do not match.",
+      }));
+      return;
+    }
+
+    try {
+      const response = await axios.patch(
+        `http://localhost:5000/api/v1/users/change-password`,
+        { currentPassword, newPassword },
+        { withCredentials: true }
+      );
+
+      toast.current.show({ severity: 'success', summary: 'Password Updated', detail: response.data.message, life: 3000 });
+    } catch (error) {
+      const data = error.response?.data || {};
+      setErrorMessages((prev) => ({
+        ...prev,
+        currentPassword: data.errors?.currentPassword?.message || "",
+        newPassword: data.errors?.newPassword?.message || "",
+      }));
+
+      toast.current.show({
+        severity: "error",
+        summary: "Error",
+        detail: "Failed to update password. Please try again.",
+        life: 3000,
+      });
+    }
+  };
+
+  const handleFocus = (field) => {
+    setErrorMessages((prev) => ({ ...prev, [field]: "" }));
+  };
 
   return (
     <div className="bg-gray-100 dark:bg-gray-900 min-h-screen p-8 font-inter">
@@ -105,114 +146,131 @@ const ProfilePage = () => {
             <h3 className="font-bold text-lg text-gray-900 dark:text-white">
               Personal Information
             </h3>
-            <form className="space-y-4" onSubmit={handleSaveProfile}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-gray-700 dark:text-gray-300">
-                    First name
-                  </label>
-                  <input
-                    type="text"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    className="w-full p-3 rounded-md border dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600"
-                  />
-                </div>
+            <form onSubmit={handleSaveProfile} className="space-y-4">
+              {/* First Name */}
+              <div className="relative">
+                <label htmlFor="first-name" className="sr-only">First Name</label>
+                <input
+                  id="first-name"
+                  type="text"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  onFocus={() => handleFocus("firstName")}
+                  placeholder="First Name"
+                  className={`w-full px-4 py-3 pl-10 border ${errorMessages.firstName ? "border-red-500" : "border-gray-300"} dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                />
+                {errorMessages.firstName && <div className="text-red-500 dark:text-red-400">{errorMessages.firstName}</div>}
+              </div>
 
-                <div>
-                  <label className="block text-gray-700 dark:text-gray-300">
-                    Last name
-                  </label>
-                  <input
-                    type="text"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    className="w-full p-3 rounded-md border dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600"
-                  />
-                </div>
+              {/* Last Name */}
+              <div className="relative">
+                <label htmlFor="last-name" className="sr-only">Last Name</label>
+                <input
+                  id="last-name"
+                  type="text"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  onFocus={() => handleFocus("lastName")}
+                  placeholder="Last Name"
+                  className={`w-full px-4 py-3 pl-10 border ${errorMessages.lastName ? "border-red-500" : "border-gray-300"} dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                />
+                {errorMessages.lastName && <div className="text-red-500 dark:text-red-400">{errorMessages.lastName}</div>}
+              </div>
 
-                <div>
-                  <label className="block text-gray-700 dark:text-gray-300">
-                    Phone number
-                  </label>
-                  <input
-                    type="text"
-                    value={phone} // Bind phone value to state
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="w-full p-3 rounded-md border dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600"
-                  />
-                </div>
+              {/* Phone Number */}
+              <div className="relative">
+                <label htmlFor="phone" className="sr-only">Phone Number</label>
+                <input
+                  id="phone"
+                  type="text"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  onFocus={() => handleFocus("phone")}
+                  placeholder="Phone Number"
+                  className={`w-full px-4 py-3 pl-10 border ${errorMessages.phone ? "border-red-500" : "border-gray-300"} dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                />
+                {errorMessages.phone && <div className="text-red-500 dark:text-red-400">{errorMessages.phone}</div>}
+              </div>
 
-                <div className="col-span-2">
-                  <label className="block text-gray-700 dark:text-gray-300">
-                    Email address
-                  </label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full p-3 rounded-md border dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600"
-                  />
-                </div>
+              {/* Email */}
+              <div className="relative">
+                <label htmlFor="email" className="sr-only">Email</label>
+                <input
+                  id="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  onFocus={() => handleFocus("email")}
+                  placeholder="Enter your email"
+                  className={`w-full px-4 py-3 pl-10 border ${errorMessages.email ? "border-red-500" : "border-gray-300"} dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                />
+                {errorMessages.email && <div className="text-red-500 dark:text-red-400">{errorMessages.email}</div>}
               </div>
 
               <button
                 type="submit"
-                className="mt-4 px-6 py-3 bg-blue-500 text-white rounded-md shadow hover:bg-blue-600"
+                className="w-full text-white bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 px-4 py-3 rounded-md shadow-md focus:outline-none"
               >
-                Save
+                Save Changes
               </button>
             </form>
           </div>
 
-          <hr className="border-gray-300 dark:border-gray-700" />
-
-          {/* Change Password */}
-          <div className="space-y-6 mt-8">
+          {/* Update Password */}
+          <div className="space-y-6">
             <h3 className="font-bold text-lg text-gray-900 dark:text-white">
               Change Password
             </h3>
-            <form className="space-y-4">
-              <div className="grid grid-cols-1 gap-6">
-                <div>
-                  <label className="block text-gray-700 dark:text-gray-300">
-                    Current password
-                  </label>
-                  <input
-                    type="password"
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                    className="w-full p-3 rounded-md border dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600"
-                  />
-                </div>
+            <form onSubmit={handleChangePassword} className="space-y-4">
+              {/* Current Password */}
+              <div className="relative">
+                <label htmlFor="current-password" className="sr-only">Current Password</label>
+                <input
+                  id="current-password"
+                  type="password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  onFocus={() => handleFocus("currentPassword")}
+                  placeholder="Current Password"
+                  className={`w-full px-4 py-3 pl-10 border ${errorMessages.currentPassword ? "border-red-500" : "border-gray-300"} dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                />
+                {errorMessages.currentPassword && <div className="text-red-500 dark:text-red-400">{errorMessages.currentPassword}</div>}
+              </div>
 
-                <div>
-                  <label className="block text-gray-700 dark:text-gray-300">
-                    New password
-                  </label>
-                  <input
-                    type="password"
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full p-3 rounded-md border dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600"
-                  />
-                </div>
+              {/* New Password */}
+              <div className="relative">
+                <label htmlFor="new-password" className="sr-only">New Password</label>
+                <input
+                  id="new-password"
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  onFocus={() => handleFocus("newPassword")}
+                  placeholder="New Password"
+                  className={`w-full px-4 py-3 pl-10 border ${errorMessages.newPassword ? "border-red-500" : "border-gray-300"} dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                />
+                {errorMessages.newPassword && <div className="text-red-500 dark:text-red-400">{errorMessages.newPassword}</div>}
+              </div>
 
-                <div>
-                  <label className="block text-gray-700 dark:text-gray-300">
-                    Confirm password
-                  </label>
-                  <input
-                    type="password"
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full p-3 rounded-md border dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600"
-                  />
-                </div>
+              {/* Confirm Password */}
+              <div className="relative">
+                <label htmlFor="confirm-password" className="sr-only">Confirm New Password</label>
+                <input
+                  id="confirm-password"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onFocus={() => handleFocus("confirmPassword")}
+                  placeholder="Confirm New Password"
+                  className={`w-full px-4 py-3 pl-10 border ${errorMessages.confirmPassword ? "border-red-500" : "border-gray-300"} dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                />
+                {errorMessages.confirmPassword && <div className="text-red-500 dark:text-red-400">{errorMessages.confirmPassword}</div>}
               </div>
 
               <button
                 type="submit"
-                className="mt-4 px-6 py-3 bg-blue-500 text-white rounded-md shadow hover:bg-blue-600"
+                className="w-full text-white bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 px-4 py-3 rounded-md shadow-md focus:outline-none"
               >
-                Save
+                Change Password
               </button>
             </form>
           </div>
