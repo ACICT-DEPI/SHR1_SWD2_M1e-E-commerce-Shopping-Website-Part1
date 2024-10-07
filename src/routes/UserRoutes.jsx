@@ -12,6 +12,9 @@ import ProfilePage from "../pages/Client/ProfilePage";
 import ResetPassword from "../pages/Client/ResetPassword";
 import LogoutPage from "../pages/Client/LogoutPage";
 import CollectionProducts from "../pages/Client/CollectionProducts";
+import UnauthorizedPage from "../pages/Client/UnauthorizedPage";
+import ExpiredOrInvalidTokenPage from "../pages/Client/ExpiredOrInvalidTokenPage";
+import TokenValidation from "../pages/Client/TokenValidation";
 function UserRoutes() {
   return (
     <Routes>
@@ -19,14 +22,26 @@ function UserRoutes() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/logout" element={<LogoutPage />} />
-      <Route path="/forget-passwrd" element={<ForgetPassword />} />
-      <Route path="/reset-passwrd" element={<ResetPassword />} />
+      <Route path="/forget-password" element={<ForgetPassword />} />
+      <Route
+        path="/password/reset-password/:userId/:token"
+        element={<TokenValidation />}
+      />
+      <Route
+        path="/password/get-reset-password-form/:userId/:token"
+        element={<ResetPassword />}
+      />
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/product/:id" element={<ProductDetails />} />
       <Route path="/contact" element={<ContactPage />} />
       <Route path="/collections" element={<AllCollections />} />
       <Route path="/collections/:param" element={<CollectionProducts />} />
 
+      <Route path="/unauthorized-page" element={<UnauthorizedPage />} />
+      <Route
+        path="/expired-invalid-token-page"
+        element={<ExpiredOrInvalidTokenPage />}
+      />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );

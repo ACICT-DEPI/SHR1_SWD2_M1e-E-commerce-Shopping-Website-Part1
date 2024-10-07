@@ -121,7 +121,10 @@ const Login = () => {
 
         {/* Forgot Password Link */}
         <div className="text-center mt-4">
-          <Link to="/forget-passwrd" className="text-blue-500 dark:text-blue-400">
+          <Link
+            to="/forget-password"
+            className="text-blue-500 dark:text-blue-400"
+          >
             Forgot Password?
           </Link>
         </div>

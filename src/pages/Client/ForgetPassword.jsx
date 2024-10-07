@@ -1,34 +1,35 @@
 import React, { useState, useRef } from "react";
 import axios from "axios";
-import { Toast } from 'primereact/toast';
+import { Toast } from "primereact/toast";
 import DarkModeSwitcher from "../../components/Admin/Header/DarkModeSwitcher";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
-  const toast = useRef(null);  // Reference for the Toast component
+  const toast = useRef(null); // Reference for the Toast component
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-     const response = await axios.post("http://localhost:5000/api/v1/users/password/forget-password", { email });
-     console.log(response)
-     
+      const response = await axios.post(
+        `http://localhost:5000/api/v1/users/password/forget-password`,
+        { email },
+        { withCredentials: true }
+      );
 
-     if (response.status === 200) {
       toast.current.show({
         severity: "success",
-        summary: "Success",
+        summary: "Link sent successfully",
         detail: response.data.message,
         life: 3000,
       });
-    }
-      // Show success message
-    } catch (err) {
-     // console.log(err.response.message)
-     const data = err.response?.data || {};
-
-      // Show error message
-      toast.current.show({ severity: 'error', summary: 'Error', detail: data.message ||'Failed to send password reset link. Please try again.', life: 3000 });
+    } catch (error) {
+      const data = error.response?.data || {};
+      toast.current.show({
+        severity: "error",
+        summary: "Error",
+        detail: data.message || "Failed to update password. Please try again.",
+        life: 3000,
+      });
     }
   };
 
