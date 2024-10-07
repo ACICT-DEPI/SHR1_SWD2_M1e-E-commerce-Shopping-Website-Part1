@@ -11,19 +11,21 @@ import AllCollections from "../pages/Client/AllCollections";
 import ProfilePage from "../pages/Client/ProfilePage";
 import ResetPassword from "../pages/Client/ResetPassword";
 import LogoutPage from "../pages/Client/LogoutPage";
+import CollectionProducts from "../pages/Client/CollectionProducts";
 function UserRoutes() {
   return (
     <Routes>
       <Route path="/" element={<UserPage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/logout" element={<LogoutPage/>} />
+      <Route path="/logout" element={<LogoutPage />} />
       <Route path="/forget-passwrd" element={<ForgetPassword />} />
       <Route path="/reset-passwrd" element={<ResetPassword />} />
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/product/:id" element={<ProductDetails />} />
       <Route path="/contact" element={<ContactPage />} />
       <Route path="/collections" element={<AllCollections />} />
+      <Route path="/collections/:param" element={<CollectionProducts />} />
 
       <Route path="*" element={<NotFoundPage />} />
     </Routes>

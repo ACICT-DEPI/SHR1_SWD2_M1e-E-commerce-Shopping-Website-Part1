@@ -2,14 +2,12 @@ import React, { useEffect, useState } from "react";
 import { Paginator } from "primereact/paginator";
 import axios from "axios";
 import Card from "../Card/Card";
-import { useParams } from "react-router-dom";
 import LoadingCard from "../Card/LoadingCard";
 import { Dropdown } from "primereact/dropdown";
 import { dropdownClient } from "../../../layout/dropdownClient";
 
-const CollectionProduct = () => {
-  // const { id } = useParams(); // الفئة الممررة عبر الرابط
-  const id = "66fe9e9f1e39c57133bd9911";
+const CollectionProduct = ({ collection }) => {
+  const param = collection;
   const [products, setProducts] = useState([]); // تخزين المنتجات
   const [totalRecords, setTotalRecords] = useState(0); // تخزين العدد الكلي للمنتجات
   const [first, setFirst] = useState(0); // التحكم في البداية
@@ -29,7 +27,7 @@ const CollectionProduct = () => {
       try {
         // طلب API باستخدام category title
         const response = await axios.get(
-          `http://localhost:5000/api/v1/categories/${id}`
+          `http://localhost:5000/api/v1/categories/${param}`
         );
 
         if (response.data && response.data.data) {
@@ -39,9 +37,8 @@ const CollectionProduct = () => {
         console.error("Error fetching collection name:", error);
       }
     };
-
     getCollectionName();
-  }, [category]);
+  }, [param]);
 
   // دالة عمل الفلترة
   useEffect(() => {
@@ -80,7 +77,7 @@ const CollectionProduct = () => {
           `http://localhost:5000/api/v1/products`,
           {
             params: {
-              categories: id, // تمرير الفئة
+              categories: param, // تمرير الفئة
               page: first / rows + 1, // حساب رقم الصفحة
               limit: rows, // عدد المنتجات لكل صفحة
             },
@@ -99,7 +96,7 @@ const CollectionProduct = () => {
     };
 
     getProductByCollection();
-  }, [id, first, rows]); // استدعاء الدالة عند تغيير id أو pagination
+  }, [param, first, rows]); // استدعاء الدالة عند تغيير id أو pagination
 
   // دالة لتحديث المؤشر عند تغيير الصفحة
   const onPageChange = (event) => {
