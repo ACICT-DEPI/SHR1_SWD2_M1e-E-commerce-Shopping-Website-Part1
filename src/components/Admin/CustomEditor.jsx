@@ -1,9 +1,25 @@
 import { Editor } from "primereact/editor";
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
+import DOMPurify from "dompurify"; // استيراد مكتبة DOMPurify
 
 const CustomEditor = ({ value, onTextChange }) => {
-  const [textEditor, setTextEditor] = useState(value);
-  // Editor Header
+  const [textEditor, setTextEditor] = useState("");
+
+  // تعقيم الـ HTML المستلم
+  useEffect(() => {
+    if (value) {
+      const cleanHtml = DOMPurify.sanitize(value); // تعقيم HTML
+      setTextEditor(cleanHtml); // تعيين النص المعقم
+    }
+  }, [value]);
+
+  // التعامل مع تغييرات المحرر
+  const handleTextChange = (e) => {
+    setTextEditor(e.htmlValue); // تحديث القيمة المحلية
+    onTextChange(e); // تمرير التغييرات إلى المكون الأب
+  };
+
+  // Editor Heade
   const editorHeader = () => {
     return (
       <Fragment>
@@ -12,10 +28,8 @@ const CustomEditor = ({ value, onTextChange }) => {
           <button className="ql-bold" aria-label="Bold"></button>
           <button className="ql-italic" aria-label="Italic"></button>
           <button className="ql-underline" aria-label="Underline"></button>
-
           <button className="ql-header" value="1" aria-label="header1"></button>
           <button className="ql-header" value="2" aria-label="header2"></button>
-
           <button
             className="ql-list"
             value="bullet"
@@ -26,9 +40,7 @@ const CustomEditor = ({ value, onTextChange }) => {
             value="ordered"
             aria-label="ordered list"
           ></button>
-
           <select className="ql-align" aria-label="align"></select>
-
           <button className="ql-link" aria-label="link"></button>
           <button className="ql-blockquote" aria-label="blockquote"></button>
           <button className="ql-image" aria-label="image"></button>
@@ -36,17 +48,19 @@ const CustomEditor = ({ value, onTextChange }) => {
       </Fragment>
     );
   };
+
   const header = editorHeader();
 
   return (
     <Fragment>
       <Editor
-        value={textEditor}
-        onTextChange={onTextChange}
+        value={textEditor} // استخدام القيمة المعقمة هنا
+        onTextChange={handleTextChange} // تمرير التغيير
         headerTemplate={header}
         placeholder="Write something ..."
       />
     </Fragment>
   );
 };
+
 export default CustomEditor;

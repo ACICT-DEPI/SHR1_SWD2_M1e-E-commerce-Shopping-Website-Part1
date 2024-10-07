@@ -37,8 +37,6 @@ const AdminPage = () => {
         <Route path="collections" element={<Collections />} />
         <Route path="collections/add" element={<AddCollection />} />
         <Route path="collections/update/:id" element={<UpdateCollection />} />
-        <Route path="collections/update/:id" element={<UpdateCollection />} />
-
       </Routes>
     </DefaultLayout>
   );
