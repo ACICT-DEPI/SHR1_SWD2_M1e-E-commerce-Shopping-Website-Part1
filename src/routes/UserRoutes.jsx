@@ -7,7 +7,7 @@ import ProductDetails from "../pages/Client/ProductDetails";
 import ForgetPassword from "../pages/Client/ForgetPassword";
 import NotFoundPage from "../pages/Client/NotFoundPage";
 import ContactPage from "../pages/Client/ContactPage";
-import AllCollections from "../pages/Client/AllCollections";
+import AllCollectionsPage from "../pages/Client/AllCollectionsPage";
 import ProfilePage from "../pages/Client/ProfilePage";
 import ResetPassword from "../pages/Client/ResetPassword";
 import LogoutPage from "../pages/Client/LogoutPage";
@@ -34,7 +34,7 @@ function UserRoutes() {
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/product/:id" element={<ProductDetails />} />
       <Route path="/contact" element={<ContactPage />} />
-      <Route path="/collections" element={<AllCollections />} />
+      <Route path="/collections" element={<AllCollectionsPage />} />
       <Route path="/collections/:param" element={<CollectionProducts />} />
 
       <Route path="/unauthorized-page" element={<UnauthorizedPage />} />

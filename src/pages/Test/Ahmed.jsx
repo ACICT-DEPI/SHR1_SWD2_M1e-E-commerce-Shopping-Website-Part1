@@ -3,17 +3,15 @@ import DataTabel from "../../components/Admin/DataTabel/DataTabel";
 import DefaultLayout from "../../layout/DefaultLayout";
 import OurCollectionSection from "../../components/Client/Collections/OurCollectionSection";
 import { useSelector } from "react-redux";
-import AllCollections from "../Client/AllCollections";
+import AllCollections from "../Client/AllCollectionsPage";
 import CollectionProduct from "../../components/Client/Collections/CollectionProduct";
 import Card from "../../components/Client/Card/Card";
 
 const Ahmed = () => {
-  const collections = useSelector((state) => state.allCollections);
-
   return (
     <Fragment>
       <main className="bg-white">
-        {/* <OurCollectionSection data={collections} /> */}
+        <OurCollectionSection />
         {/* <AllCollections /> */}
         <CollectionProduct />
       </main>
