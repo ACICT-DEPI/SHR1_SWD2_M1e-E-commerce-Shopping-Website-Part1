@@ -1,13 +1,19 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { FaSearch, FaShoppingCart } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import SearchComponent from '../Client/SearchComponent';
-import ClickOutside from '../Client/ClickOutside';  // Update with the correct path
-import { CheckAuth } from "./CheckAuth";
+import SearchComponent from "../Client/SearchComponent";
+import ClickOutside from "../Client/ClickOutside"; // Update with the correct path
+import axios from "axios";
+import AuthLinks from "./AuthLinks";
+import UserDropdown from "./UserDropDown";
 
 const UserHeader = () => {
   const [isShopOpen, setIsShopOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [firstname, setFirstname] = useState(""); // State to store firstname
+  const [loading, setLoading] = useState(true); // State to manage loading status
+  const [error, setError] = useState(null); // State to manage any errors
 
   const shopButtonRef = useRef(null); // Reference for the Shop button
 
@@ -19,6 +25,29 @@ const UserHeader = () => {
   const toggleSearch = () => {
     setIsSearchOpen(!isSearchOpen);
   };
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:5000/api/v1/users/profile",
+          {
+            withCredentials: true, // Make sure your server has proper CORS settings for this
+          }
+        );
+        setIsAuthenticated(true);
+        console.log("API Response: ", response.data);
+
+        setFirstname(response.data.data.firstname);
+      } catch (error) {
+        setError(error.response ? error.response.data.message : error.message);
+        setIsAuthenticated(false); // Default to false if there's an error
+      } finally {
+        setLoading(false); // Stop loading once request is complete
+      }
+    };
+    checkAuth();
+  }, []);
 
   return (
     <header className="w-full relative z-[999]">
@@ -60,7 +89,11 @@ const UserHeader = () => {
 
           {/* Right Side - Sign In, Create Account, Search, Cart */}
           <div className="hidden md:flex items-center space-x-6">
-            <CheckAuth />
+            {isAuthenticated ? (
+              <UserDropdown firstname={firstname} /> // Pass firstname as username prop
+            ) : (
+              <AuthLinks /> // Render AuthLinks if not authenticated
+            )}
 
             {/* Search Icon */}
             <FaSearch

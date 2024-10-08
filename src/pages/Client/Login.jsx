@@ -39,10 +39,9 @@ const Login = () => {
         life: 3000,
       });
 
-      // Redirect to home page after successful login
       setTimeout(() => {
-        navigate("/"); // Change '/' to your home page route
-      }, 2000);
+        window.location.href = "/";
+      }, 1000);
     } catch (err) {
       setLoading(false);
       setError(

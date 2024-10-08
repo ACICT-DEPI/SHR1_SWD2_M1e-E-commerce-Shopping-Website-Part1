@@ -11,7 +11,7 @@ const LogoutPage = () => {
   const handleLogout = async () => {
     try {
       // Make an API call to logout
-     const response = await axios.post(
+      const response = await axios.post(
         "http://localhost:5000/api/v1/users/logout", // Your API logout route
         {},
         { withCredentials: true }
@@ -25,10 +25,9 @@ const LogoutPage = () => {
         life: 3000,
       });
 
-      // Redirect to login page after successful logout
       setTimeout(() => {
-        navigate("/login");
-      }, 2000);
+        window.location.href = "/login";
+      }, 1000);
     } catch (err) {
       toast.current.show({
         severity: "error",
@@ -49,7 +48,8 @@ const LogoutPage = () => {
       <div className="absolute top-4 right-4">
         <DarkModeSwitcher />
       </div>
-      <Toast ref={toast} position="bottom-left" /> {/* PrimeReact Toast component */}
+      <Toast ref={toast} position="bottom-left" />{" "}
+      {/* PrimeReact Toast component */}
       <div className="w-full max-w-md p-8 space-y-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
         <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white">
           Are you sure you want to log out?
