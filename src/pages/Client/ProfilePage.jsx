@@ -4,6 +4,7 @@ import axios from "axios";
 import DarkModeSwitcher from "../../components/Admin/Header/DarkModeSwitcher";
 import ProfilePictureUpload from "../../components/Client/ProfilePictureUpload";
 import { Toast } from 'primereact/toast'; // Importing the Toast component
+import { AiOutlineLock, AiOutlineMail, AiOutlinePhone, AiOutlineUser } from "react-icons/ai";
 
 const ProfilePage = () => {
   const { id } = useParams(); // Get the user ID from the URL
@@ -95,6 +96,11 @@ const ProfilePage = () => {
       );
 
       toast.current.show({ severity: 'success', summary: 'Password Updated', detail: response.data.message, life: 3000 });
+       // Clear form fields after successful registration
+       setCurrentPassword("");
+       setNewPassword("");
+       setConfirmPassword("");
+      
     } catch (error) {
       const data = error.response?.data || {};
       setErrorMessages((prev) => ({
@@ -159,6 +165,8 @@ const ProfilePage = () => {
                   placeholder="First Name"
                   className={`w-full px-4 py-3 pl-10 border ${errorMessages.firstName ? "border-red-500" : "border-gray-300"} dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500`}
                 />
+                            <AiOutlineUser className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
+
                 {errorMessages.firstName && <div className="text-red-500 dark:text-red-400">{errorMessages.firstName}</div>}
               </div>
 
@@ -174,6 +182,8 @@ const ProfilePage = () => {
                   placeholder="Last Name"
                   className={`w-full px-4 py-3 pl-10 border ${errorMessages.lastName ? "border-red-500" : "border-gray-300"} dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500`}
                 />
+                            <AiOutlineUser className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
+
                 {errorMessages.lastName && <div className="text-red-500 dark:text-red-400">{errorMessages.lastName}</div>}
               </div>
 
@@ -189,6 +199,7 @@ const ProfilePage = () => {
                   placeholder="Phone Number"
                   className={`w-full px-4 py-3 pl-10 border ${errorMessages.phone ? "border-red-500" : "border-gray-300"} dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500`}
                 />
+                 <AiOutlinePhone className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
                 {errorMessages.phone && <div className="text-red-500 dark:text-red-400">{errorMessages.phone}</div>}
               </div>
 
@@ -203,6 +214,8 @@ const ProfilePage = () => {
                   placeholder="Enter your email"
                   className={`w-full px-4 py-3 pl-10 border ${errorMessages.email ? "border-red-500" : "border-gray-300"} dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500`}
                 />
+                            <AiOutlineMail className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
+
                 {errorMessages.email && <div className="text-red-500 dark:text-red-400">{errorMessages.email}</div>}
               </div>
 
@@ -233,6 +246,8 @@ const ProfilePage = () => {
                   placeholder="Current Password"
                   className={`w-full px-4 py-3 pl-10 border ${errorMessages.currentPassword ? "border-red-500" : "border-gray-300"} dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500`}
                 />
+                            <AiOutlineLock className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
+
                 {errorMessages.currentPassword && <div className="text-red-500 dark:text-red-400">{errorMessages.currentPassword}</div>}
               </div>
 
@@ -248,6 +263,8 @@ const ProfilePage = () => {
                   placeholder="New Password"
                   className={`w-full px-4 py-3 pl-10 border ${errorMessages.newPassword ? "border-red-500" : "border-gray-300"} dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500`}
                 />
+                            <AiOutlineLock className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
+
                 {errorMessages.newPassword && <div className="text-red-500 dark:text-red-400">{errorMessages.newPassword}</div>}
               </div>
 
@@ -263,6 +280,8 @@ const ProfilePage = () => {
                   placeholder="Confirm New Password"
                   className={`w-full px-4 py-3 pl-10 border ${errorMessages.confirmPassword ? "border-red-500" : "border-gray-300"} dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500`}
                 />
+                            <AiOutlineLock className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
+
                 {errorMessages.confirmPassword && <div className="text-red-500 dark:text-red-400">{errorMessages.confirmPassword}</div>}
               </div>
 
