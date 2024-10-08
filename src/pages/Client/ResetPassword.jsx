@@ -44,19 +44,19 @@ const ResetPassword = () => {
         newPassword: data.errors.newPassword.message,
       }));
 
-      // console.log(errorMessages);
-      // toast.current.show({
-      //   severity: "error",
-      //   summary: "Error",
-      //   detail: data.message || "Error resetting password. Please try again.",
-      //   life: 3000,
-      // });
+      console.log(errorMessages);
+      toast.current.show({
+        severity: "error",
+        summary: "Error",
+        detail: err.response.error.message || "Error resetting password. Please try again.",
+        life: 3000,
+      });
     }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
-      <Toast ref={toast} />
+      <Toast ref={toast} position={"bottom-left"} />
       <div className="absolute top-4 right-4">
         <DarkModeSwitcher />
       </div>
