@@ -3,6 +3,7 @@ import { FaSearch, FaShoppingCart } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import SearchComponent from '../Client/SearchComponent';
 import ClickOutside from '../Client/ClickOutside';  // Update with the correct path
+import { CheckAuth } from "./CheckAuth";
 
 const Header = () => {
     const [isShopOpen, setIsShopOpen] = useState(false);
@@ -55,12 +56,7 @@ const Header = () => {
 
                     {/* Right Side - Sign In, Create Account, Search, Cart */}
                     <div className="hidden md:flex items-center space-x-6">
-                        <a href="#signin" className="text-gray-700 hover:underline">Sign in</a>
-
-                        {/* Link to the Register Page */}
-                        <Link to="Register" className="text-gray-700 hover:underline">
-                            Create account
-                        </Link>
+                        <CheckAuth />
 
                         {/* Search Icon */}
                         <FaSearch className="text-gray-700 cursor-pointer" onClick={toggleSearch} />
