@@ -15,35 +15,38 @@ import CollectionProducts from "../pages/Client/CollectionProducts";
 import UnauthorizedPage from "../pages/Client/UnauthorizedPage";
 import ExpiredOrInvalidTokenPage from "../pages/Client/ExpiredOrInvalidTokenPage";
 import TokenValidation from "../pages/Client/TokenValidation";
+import UserLayout from "../layout/UserLayout";
 function UserRoutes() {
   return (
-    <Routes>
-      <Route path="/" element={<UserPage />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/logout" element={<LogoutPage />} />
-      <Route path="/forget-password" element={<ForgetPassword />} />
-      <Route
-        path="/password/reset-password/:userId/:token"
-        element={<TokenValidation />}
-      />
-      <Route
-        path="/password/get-reset-password-form/:userId/:token"
-        element={<ResetPassword />}
-      />
-      <Route path="/profile" element={<ProfilePage />} />
-      <Route path="/product/:id" element={<ProductDetails />} />
-      <Route path="/contact" element={<ContactPage />} />
-      <Route path="/collections" element={<AllCollectionsPage />} />
-      <Route path="/collections/:param" element={<CollectionProducts />} />
+    <UserLayout>
+      <Routes>
+        <Route path="/" element={<UserPage />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/logout" element={<LogoutPage />} />
+        <Route path="/forget-password" element={<ForgetPassword />} />
+        <Route
+          path="/password/reset-password/:userId/:token"
+          element={<TokenValidation />}
+        />
+        <Route
+          path="/password/get-reset-password-form/:userId/:token"
+          element={<ResetPassword />}
+        />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/product/:id" element={<ProductDetails />} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/collections" element={<AllCollectionsPage />} />
+        <Route path="/collections/:param" element={<CollectionProducts />} />
 
-      <Route path="/unauthorized-page" element={<UnauthorizedPage />} />
-      <Route
-        path="/expired-invalid-token-page"
-        element={<ExpiredOrInvalidTokenPage />}
-      />
-      <Route path="*" element={<NotFoundPage />} />
-    </Routes>
+        <Route path="/unauthorized-page" element={<UnauthorizedPage />} />
+        <Route
+          path="/expired-invalid-token-page"
+          element={<ExpiredOrInvalidTokenPage />}
+        />
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </UserLayout>
   );
 }
 
