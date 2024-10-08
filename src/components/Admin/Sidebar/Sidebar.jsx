@@ -32,7 +32,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       }`}
     >
-      <div className="sidebar-header pt-7 pb-10 px-9 flex justify-between items-center text-3xl font-bold text-bodydark1 gap-2">
+      <div className="sidebar-header pt-7 pb-10 px-9 flex justify-between items-center text-2xl font-bold text-bodydark1 gap-2">
         <NavLink to="/admin" className=" ">
           Trade Sphere
         </NavLink>
