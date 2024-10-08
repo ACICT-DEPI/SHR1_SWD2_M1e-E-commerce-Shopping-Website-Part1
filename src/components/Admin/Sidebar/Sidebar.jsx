@@ -34,7 +34,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     >
       <div className="sidebar-header pt-7 pb-10 px-9 flex justify-between items-center text-3xl font-bold text-bodydark1 gap-2">
         <NavLink to="/admin" className=" ">
-          Shopify
+          Trade Sphere
         </NavLink>
         <button
           onClick={() => setSidebarOpen(false)}
