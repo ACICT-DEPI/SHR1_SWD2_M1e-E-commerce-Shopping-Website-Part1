@@ -5,7 +5,7 @@ import UserHeader from "../components/Client/UserHeader";
 
 const UserLayout = ({ children }) => {
   return (
-    <div className="dark:bg-boxdark-2 dark:text-bodydark">
+    <div className="dark:bg-boxdark-2 dark:text-bodydark bg-white">
       <UserHeader />
       <main>{children}</main>
     </div>
