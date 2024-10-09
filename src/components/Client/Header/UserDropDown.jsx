@@ -1,49 +1,23 @@
-import React, { useRef, useState } from 'react';
-import { Avatar } from 'primereact/avatar';
-import { Menu } from 'primereact/menu';
-import { useNavigate } from 'react-router-dom';
-import { Toast } from "primereact/toast"; // PrimeReact Toast
-import { SlArrowDown } from 'react-icons/sl'; // Import arrow icon
-import axios from 'axios';
+import React, { useState, useRef } from "react";
+import { SlArrowDown } from "react-icons/sl"; // Arrow icon
+import DropdownList from "./DropdownList"; // Import the dropdown list
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { Toast } from 'primereact/toast'; // Assuming you use PrimeReact for toasts
 
-const UserDropdown = ({ firstname, avatarUrl }) => {
-  const navigate = useNavigate();
-  const toast = useRef(null); // Toast reference
-  const menuRef = useRef(null);
-  const [visible, setVisible] = useState(false); // State to manage visibility of menu
+const UserDropdown = ({ firstname, avatarUrl}) => {
+  const [visible, setVisible] = useState(false); // State to control visibility of dropdown
+  const navigate = useNavigate(); // To navigate between pages
+  const toast = useRef(null); // Reference for toast notifications
 
-  // Dropdown items
-  const items = [
-    { label: 'Profile', icon: 'pi pi-user', command: () => navigate(`/profile/:${firstname}`) },
-    { label: 'Orders', icon: 'pi pi-shopping-cart', command: () => navigate('/orders') },
-    { label: 'Logout', icon: 'pi pi-sign-out', command: () => handleLogout() },
-  ];
-
-  // Custom template for the user section (avatar + firstname)
-  const selectedTemplate = () => (
-    <div className="flex items-center space-x-2">
-      <Avatar image={avatarUrl} shape="circle" size="large" className="mr-2" />
-      <div className="text-left">
-        <span className="font-bold text-gray-800 dark:text-gray-200">{firstname}</span> {/* Show firstname */}
-      </div>
-      <SlArrowDown className={`transition-transform duration-300 ${visible ? 'rotate-180' : ''}`} /> {/* Arrow icon */}
-    </div>
-  );
-
-  const handleMenuToggle = (e) => {
-    menuRef.current.toggle(e);
-    setVisible(!visible); // Toggle visibility state
-  };
-
+  // Function to handle logout
   const handleLogout = async () => {
     try {
-      // Make an API call to logout
       const response = await axios.post(
         "http://localhost:5000/api/v1/users/logout", // Your API logout route
         {},
         { withCredentials: true }
       );
-
       // Show success message
       toast.current.show({
         severity: "success",
@@ -52,6 +26,7 @@ const UserDropdown = ({ firstname, avatarUrl }) => {
         life: 3000,
       });
 
+      // Redirect to login page after 1 second
       setTimeout(() => {
         window.location.href = "/login";
       }, 1000);
@@ -65,32 +40,49 @@ const UserDropdown = ({ firstname, avatarUrl }) => {
     }
   };
 
+  // Dropdown items
+  const items = [
+    { label: 'Profile', icon: 'pi pi-user', command: () => navigate(`/profile/${firstname}`) },
+    { label: 'Orders', icon: 'pi pi-shopping-cart', command: () => navigate('/orders') },
+    { label: 'Logout', icon: 'pi pi-sign-out', command: () => handleLogout() },
+  ];
+
   return (
-    <div className="user-dropdown relative">
-      <Toast ref={toast} position="bottom-left" />
+    <li className="relative">
+      {/* Toast Component for Notifications */}
+      <Toast ref={toast} />
 
-      {/* Button to show the menu */}
-      <button
-        type="button"
-        className="flex items-center bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border rounded-md px-4 py-2 shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition duration-200"
-        onClick={handleMenuToggle}
+      <div
+        className="flex items-center gap-3 cursor-pointer"
+        onClick={() => setVisible(!visible)} // Toggle dropdown visibility
       >
-        {selectedTemplate()}
-      </button>
+        {/* Display user first name and role */}
+        <span className="hidden lg:block text-right">
+          <span className="block text-sm font-medium text-black dark:text-white">
+            {firstname}
+          </span>
+        </span>
 
-      {/* PrimeReact Menu */}
-      <Menu
-        model={items}
-        popup
-        ref={menuRef}
-        onHide={() => {
-          menuRef.current.hide();
-          setVisible(false); // Reset visibility when hidden
-        }}
-        className="p-menu-overlay bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg"
-        // Style adjustments for the menu
-      />
-    </div>
+        {/* Display avatar */}
+        <span className="h-12 w-12 rounded-full">
+          <img src={avatarUrl} alt="User" className="rounded-full" />
+        </span>
+
+        {/* Arrow rotation */}
+        <SlArrowDown
+          className={`fill-body dark:fill-bodydark ${
+            visible ? "rotate-180" : ""
+          }`}
+        />
+      </div>
+
+      {/* Show DropdownList only if visible */}
+      {visible && (
+        <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-lg z-20">
+          <DropdownList items={items} /> {/* Pass dropdown items */}
+        </div>
+      )}
+    </li>
   );
 };
 

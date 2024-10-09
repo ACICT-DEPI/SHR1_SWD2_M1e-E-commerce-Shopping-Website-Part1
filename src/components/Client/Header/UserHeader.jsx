@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { FaSearch, FaShoppingCart, FaBars } from "react-icons/fa";
+import { FaSearch, FaShoppingCart, FaBars, FaUser, FaSignInAlt, FaSignOutAlt, FaRegEnvelope } from "react-icons/fa"; // Import icons
 import { Link } from "react-router-dom";
 import SearchComponent from "./SearchComponent";
 import ClickOutside from "../ClickOutside"; // Update with the correct path
@@ -89,39 +89,44 @@ const UserHeader = () => {
             >
               Shop
             </button>
-          </div>
 
-          {/* Right Side - Sign In, Create Account, Search, Cart, Dark Mode Toggle */}
-          <div className="hidden md:flex items-center space-x-6">
-            {isAuthenticated ? (
-              <UserDropdown firstname={firstname} avatarUrl={avatarUrl} />
-            ) : (
-              <AuthLinks />
-            )}
-
-            {/* Search Icon */}
-            <FaSearch
-              className="text-gray-700 dark:text-gray-300 cursor-pointer"
-              onClick={toggleSearch}
-            />
-
-            {/* Cart Icon with number */}
-            <div className="relative">
-              <FaShoppingCart className="text-gray-700 dark:text-gray-300 text-2xl cursor-pointer" />
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-                3
-              </span>
+            {/* Mobile Menu Button next to Shop button */}
+            <div className="md:hidden flex items-center">
+              <FaBars
+                onClick={toggleMobileMenu}
+                className="text-gray-700 dark:text-gray-300 cursor-pointer"
+              />
             </div>
-
-            {/* Dark Mode Toggle */}
-            <DarkModeSwitcher />
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center">
-            <FaBars onClick={toggleMobileMenu} className="text-gray-700 dark:text-gray-300 cursor-pointer" />
-            <DarkModeSwitcher className="ml-2" />
-          </div>
+          {/* Right Side - Sign In, Create Account, Dark Mode Toggle */}
+          {!isMobileMenuOpen && (  // Hide other elements when mobile menu is open
+            <div className="user-interactions">
+              <ul className="flex gap-4 items-center lg:gap-9">
+                <DarkModeSwitcher />
+
+                {isAuthenticated ? (
+                  <UserDropdown firstname={firstname} avatarUrl={avatarUrl} />
+                ) : (
+                  <AuthLinks />
+                )}
+
+                {/* Search Icon (Hidden in mobile view) */}
+                <FaSearch
+                  className="hidden md:block text-gray-700 dark:text-gray-300 cursor-pointer"
+                  onClick={toggleSearch}
+                />
+
+                {/* Cart Icon with number (Hidden in mobile view) */}
+                <div className="relative hidden md:block">
+                  <FaShoppingCart className="text-gray-700 dark:text-gray-300 text-2xl cursor-pointer" />
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                    3
+                  </span>
+                </div>
+              </ul>
+            </div>
+          )}
         </div>
       </div>
 
@@ -131,21 +136,32 @@ const UserHeader = () => {
           <div className="container mx-auto px-4 py-4">
             {isAuthenticated ? (
               <>
-          <Link
-            to={`/profile/${firstname}`} // Use the firstname state for the dynamic route
-            className="block mt-2 text-gray-700 dark:text-gray-300 hover:underline"
-          >
-            Personal Profile
-          </Link>                <Link to="/orders" className="block mt-2 text-gray-700 dark:text-gray-300 hover:underline">Orders</Link>
-                <Link to="/logout" className="block mt-2 text-gray-700 dark:text-gray-300 hover:underline">Logout</Link>
+                <Link
+                  to={`/profile/${firstname}`} // Use the firstname state for the dynamic route
+                  className="flex items-center mt-2 text-gray-700 dark:text-gray-300 hover:underline"
+                >
+                  <FaUser className="mr-2" /> Personal Profile
+                </Link>
+                <Link to="/orders" className="flex items-center mt-2 text-gray-700 dark:text-gray-300 hover:underline">
+                  <FaShoppingCart className="mr-2" /> Orders
+                </Link>
+                <Link to="/logout" className="flex items-center mt-2 text-gray-700 dark:text-gray-300 hover:underline">
+                  <FaSignOutAlt className="mr-2" /> Logout
+                </Link>
               </>
             ) : (
               <>
-                <Link to="/login" className="block mt-2 text-gray-700 dark:text-gray-300 hover:underline">Login</Link>
-                <Link to="/register" className="block mt-2 text-gray-700 dark:text-gray-300 hover:underline">Create Account</Link>
+                <Link to="/login" className="flex items-center mt-2 text-gray-700 dark:text-gray-300 hover:underline">
+                  <FaSignInAlt className="mr-2" /> Login
+                </Link>
+                <Link to="/register" className="flex items-center mt-2 text-gray-700 dark:text-gray-300 hover:underline">
+                  <FaUser className="mr-2" /> Create Account
+                </Link>
               </>
             )}
-            <Link to="/contact" className="block mt-2 text-gray-700 dark:text-gray-300 hover:underline">Contact Us</Link>
+            <Link to="/contact" className="flex items-center mt-2 text-gray-700 dark:text-gray-300 hover:underline">
+              <FaRegEnvelope className="mr-2" /> Contact Us
+            </Link>
           </div>
         </div>
       )}
@@ -202,6 +218,11 @@ const UserHeader = () => {
                     <li>Xiaomi</li>
                   </ul>
                   <h3 className="font-bold mt-4 mb-2 text-gray-900 dark:text-gray-200">/Our Selection</h3>
+                  <ul className="space-y-1">
+                    <li>Top Picks</li>
+                    <li>New Arrivals</li>
+                    <li>Best Sellers</li>
+                  </ul>
                 </div>
               </div>
             </div>
@@ -210,7 +231,7 @@ const UserHeader = () => {
       )}
 
       {/* Search Component */}
-      {isSearchOpen && <SearchComponent onClose={() => setIsSearchOpen(false)} />}
+      {isSearchOpen && <SearchComponent onClose={toggleSearch} />}
     </header>
   );
 };
