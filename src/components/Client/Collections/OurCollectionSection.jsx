@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios"; // تأكد من استيراد axios
+import SimpleLoadingCard from "../Card/SimpleLoadingCard";
 
 const OurCollectionSection = () => {
   const [categories, setCategories] = useState([]); // تخزين الفئات
+  const [loading, setLoading] = useState(false); // حالة التحميل
 
   useEffect(() => {
     // دالة لجلب الفئات
     const fetchCategories = async () => {
+      setLoading(true); // تعيين حالة التحميل إلى true عند بدء الجلب
       try {
         const response = await axios.get(
           "http://localhost:5000/api/v1/categories/",
@@ -20,6 +23,8 @@ const OurCollectionSection = () => {
         setCategories(response.data.data.categories); // تعيين الفئات
       } catch (error) {
         console.error("Error fetching categories:", error);
+      } finally {
+        setLoading(false); // تعيين حالة التحميل إلى false بعد انتهاء الجلب
       }
     };
 
@@ -66,11 +71,17 @@ const OurCollectionSection = () => {
         </Link>
       </div>
       <div>
-        <div className="mt-5 flow-root">
+        <div className="mt-5 flow-root [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500">
           <div className="-my-2">
             <div className="relative box-content h-64 overflow-x-auto py-2 xl:overflow-visible">
-              <div className="min-w-screen-xl absolute flex space-x-8 px-4 sm:px-6 lg:px-8 xl:relative xl:grid xl:grid-cols-5 xl:gap-8 xl:space-x-0 xl:px-0">
-                {card}
+              <div className="min-w-screen-xl absolute flex space-x-8 px-4 sm:px-6 lg:px-8 xl:relative xl:grid xl:grid-cols-5 xl:gap-8 xl:space-x-0 xl:px-0 ">
+                {loading ? (
+                  // عرض الـ loading أثناء جلب البيانات
+                  <SimpleLoadingCard count={5} />
+                ) : (
+                  // عرض البيانات الفعلية بعد الانتهاء
+                  card
+                )}
               </div>
             </div>
           </div>
