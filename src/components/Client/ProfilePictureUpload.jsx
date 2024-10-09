@@ -9,31 +9,29 @@ const ProfilePictureUpload = () => {
   const toastRef = useRef(null); // Reference for the Toast
   const fileInputRef = useRef(null); // Reference for the file input
 
-  // Fetch user's current profile picture when the component mounts
-  useEffect(() => {
-    const fetchProfilePicture = async () => {
-      try {
-        const response = await axios.get('http://localhost:5000/api/v1/users/profile', {
-          withCredentials: true, // Include credentials if needed
-        });
-        // Assuming the response contains the profile picture URL
-        setPreviewUrl(
-          response.data.data.avatar.url 
-        );
-      } catch (err) {
-        console.error('Error fetching profile picture:', err);
-        toastRef.current.show({
-          severity: 'error',
-          summary: 'Error',
-          detail: err.response.error.message,
-          life: 3000,
-        });
-      }
-    };
+  // Fetch user's current profile picture
+  const fetchProfilePicture = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/v1/users/profile', {
+        withCredentials: true, // Include credentials if needed
+      });
+      setPreviewUrl(response.data.data.avatar.url); // Assuming the response contains the profile picture URL
+    } catch (err) {
+      console.error('Error fetching profile picture:', err);
+      toastRef.current.show({
+        severity: 'error',
+        summary: 'Error',
+        detail: err.response?.data?.message || 'Failed to fetch profile picture.',
+        life: 3000,
+      });
+    }
+  };
 
+  // Fetch the profile picture when the component mounts
+  useEffect(() => {
     fetchProfilePicture();
-  }, []); // Empty dependency array ensures this runs only once when the component mounts
-  
+  }, []);
+
   const handleFileChange = async (e) => {
     const file = e.target.files[0]; // Get the first file
     if (!file) return;
@@ -62,10 +60,11 @@ const ProfilePictureUpload = () => {
 
       console.log('Upload response:', response.data);
 
-      // Check if the response indicates a successful upload
-      if (response.data.data && response.data.data.url) {
-        setPreviewUrl(response.data.data.url); // Use the uploaded image URL from the response
-      }
+      // Re-fetch the profile picture to update the preview URL
+      await fetchProfilePicture();
+
+      // Optional: Reload the page to reflect changes (if needed)
+      window.location.reload(); // Reload the page
 
       toastRef.current.show({
         severity: 'success',
@@ -116,7 +115,7 @@ const ProfilePictureUpload = () => {
           className="hidden"
         />
         <img
-          src={previewUrl || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'} // Default avatar image
+          src={previewUrl} // Default avatar image
           alt="Profile"
           className={`w-32 h-32 md:w-48 md:h-48 rounded-full object-cover border-4 border-gray-300 dark:border-gray-600 transition-transform duration-200 cursor-pointer hover:scale-105 hover:shadow-lg ${loading ? 'opacity-50' : ''}`}
           onClick={openFileDialog} // Open file dialog on image click

@@ -38,10 +38,7 @@ const ForgotPassword = () => {
       {/* Toast for displaying messages */}
       <Toast ref={toast} />
 
-      {/* Dark mode switcher */}
-      <div className="absolute top-4 right-4">
-        <DarkModeSwitcher />
-      </div>
+      
 
       {/* Form container */}
       <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-8 max-w-md w-full">

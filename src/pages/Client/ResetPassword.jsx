@@ -57,9 +57,7 @@ const ResetPassword = () => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
       <Toast ref={toast} position={"bottom-left"} />
-      <div className="absolute top-4 right-4">
-        <DarkModeSwitcher />
-      </div>
+      
 
       <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-8 max-w-md w-full">
         <h2 className="text-2xl font-bold text-center text-gray-800 dark:text-gray-100 mb-4">

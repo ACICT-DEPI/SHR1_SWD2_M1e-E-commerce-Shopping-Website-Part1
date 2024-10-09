@@ -9,8 +9,8 @@ import ForgotPassword from "../Client/ForgetPassword";
 import NotFoundPage from "../Client/NotFoundPage";
 import ProfilePage from "../Client/ProfilePage";
 import ResetPassword from "../Client/ResetPassword";
-import AuthLinks from "../../components/Client/AuthLinks";
-import UserDropdown from "../../components/Client/UserDropDown";
+import AuthLinks from "../../components/Client/Header/AuthLinks";
+import UserDropdown from "../../components/Client/Header/UserDropDown";
 import axios from "axios";
 
 const Hamis = () => {

@@ -101,9 +101,7 @@ const Register = () => {
   return (
     <div className="flex items-center justify-center h-screen bg-gray-100 dark:bg-gray-900 relative">
       <Toast ref={toast} position="bottom-left" />
-      <div className="absolute top-4 right-4">
-        <DarkModeSwitcher />
-      </div>
+      
       <div className="w-full max-w-xl p-10 space-y-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
         <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white">
           Register to Shopify

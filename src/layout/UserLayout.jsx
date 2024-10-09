@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 
-import Header from "../components/Admin/Header/Header";
-import UserHeader from "../components/Client/UserHeader";
+import UserHeader from "../components/Client//Header/UserHeader";
 
 const UserLayout = ({ children }) => {
   return (

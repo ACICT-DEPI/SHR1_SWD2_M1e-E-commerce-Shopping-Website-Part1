@@ -7,13 +7,13 @@ const AuthLinks = () => {
         <div className="flex space-x-4">
             <a
                 href="/login"
-                className="text-gray-700 hover:underline"
+                className="text-gray-700 dark:text-gray-300 hover:underline"
             >
-                log In
+                Log In
             </a>
             <Link
                 to="/register"
-                className="text-gray-700 hover:underline"
+                className="text-gray-700 dark:text-gray-300 hover:underline"
             >
                 Create account
             </Link>

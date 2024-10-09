@@ -10,9 +10,7 @@ const ContactPage = () => {
 
   return (
     <div className="bg-gray-100 dark:bg-gray-800 min-h-screen py-10 px-4 sm:px-6 lg:px-8">
-      <div className="absolute top-4 right-4">
-        <DarkModeSwitcher />
-      </div>
+      
       <div className="max-w-3xl mx-auto bg-white dark:bg-gray-900 shadow-md rounded-lg overflow-hidden">
         {/* Header */}
         <div className="bg-gray-800 p-6">

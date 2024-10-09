@@ -53,9 +53,7 @@ const Login = () => {
 
   return (
     <div className="flex items-center justify-center h-screen bg-gray-100 dark:bg-gray-900 relative">
-      <div className="absolute top-4 right-4">
-        <DarkModeSwitcher />
-      </div>
+      
       <Toast ref={toast} position="bottom-left" />{" "}
       {/* PrimeReact Toast component */}
       <div className="w-full max-w-md p-8 space-y-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">

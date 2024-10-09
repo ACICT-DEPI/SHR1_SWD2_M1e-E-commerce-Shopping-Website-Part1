@@ -10,7 +10,6 @@ import ContactPage from "../pages/Client/ContactPage";
 import AllCollectionsPage from "../pages/Client/AllCollectionsPage";
 import ProfilePage from "../pages/Client/ProfilePage";
 import ResetPassword from "../pages/Client/ResetPassword";
-import LogoutPage from "../pages/Client/LogoutPage";
 import CollectionProducts from "../pages/Client/CollectionProducts";
 import UnauthorizedPage from "../pages/Client/UnauthorizedPage";
 import ExpiredOrInvalidTokenPage from "../pages/Client/ExpiredOrInvalidTokenPage";
@@ -23,7 +22,6 @@ function UserRoutes() {
         <Route path="/" element={<UserPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/logout" element={<LogoutPage />} />
         <Route path="/forget-password" element={<ForgetPassword />} />
         <Route
           path="/password/reset-password/:userId/:token"
@@ -33,7 +31,7 @@ function UserRoutes() {
           path="/password/get-reset-password-form/:userId/:token"
           element={<ResetPassword />}
         />
-        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/profile/:fullname" element={<ProfilePage />} />
         <Route path="/product/:id" element={<ProductDetails />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/collections" element={<AllCollectionsPage />} />
