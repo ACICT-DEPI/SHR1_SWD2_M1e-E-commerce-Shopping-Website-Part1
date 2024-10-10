@@ -77,7 +77,7 @@ const CollectionTopProducts = ({
         alt={title}
         className="w-full h-auto max-h-96 object-cover object-center rounded-lg"
       />
-      <div className="pt-12 pb-24">
+      <div className="pt-12 pb-12">
         {loading ? (
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
             <LoadingCard count={productCount} />

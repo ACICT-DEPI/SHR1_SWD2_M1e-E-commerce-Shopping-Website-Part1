@@ -31,14 +31,14 @@ const AdminPage = () => {
         <Route path="products" element={<Products />} />
         <Route path="orders" element={<Orders />} />
         <Route path="orders/edit/:id" element={<EditOrderForm />} />
-        <Route path="/orders/:id" element={<SingleOrderDetails />} /> 
+        <Route path="/orders/:id" element={<SingleOrderDetails />} />
         <Route path="customers" element={<Customers />} />
         <Route path="customers/:name" element={<SingleCustomerDetails />} />
         <Route path="customers/edit/:name" element={<EditCustomerForm />} />
         <Route path="reviews" element={<Reviews />} />
         <Route path="collections" element={<Collections />} />
         <Route path="collections/add" element={<AddCollection />} />
-        <Route path="collections/update/:id" element={<UpdateCollection />} />
+        <Route path="collections/:id" element={<UpdateCollection />} />
       </Routes>
     </DefaultLayout>
   );

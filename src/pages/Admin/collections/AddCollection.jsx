@@ -91,7 +91,7 @@ const AddCollection = () => {
 
         // الانتظار لمدة 3 ثوانٍ قبل إعادة التوجيه
         setTimeout(() => {
-          navigate(`/admin/collections/update/${collectionId}`);
+          navigate(`/admin/collections/${collectionId}`);
         }, 3000);
       } else {
         handleErrors(response.data);
