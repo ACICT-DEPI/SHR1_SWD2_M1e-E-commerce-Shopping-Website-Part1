@@ -44,7 +44,7 @@ function UserRoutes() {
         />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
-    </UserLayout>
+    </UserLayout> 
   );
 }
 

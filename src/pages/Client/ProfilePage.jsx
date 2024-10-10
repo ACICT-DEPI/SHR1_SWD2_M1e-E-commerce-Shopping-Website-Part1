@@ -18,6 +18,8 @@ const ProfilePage = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errorMessages, setErrorMessages] = useState({});
   const [loading, setLoading] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
   const toast = useRef(null);
 
   useEffect(() => {
@@ -31,9 +33,13 @@ const ProfilePage = () => {
         setLastName(userData.lastName);
         setEmail(userData.email);
         setPhone(userData.phone); 
+        setIsAuthenticated(true);
+
       } catch (error) {
         console.error("Error fetching user data:", error);
         toast.current.show({ severity: "error", summary: "Error", detail: "Failed to fetch user data", life: 3000 });
+        setIsAuthenticated(false);
+
       } finally {
         setLoading(false);
       }

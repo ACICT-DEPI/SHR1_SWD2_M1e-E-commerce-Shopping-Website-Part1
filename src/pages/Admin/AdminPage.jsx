@@ -15,6 +15,7 @@ import SingleCustomerDetails from "./Customers/SingleCustomerDetails";
 import EditOrderForm from "./Orders/EditOrderForm";
 import EditCustomerForm from "./Customers/EditCustomerForm";
 import ProfilePage from "../Client/ProfilePage";
+import UnauthorizedPage from "../Client/UnauthorizedPage";
 
 const AdminPage = () => {
   const [loading, setLoading] = useState(true);
@@ -28,7 +29,7 @@ const AdminPage = () => {
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/profile/:fullname" element={<ProfilePage />} />
-
+        <Route path="/unauthorized-page" element={<UnauthorizedPage />} />
         <Route path="products" element={<Products />} />
         <Route path="orders" element={<Orders />} />
         <Route path="orders/edit/:id" element={<EditOrderForm />} />

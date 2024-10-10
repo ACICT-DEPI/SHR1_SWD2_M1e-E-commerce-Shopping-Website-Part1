@@ -5,12 +5,15 @@ import { CiSearch } from "react-icons/ci";
 import { FaBars } from "react-icons/fa6";
 import axios from "axios";
 import UserDropdown from "../../Client/Header/UserDropDown";
+import { useNavigate } from "react-router-dom";
 
 const Header = (props) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [fullname, setFullName] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [role, setRole] = useState("");
+  const navigate = useNavigate();
+
 
   const [error, setError] = useState(null);
 
@@ -37,11 +40,15 @@ const Header = (props) => {
       } catch (error) {
         setError(error.response ? error.response.data.message : error.message);
         setIsAuthenticated(false);
+        navigate('/unauthorized-page');
+
       }
     };
 
     checkAuth();
   }, []);
+
+ 
 
  
 

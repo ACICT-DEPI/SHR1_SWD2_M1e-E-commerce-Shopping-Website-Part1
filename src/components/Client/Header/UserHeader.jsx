@@ -7,6 +7,7 @@ import axios from "axios";
 import AuthLinks from "./AuthLinks";
 import UserDropdown from "./UserDropDown";
 import DarkModeSwitcher from "../../Admin/Header/DarkModeSwitcher";
+import { useNavigate } from "react-router-dom";
 
 const UserHeader = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -15,6 +16,7 @@ const UserHeader = () => {
   const [avatarUrl, setAvatarUrl] = useState("");
   const [error, setError] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const navigate = useNavigate();
 
 
   const searchButtonRef = useRef(null);
@@ -43,10 +45,13 @@ const UserHeader = () => {
       } catch (error) {
         setError(error.response ? error.response.data.message : error.message);
         setIsAuthenticated(false);
+        navigate('/expired-invalid-token-page');
+
       }
     };
     checkAuth();
   }, []);
+  
 
   return (
     <header className="bg-white dark:bg-gray-900 w-full z-[999]">
