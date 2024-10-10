@@ -117,7 +117,7 @@ const ImageSlider = () => {
                 fontSize: '1.7rem',
                 color: '#fff',
                 textShadow: '3px 3px 4px rgba(0, 0, 0, 0.5)',
-                marginBottom: '10px',
+                marginBottom: '20px',
               }}
             >
               {slide.description} {/* Use the slide description */}
@@ -126,7 +126,7 @@ const ImageSlider = () => {
               href="/product"
               style={{
                 display: 'block',
-                margin: '0 auto',
+                marginBottom: '70px',
                 padding: '15px 100px',
                 fontSize: '1.7rem',
                 color: 'black',
