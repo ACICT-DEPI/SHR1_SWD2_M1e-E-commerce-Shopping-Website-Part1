@@ -10,16 +10,20 @@ import Test from "./pages/Test/Test";
 import { PrimeReactProvider } from "primereact/api";
 import Tailwind from "primereact/passthrough/tailwind";
 import { ratingStyle } from "./layout/ratingStyle";
+import { galleria } from "./layout/galleria";
 
 function App() {
   const rating = {
     rating: ratingStyle,
   };
+  const galleriastyle = {
+    galleria: galleria,
+  };
   return (
     <div className="App">
       {/* Defined PrimeReact */}
       <PrimeReactProvider
-        value={{ unstyled: true, pt: { ...Tailwind, ...rating } }}
+        value={{ unstyled: true, pt: { ...Tailwind, ...rating, ...galleriastyle } }}
       >
         <Routes>
           {/* Routes for users */}

@@ -52,7 +52,7 @@ const Login = () => {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-100 :bg-gray-9dark00 relative">
+    <div className="flex items-center justify-center h-screen bg-gray-100 dark:bg-gray-900 relative">
       
       <Toast ref={toast} position="bottom-left" />{" "}
       {/* PrimeReact Toast component */}
