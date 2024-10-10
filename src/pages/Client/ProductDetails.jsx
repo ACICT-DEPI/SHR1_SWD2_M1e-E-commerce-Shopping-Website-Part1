@@ -1,5 +1,13 @@
+import SectionOne from "../../components/Client/ProductDetails/SectionOne";
+import React from "react";
 const ProductDetails = () => {
-  return <h1>Product Details</h1>;
+  return (
+    <div>
+      
+        <SectionOne />
+      
+    </div>
+  );
 };
 
 export default ProductDetails;

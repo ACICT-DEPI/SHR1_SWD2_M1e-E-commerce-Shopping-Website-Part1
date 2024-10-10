@@ -1,10 +1,10 @@
 import React, { Fragment } from "react";
-import ImageSlider from "../../components/Client/Gallary/ImageSlider";
 import OurCollectionSection from "../../components/Client/Collections/OurCollectionSection";
+import ImageSlider from "../../components/Client/Gallary/ImageSlider";
 const UserPage = () => {
   return (
     <Fragment>
-      {/* <ImageSlider /> */}
+      <ImageSlider/>
       <OurCollectionSection />
     </Fragment>
   );
