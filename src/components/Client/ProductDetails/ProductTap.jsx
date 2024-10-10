@@ -6,16 +6,16 @@ const ProductTabs = ({ description, reviews }) => {
   const [activeTab, setActiveTab] = useState('description');
 
   return (
-    <div className="mt-6">
+    <div className="mt-6 p-10">
       <div className="flex border-b">
         <button
-          className={`py-2 px-4 text-lg ${activeTab === 'description' ? 'border-b-2 border-blue-600 font-bold text-blue-600' : 'text-gray-600'}`} // زيادة حجم الخط وإضافة نمط عند التفعيل
+          className={`py-2 px-4 text-xl ${activeTab === 'description' ? 'border-b-2 border-blue-600 font-bold text-blue-600' : 'text-gray-600'}`} // زيادة حجم الخط وإضافة نمط عند التفعيل
           onClick={() => setActiveTab('description')}
         >
           Description
         </button>
         <button
-          className={`py-2 px-4 text-lg ${activeTab === 'reviews' ? 'border-b-2 border-blue-600 font-bold text-blue-600' : 'text-gray-600'}`} // زيادة حجم الخط وإضافة نمط عند التفعيل
+          className={`py-2 px-4 text-xl ${activeTab === 'reviews' ? 'border-b-2 border-blue-600 font-bold text-blue-600' : 'text-gray-600'}`} // زيادة حجم الخط وإضافة نمط عند التفعيل
           onClick={() => setActiveTab('reviews')}
         >
           Reviews
@@ -24,12 +24,12 @@ const ProductTabs = ({ description, reviews }) => {
 
       {activeTab === 'description' && (
         <div className="mt-4">
-          <p className="text-lg">{description}</p>
+          <p className="text-xl">{description}</p>
         </div>
       )}
 
       {activeTab === 'reviews' && (
-        <div className="mt-4">
+        <div className="mt-4 text-xl">
           {reviews.length > 0 ? (
             reviews.map((review, index) => (
               <div key={index} className="border-b pb-2 mb-2">

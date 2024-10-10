@@ -71,36 +71,13 @@ const CollectionsDataTabel = () => {
           className="h-12.5 w-15 rounded-md	inline-block	mr-5"
           style={{ width: "64px" }}
         />
-        <Link
-          to={`collections/update/${rowData._id}`}
-          className="hover:text-primary"
-        >
+        <Link to={`collections/${rowData._id}`} className="hover:text-primary">
           {rowData.title}
         </Link>
       </Fragment>
     );
   };
 
-  const StatusTemplate = (rowData) => {
-    return (
-      <span
-        className={`px-2 py-2 rounded-full text-xs  `}
-        style={
-          rowData.status === "Unavailable"
-            ? {
-                backgroundColor: "rgb(211 64 83 /0.2)",
-                color: "rgb(211 64 83 /1)",
-              }
-            : {
-                backgroundColor: "rgb(33 150 83 /0.2)",
-                color: "rgb(33 150 83 /1)",
-              }
-        }
-      >
-        {rowData.status}
-      </span>
-    );
-  };
 
   return (
     <div>

@@ -14,8 +14,8 @@ export const galleria = {
     previousthumbnailbutton: {
         className: classNames(
             'self-center flex shrink-0 justify-center items-center overflow-hidden relative',
-            'm-2 bg-transparent text-black/90 w-8 h-8 transition duration-200 ease-in-out rounded-full',
-            'hover:bg-black/10 hover:text-black/90',
+            'm-2 bg-gray-700 text-gray-800 w-8 h-8 transition duration-200 ease-in-out rounded-full', // Change text color to dark gray
+            'hover:bg-gray-700 hover:text-white', // Change hover background and text color
             'focus:outline-none focus:outline-offset-0 cursor-pointer focus:shadow-[0_0_0_0.2rem_rgba(191,219,254,1)]'
         )
     },
@@ -27,9 +27,9 @@ export const galleria = {
     nextthumbnailbutton: {
         className: classNames(
             'self-center flex shrink-0 justify-center items-center overflow-hidden relative',
-            'm-2 bg-transparent text-black/90 w-8 h-8 transition duration-200 ease-in-out rounded-full',
-            'hover:bg-black/10 hover:text-black/90',
-            'focus:outline-none focus:outline-offset-0 cursor-pointer  focus:shadow-[0_0_0_0.2rem_rgba(191,219,254,1)]'
+            'm-2 bg-gray-700 text-gray-800 w-8 h-8 transition duration-200 ease-in-out rounded-full', // Change text color to dark gray
+            'hover:bg-gray-700 hover:text-white', // Change hover background and text color
+            'focus:outline-none focus:outline-offset-0 cursor-pointer focus:shadow-[0_0_0_0.2rem_rgba(191,219,254,1)]'
         )
     },
     indicators: {
@@ -64,4 +64,4 @@ export const galleria = {
         leaveActiveClass: 'transition-all duration-150 ease-in',
         leaveToClass: 'opacity-0 scale-75'
     }
-}
+};

@@ -1,21 +1,26 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
-const ProductPrice = ({ product }) => {
-    // Calculate the new price after discount
+const ProductPrice = ({ product, onNewPrice }) => {
+    // حساب السعر الجديد بعد الخصم
     const oldPrice = product.price;
-    const discount = product.discount; // Assuming discount is a percentage
-    const newPrice = (oldPrice * (1 - discount / 100)).toFixed(2); // Calculate new price
+    const discount = product.discount; // الخصم كنسبة مئوية
+    const newPrice = (oldPrice * (1 - discount / 100)).toFixed(2); // حساب السعر الجديد
+
+    // تمرير السعر الجديد إلى المكون الرئيسي
+    useEffect(() => {
+        onNewPrice(newPrice); // تحديث السعر الجديد في المكون الرئيسي
+    }, [newPrice, onNewPrice]);
 
     return (
         <div className="flex items-center pb-5 pl-4">
-            {/* Old price */}
+            {/* السعر القديم */}
             <p className="text-lg text-gray-500 line-through mr-4">{oldPrice} $</p>
 
-            {/* New price */}
-            <p className="text-xl text-black font-semibold mr-4">{newPrice} $</p>
+            {/* السعر الجديد */}
+            <p className="text-xl text-gray font-semibold mr-4">{newPrice} $</p>
 
-            {/* Discount */}
+            {/* الخصم */}
             <p className="text-lg text-red-500 font-semibold">{discount}% Off</p>
         </div>
     );

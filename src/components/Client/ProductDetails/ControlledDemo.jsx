@@ -51,7 +51,7 @@ export default function ControlledDemo() {
     const thumbnailTemplate = (item) => {
         return (
                         <div style={{
-                            backgroundColor: 'transparent', // Ensure the background is transparent
+                            backgroundColor: 'transparent',
                             padding: '5px',
                             borderRadius: '4px',
                             display: 'flex',
@@ -78,8 +78,6 @@ export default function ControlledDemo() {
                 numVisible={5} 
                 circular 
                 style={{ maxWidth: '640px' }}
-                showItemNavigators 
-                showItemNavigatorsOnHover 
                 item={itemTemplate} 
                 thumbnail={thumbnailTemplate} 
                 pt={galleria} 

@@ -60,16 +60,10 @@ const UpdateCollection = () => {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${Cookies.get("authToken")}`,
           },
+          withCredentials: true,
         }
       );
-
-      toast.current.show({
-        severity: "success",
-        summary: "Success",
-        detail: "Collection updated successfully",
-      });
 
       // الخطوة الثانية: رفع الصورة إذا تم اختيار صورة جديدة
       if (newImage) {
@@ -81,9 +75,7 @@ const UpdateCollection = () => {
           `http://localhost:5000/api/v1/categories/category-photo-upload/${id}`,
           formData,
           {
-            headers: {
-              Authorization: `Bearer ${Cookies.get("authToken")}`,
-            },
+            withCredentials: true,
           }
         );
 
@@ -98,9 +90,12 @@ const UpdateCollection = () => {
           throw new Error(imageResponse.data.message || "Image upload failed");
         }
       }
-
-      // إعادة التوجيه بعد التحديث
-      navigate("/admin/collections");
+      toast.current.show({
+        severity: "success",
+        summary: "Success",
+        detail: "Collection updated successfully",
+        life: 3000,
+      });
     } catch (error) {
       console.error("Error updating collection:", error);
       toast.current.show({
@@ -117,7 +112,7 @@ const UpdateCollection = () => {
         <div>
           <GoBackButton />
           <h1 className="inline-block ml-4 text-3xl dark:text-white">
-            Update Collection
+            {title}
           </h1>
         </div>
       </div>
