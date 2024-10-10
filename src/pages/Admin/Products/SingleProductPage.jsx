@@ -1,15 +1,15 @@
 import { Fragment, useEffect, useRef, useState } from "react";
-import GoBackButton from "../../components/Admin/Buttons/GoBackButton";
+import GoBackButton from "../../../components/Admin/Buttons/GoBackButton";
 import { InputText } from "primereact/inputtext";
-import { inputTextStyle } from "../../layout/inputTextStyle";
+import { inputTextStyle } from "../../../layout/inputTextStyle";
 import axios from "axios";
-import { buttonsStyle } from "../../layout/buttonsStyle";
+import { buttonsStyle } from "../../../layout/buttonsStyle";
 import { Button } from "primereact/button";
-import CustomEditor from "../../components/Admin/CustomEditor";
+import CustomEditor from "../../../components/Admin/CustomEditor";
 
 import { Toast } from "primereact/toast";
 
-const AddCollection = ({ product }) => {
+const SingleProductDetails = ({ product }) => {
   const [title, setTitle] = useState("");
   const [urlHandler, setUrlHandler] = useState("");
   const [price, setPrice] = useState("");
@@ -204,4 +204,4 @@ const AddCollection = ({ product }) => {
   );
 };
 
-export default AddCollection;
+export default SingleProductDetails;

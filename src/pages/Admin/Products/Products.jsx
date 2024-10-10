@@ -1,6 +1,6 @@
 import { Fragment } from "react";
-import AddProductButton from "../../components/Admin/AddProductButton";
-import ProductDataTabel from "../../components/Admin/DataTabel/ProductDataTabel";
+import AddProductButton from "../../../components/Admin/AddProductButton";
+import ProductDataTabel from "../../../components/Admin/DataTabel/ProductDataTabel";
 
 const Product = () => {
   return (
