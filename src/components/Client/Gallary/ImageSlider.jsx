@@ -117,7 +117,7 @@ const ImageSlider = () => {
                 fontSize: '1.7rem',
                 color: '#fff',
                 textShadow: '3px 3px 4px rgba(0, 0, 0, 0.5)',
-                marginBottom: '80px',
+                marginBottom: '10px',
               }}
             >
               {slide.description} {/* Use the slide description */}

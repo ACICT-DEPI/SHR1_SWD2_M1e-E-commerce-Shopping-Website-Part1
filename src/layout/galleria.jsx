@@ -14,22 +14,22 @@ export const galleria = {
     previousthumbnailbutton: {
         className: classNames(
             'self-center flex shrink-0 justify-center items-center overflow-hidden relative',
-            'm-2 bg-transparent text-black/90 w-8 h-8 transition duration-200 ease-in-out rounded-full',
-            'hover:bg-black/10 hover:text-black/90',
-            'focus:outline-none focus:outline-offset-0 cursor-pointer focus:shadow-[0_0_0_0.2rem_rgba(191,219,254,1)]'
+            'm-2 bg-transparent text-gray/90 w-8 h-8 transition duration-200 ease-in-out rounded-full',
+            'hover:bg-gray/10 hover:text-gray/90',
+            'focus:outline-none focus:outline-offset-0 focus:shadow-[0_0_0_0.2rem_rgba(191,219,254,1)]'
         )
     },
     thumbnailitemscontainer: 'overflow-hidden w-full',
     thumbnailitems: 'flex',
     thumbnailitem: {
-        className: classNames('overflow-auto flex items-center justify-center cursor-pointer opacity-70', 'flex-1 grow-0 shrink-0 w-100', 'hover:opacity-100 hover:transition-opacity hover:duration-300')
+        className: classNames('overflow-auto flex items-center justify-center cursor-pointer opacity-50', 'flex-1 grow-0 shrink-0 w-20', 'hover:opacity-100 hover:transition-opacity hover:duration-300')
     },
     nextthumbnailbutton: {
         className: classNames(
             'self-center flex shrink-0 justify-center items-center overflow-hidden relative',
-            'm-2 bg-transparent text-black/90 w-8 h-8 transition duration-200 ease-in-out rounded-full',
-            'hover:bg-black/10 hover:text-black/90',
-            'focus:outline-none focus:outline-offset-0 cursor-pointer  focus:shadow-[0_0_0_0.2rem_rgba(191,219,254,1)]'
+            'm-2 bg-transparent text-gray/90 w-8 h-8 transition duration-200 ease-in-out rounded-full',
+            'hover:bg-gray/10 hover:text-gray/90',
+            'focus:outline-none focus:outline-offset-0 focus:shadow-[0_0_0_0.2rem_rgba(191,219,254,1)]'
         )
     },
     indicators: {
@@ -43,20 +43,39 @@ export const galleria = {
         })
     }),
     mask: {
-        className: classNames('fixed top-0 left-0 w-full h-full', 'flex items-center justify-center', 'bg-black bg-opacity-90')
+        className: classNames('fixed top-0 left-0 w-full h-full', 'flex items-center justify-center', 'bg-gray bg-opacity-90')
     },
     closebutton: {
         className: classNames(
             'absolute top-0 right-0 flex justify-center items-center overflow-hidden m-2',
-            'text-white bg-transparent w-12 h-12 rounded-full transition duration-200 ease-in-out',
-            'hover:text-white hover:bg-white/10',
+            'text-gray bg-transparent w-12 h-12 rounded-full transition duration-200 ease-in-out',
+            'hover:text-gray hover:bg-gray/10',
             'focus:outline-none focus:outline-offset-0 focus:shadow-[0_0_0_0.2rem_rgba(191,219,254,1)]'
         )
     },
     closeicon: 'w-6 h-6',
-   
+    previousitembutton: {
+        className: classNames(
+            'inline-flex justify-center items-center overflow-hidden',
+            'bg-transparent text-gray w-16 h-16 transition duration-200 ease-in-out rounded-md mx-2',
+            'fixed top-1/2 mt-[-0.5rem]',
+            'left-0',
+            'hover:bg-gray/10 hover:text-gray',
+            'focus:outline-none focus:outline-offset-0 focus:shadow-[0_0_0_0.2rem_rgba(191,219,254,1)]'
+        )
+    },
+    nextitembutton: {
+        className: classNames(
+            'inline-flex justify-center items-center overflow-hidden',
+            'bg-transparent text-gray w-16 h-16 transition duration-200 ease-in-out rounded-md mx-2',
+            'fixed top-1/2 mt-[-0.5rem]',
+            'right-0',
+            'hover:bg-gray/10 hover:text-gray',
+            'focus:outline-none focus:outline-offset-0 focus:shadow-[0_0_0_0.2rem_rgba(191,219,254,1)]'
+        )
+    },
     caption: {
-        className: classNames('absolute bottom-0 left-0 w-full', 'bg-black/50 text-white p-4')
+        className: classNames('absolute bottom-0 left-0 w-full', 'bg-gray/50 text-gray p-4')
     },
     transition: {
         enterFromClass: 'opacity-0 scale-75',
