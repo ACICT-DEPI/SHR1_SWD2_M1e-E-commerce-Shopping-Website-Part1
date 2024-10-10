@@ -46,7 +46,7 @@ const AllCollections = () => {
           <img
             src={collection.image.url}
             alt={collection.title}
-            className="w-full h-60 object-cover object-center group-hover:opacity-75"
+            className="w-full h-48 object-cover object-center group-hover:opacity-75"
           />
           <div
             aria-hidden="true"
