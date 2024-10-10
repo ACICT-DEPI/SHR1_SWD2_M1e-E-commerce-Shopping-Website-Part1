@@ -39,12 +39,12 @@ const DropdownList = ({ handleSignOut , showProfileAdmin }) => {
     {
       label: "Personal Profile",
       icon: "pi pi-user",
-      command: () => navigate(`/profile/${fullname}`),
+      command: () => navigate(`profile/${fullname}`),
     },
     {
       label: "Change Password",
       icon: "pi pi-lock",
-      command: () => console.log("Change Password clicked"),
+      command: () => navigate('changepassword'),
     },
     {
       label: "Sign Out",

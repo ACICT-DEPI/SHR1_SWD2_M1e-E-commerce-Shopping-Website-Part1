@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-import DarkModeSwitcher from "../../components/Admin/Header/DarkModeSwitcher";
 import ProfilePictureUpload from "../../components/Client/ProfilePictureUpload";
 import { Toast } from "primereact/toast"; 
 import { AiOutlineLock, AiOutlineMail, AiOutlinePhone, AiOutlineUser } from "react-icons/ai";

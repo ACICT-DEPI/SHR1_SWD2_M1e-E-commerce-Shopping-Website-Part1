@@ -83,8 +83,8 @@ const UserDropdown = ({ firstname, avatarUrl, onClose }) => {
         </span>
 
         {/* Display avatar */}
-        <span className="h-12 w-12 rounded-full">
-          <img src={avatarUrl} alt="User" className="rounded-full" />
+        <span className="h-12 w-12 rounded-full overflow-hidden">
+          <img src={avatarUrl || require("./../../../imgs/test_image.png")} alt="User" />
         </span>
 
         {/* Arrow rotation */}
