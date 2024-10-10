@@ -1,18 +1,20 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import LoadingCard from "./Card/LoadingCard";
+import LoadingCard from "../Card/LoadingCard";
 import { Link } from "react-router-dom";
-import Card from "./Card/Card";
+import Card from "../Card/Card";
 
-const FeaturedItems = ({ title, productQuery, productCount, topRating }) => {
+const CollectionTopProducts = ({
+  title,
+  productQuery,
+  productCount,
+  topRating,
+  panner,
+  goToAllCollectionProducts,
+}) => {
   const [products, setProducts] = useState([]); // تخزين المنتجات
-
   const [loading, setLoading] = useState(false); // حالة التحميل
 
-  const params = {
-    ...productQuery, // تمرير الاستعلامات
-    limit: productCount, // عدد المنتجات لكل صفحة
-  };
   useEffect(() => {
     const getProductIsFeatured = async () => {
       setLoading(true);
@@ -20,12 +22,12 @@ const FeaturedItems = ({ title, productQuery, productCount, topRating }) => {
       try {
         // طلب API باستخدام pagination و category
         const response = await axios.get(
-          `http://localhost:5000/api/v1/products/featured-products`,
-          { params: params }
+          `http://localhost:5000/api/v1/products`,
+          { params: { categories: productQuery } }
         );
 
         if (response.data && response.data.data) {
-          let fetchedProducts = response.data.data;
+          let fetchedProducts = response.data.data.products;
 
           // فرز المنتجات بناءً على التقييم الأعلى في حال وجود topRating
           if (topRating) {
@@ -33,7 +35,7 @@ const FeaturedItems = ({ title, productQuery, productCount, topRating }) => {
               (a, b) => b.rating - a.rating
             );
           }
-          setProducts(response.data.data); // تعيين المنتجات
+          setProducts(fetchedProducts); // تعيين المنتجات المفرزة
         }
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -48,11 +50,13 @@ const FeaturedItems = ({ title, productQuery, productCount, topRating }) => {
   // دالة لعرض المنتجات في الشبكة
   const displayCollections =
     products && products.length > 0 ? (
-      products.map((product) => {
+      products.slice(0, productCount).map((product) => {
         return <Card key={product._id} product={product} />;
       })
     ) : (
-      <p>No products available.</p> // عرض رسالة إذا لم تكن هناك منتجات
+      <p className="text-center text-lg font-semibold text-gray-500">
+        No products available.
+      </p> // عرض رسالة إذا لم تكن هناك منتجات
     );
 
   return (
@@ -62,26 +66,30 @@ const FeaturedItems = ({ title, productQuery, productCount, topRating }) => {
           {title}
         </h2>
         <Link
-          to={""}
+          to={`/collections/${goToAllCollectionProducts}`}
           className="hidden text-sm font-semibold text-sky-700 hover:text-sky-600 sm:block dark:text-sky-500 dark:hover:text-sky-400"
         >
-          Browse all Featured Products <span aria-hidden="true"> →</span>
+          Browse All {title} <span aria-hidden="true"> →</span>
         </Link>
       </div>
+      <img
+        src={panner}
+        alt={title}
+        className="w-full h-auto max-h-96 object-cover object-center rounded-lg"
+      />
       <div className="pt-12 pb-24">
         {loading ? (
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
             <LoadingCard count={productCount} />
           </div>
         ) : (
-          <>
-            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-              {displayCollections}
-            </div>
-          </>
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            {displayCollections}
+          </div>
         )}
       </div>
     </section>
   );
 };
-export default FeaturedItems;
+
+export default CollectionTopProducts;

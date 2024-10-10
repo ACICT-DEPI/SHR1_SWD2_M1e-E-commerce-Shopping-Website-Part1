@@ -58,14 +58,14 @@ const OurCollectionSection = () => {
   });
 
   return (
-    <section className="bg-white px-4 pt-24 space-y-5 sm:px-6 sm:pt-32 xl:mx-auto xl:max-w-7xl lg:px-8">
+    <section className=" px-4 pt-24 space-y-5 sm:px-6 sm:pt-32 xl:mx-auto xl:max-w-7xl lg:px-8">
       <div className="sm:flex sm:items-center sm:justify-between">
-        <h2 className="text-2xl font-bold tracking-tight text-slate-900">
+        <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
           Our collections
         </h2>
         <Link
           to={"/collections"}
-          className="hidden text-sm font-semibold text-sky-700 hover:text-sky-600 sm:block"
+          className="hidden text-sm font-semibold text-sky-700 hover:text-sky-600 dark:text-sky-500 dark:hover:text-sky-400 sm:block"
         >
           Browse all collections <span aria-hidden="true"> →</span>
         </Link>

@@ -116,8 +116,8 @@ const CollectionProduct = ({ collection }) => {
 
   return (
     <div className="mx-auto max-w-2xl px-4 lg:max-w-7xl lg:px-8">
-      <div className="flex items-baseline justify-between border-b border-slate-200 pb-6 pt-24">
-        <h1 className="text-4xl font-bold tracking-tight text-slate-900">
+      <div className="flex items-baseline justify-between border-b border-slate-200 dark:border-slate-500 pb-6 pt-24">
+        <h1 className="text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
           {category}
         </h1>
         <div className="hidden lg:flex lg:items-center">

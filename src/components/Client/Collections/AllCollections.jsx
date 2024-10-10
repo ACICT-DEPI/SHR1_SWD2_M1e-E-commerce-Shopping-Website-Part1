@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Paginator } from "primereact/paginator";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import SimpleLoadingCard from "../Card/SimpleLoadingCard";
 
 const AllCollections = () => {
   const [collections, setCollections] = useState([]); // إدارة البيانات محليًا
@@ -45,7 +46,7 @@ const AllCollections = () => {
           <img
             src={collection.image.url}
             alt={collection.title}
-            className="w-full h-48 object-cover object-center group-hover:opacity-75"
+            className="w-full h-60 object-cover object-center group-hover:opacity-75"
           />
           <div
             aria-hidden="true"
@@ -67,13 +68,17 @@ const AllCollections = () => {
 
   return (
     <div className="mx-auto max-w-2xl px-4 lg:max-w-7xl lg:px-8">
-      <div className="border-b border-slate-200 pt-24 pb-10">
-        <h1 className="text-4xl font-bold tracking-tight text-slate-900">
+      <div className="border-b border-slate-200 dark:border-slate-500 pt-24 pb-10">
+        <h1 className="text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
           All collections
         </h1>
       </div>
       {loading ? (
-        <p>Loading collections...</p>
+        <div className="pt-12 pb-24">
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            <SimpleLoadingCard count={12} />
+          </div>
+        </div>
       ) : (
         <div className="pt-12 pb-24">
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">

@@ -8,20 +8,22 @@ import CollectionProduct from "../../components/Client/Collections/CollectionPro
 import Card from "../../components/Client/Card/Card";
 import FeaturedItems from "../../components/Client/FeaturedItems";
 import UserLayout from "../../layout/UserLayout";
+import CollectionTopProducts from "../../components/Client/Collections/CollectionTopProducts";
+import AllCollectionsTopProducts from "../../components/Client/Collections/AllCollectionsTopProducts";
 const Ahmed = () => {
   return (
     <Fragment>
       <UserLayout>
-        <main className="bg-white">
-          <OurCollectionSection />
-          {/* <AllCollections /> */}
-          {/* <CollectionProduct /> */}
-          <FeaturedItems
-            title={"Feature Products"}
-            productCount={8}
-            topRating={false}
-          />
-        </main>
+        <OurCollectionSection />
+        {/* <AllCollections /> */}
+        {/* <CollectionProduct /> */}
+        <FeaturedItems
+          title={"Feature Products"}
+          productCount={8}
+          topRating={false}
+        />
+        {/* <CollectionTopProducts productCount={8} topRating={true} /> */}
+        <AllCollectionsTopProducts />
       </UserLayout>
     </Fragment>
   );
