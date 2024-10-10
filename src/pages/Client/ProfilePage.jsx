@@ -5,6 +5,7 @@ import DarkModeSwitcher from "../../components/Admin/Header/DarkModeSwitcher";
 import ProfilePictureUpload from "../../components/Client/ProfilePictureUpload";
 import { Toast } from "primereact/toast"; 
 import { AiOutlineLock, AiOutlineMail, AiOutlinePhone, AiOutlineUser } from "react-icons/ai";
+import { useNavigate } from "react-router-dom";
 
 const ProfilePage = () => {
   const { id } = useParams();
@@ -19,6 +20,8 @@ const ProfilePage = () => {
   const [errorMessages, setErrorMessages] = useState({});
   const [loading, setLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const navigate = useNavigate();
+
 
   const toast = useRef(null);
 
@@ -39,6 +42,7 @@ const ProfilePage = () => {
         console.error("Error fetching user data:", error);
         toast.current.show({ severity: "error", summary: "Error", detail: "Failed to fetch user data", life: 3000 });
         setIsAuthenticated(false);
+        navigate('/expired-invalid-token-page');
 
       } finally {
         setLoading(false);

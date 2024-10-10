@@ -22,7 +22,7 @@ const Header = (props) => {
     const checkAuth = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/v1/users/profile",
+          "http://localhost:5000/api/v1/users/profileAdmin",
           { withCredentials: true }
         );
         setIsAuthenticated(true);
@@ -37,6 +37,8 @@ const Header = (props) => {
             setRole(response.data.data.role);
           }
         }
+        //401 token expiered or no  unauthorized
+        //404 page not found
       } catch (error) {
         setError(error.response ? error.response.data.message : error.message);
         setIsAuthenticated(false);

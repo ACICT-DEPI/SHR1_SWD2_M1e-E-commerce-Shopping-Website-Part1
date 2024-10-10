@@ -28,8 +28,6 @@ const AdminPage = () => {
     <DefaultLayout>
       <Routes>
         <Route path="/" element={<Dashboard />} />
-        <Route path="/profile/:fullname" element={<ProfilePage />} />
-        <Route path="/unauthorized-page" element={<UnauthorizedPage />} />
         <Route path="products" element={<Products />} />
         <Route path="orders" element={<Orders />} />
         <Route path="orders/edit/:id" element={<EditOrderForm />} />

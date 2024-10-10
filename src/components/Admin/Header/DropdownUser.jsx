@@ -84,7 +84,7 @@ const DropdownUser = ({ fullname, avatarUrl, role, onClose }) => {
           ref={dropdownRef} // Add ref to dropdown
           className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-lg z-20"
         >
-          <DropdownList handleSignOut={handleLogout} />
+          <DropdownList handleSignOut={handleLogout}  />
         </div>
       )}
     </li>

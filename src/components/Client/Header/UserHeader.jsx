@@ -45,7 +45,6 @@ const UserHeader = () => {
       } catch (error) {
         setError(error.response ? error.response.data.message : error.message);
         setIsAuthenticated(false);
-        navigate('/expired-invalid-token-page');
 
       }
     };
