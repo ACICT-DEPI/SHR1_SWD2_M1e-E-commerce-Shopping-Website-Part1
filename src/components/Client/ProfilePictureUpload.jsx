@@ -103,7 +103,7 @@ const ProfilePictureUpload = () => {
   };
 
   return (
-    <div className="flex flex-col items-center mb-6 bg-white dark:bg-gray-800 shadow-lg rounded-lg p-4 transition-all duration-200">
+    <>
       <Toast ref={toastRef} position="bottom-left" /> {/* PrimeReact Toast component */}
 
       <div className="relative">
@@ -128,7 +128,7 @@ const ProfilePictureUpload = () => {
       </div>
 
       {error && <p className="text-red-500 mt-2">{error}</p>}
-    </div>
+    </>
   );
 };
 

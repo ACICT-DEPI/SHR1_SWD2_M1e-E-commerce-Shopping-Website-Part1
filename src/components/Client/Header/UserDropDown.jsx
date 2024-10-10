@@ -1,14 +1,15 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { SlArrowDown } from "react-icons/sl"; // Arrow icon
 import DropdownList from "./DropdownList"; // Import the dropdown list
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Toast } from 'primereact/toast'; // Assuming you use PrimeReact for toasts
 
-const UserDropdown = ({ firstname, avatarUrl}) => {
+const UserDropdown = ({ firstname, avatarUrl, onClose }) => {
   const [visible, setVisible] = useState(false); // State to control visibility of dropdown
   const navigate = useNavigate(); // To navigate between pages
   const toast = useRef(null); // Reference for toast notifications
+  const menuRef = useRef(null); // Reference for the dropdown menu
 
   // Function to handle logout
   const handleLogout = async () => {
@@ -40,6 +41,24 @@ const UserDropdown = ({ firstname, avatarUrl}) => {
     }
   };
 
+  // Handle click outside and close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setVisible(false); // Close the dropdown when clicked outside
+        if (onClose) onClose(); // Call onClose if provided
+      }
+    };
+
+    // Add event listener for click outside when the component is mounted
+    document.addEventListener('mousedown', handleClickOutside);
+    
+    // Clean up event listener when the component is unmounted
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [onClose]);
+
   // Dropdown items
   const items = [
     { label: 'Profile', icon: 'pi pi-user', command: () => navigate(`/profile/${firstname}`) },
@@ -56,7 +75,7 @@ const UserDropdown = ({ firstname, avatarUrl}) => {
         className="flex items-center gap-3 cursor-pointer"
         onClick={() => setVisible(!visible)} // Toggle dropdown visibility
       >
-        {/* Display user first name and role */}
+        {/* Display user first name */}
         <span className="hidden lg:block text-right">
           <span className="block text-sm font-medium text-black dark:text-white">
             {firstname}
@@ -70,15 +89,13 @@ const UserDropdown = ({ firstname, avatarUrl}) => {
 
         {/* Arrow rotation */}
         <SlArrowDown
-          className={`fill-body dark:fill-bodydark ${
-            visible ? "rotate-180" : ""
-          }`}
+          className={`fill-body dark:fill-bodydark ${visible ? "rotate-180" : ""}`}
         />
       </div>
 
       {/* Show DropdownList only if visible */}
       {visible && (
-        <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-lg z-20">
+        <div ref={menuRef} className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-lg z-20">
           <DropdownList items={items} /> {/* Pass dropdown items */}
         </div>
       )}

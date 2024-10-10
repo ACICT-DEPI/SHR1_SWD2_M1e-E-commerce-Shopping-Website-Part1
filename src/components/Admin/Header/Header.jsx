@@ -1,10 +1,50 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import DarkModeSwitcher from "./DarkModeSwitcher";
 import DropdownUser from "./DropdownUser";
 import { CiSearch } from "react-icons/ci";
 import { FaBars } from "react-icons/fa6";
+import axios from "axios";
+import UserDropdown from "../../Client/Header/UserDropDown";
 
 const Header = (props) => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [fullname, setFullName] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
+  const [role, setRole] = useState("");
+
+  const [error, setError] = useState(null);
+
+  // Check authentication status and fetch user data if authenticated
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:5000/api/v1/users/profile",
+          { withCredentials: true }
+        );
+        setIsAuthenticated(true);
+
+        if (response.data && response.data.data) {
+          const fullName = `${response.data.data.firstName} ${response.data.data.lastName}`;
+          setFullName(fullName);
+          if (response.data.data.avatar) {
+            setAvatarUrl(response.data.data.avatar.url);
+          }
+          if (response.data.data.role) {
+            setRole(response.data.data.role);
+          }
+        }
+      } catch (error) {
+        setError(error.response ? error.response.data.message : error.message);
+        setIsAuthenticated(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+ 
+
   return (
     <header className="header bg-white sticky top-0 z-30 flex w-full drop-shadow-md dark:bg-boxdark dark:drop-shadow-none">
       <div className="header-container flex flex-grow items-center justify-between px-4 py-4 md:px-6 2xl:px-11">
@@ -36,8 +76,8 @@ const Header = (props) => {
         <div className="user-interactions">
           <ul className="flex gap-4 items-center lg:gap-9">
             <DarkModeSwitcher />
-            <DropdownUser />
-          </ul>
+            <DropdownUser fullname={fullname} avatarUrl={avatarUrl} role ={role} />
+            </ul>
         </div>
       </div>
     </header>
