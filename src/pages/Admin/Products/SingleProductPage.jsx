@@ -9,6 +9,7 @@ import { Toast } from "primereact/toast";
 import MediaUpload from "../../../components/Admin/MediaUpload/MediaUpload";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
+import ActionButton from "../../../components/Admin/Buttons/ActionButton";
 
 const SingleProductPage = () => {
   const { id } = useParams();
@@ -23,7 +24,8 @@ const SingleProductPage = () => {
   const [description, setDescription] = useState("");
   const [existingImage, setExistingImage] = useState(null);
   const [newImage, setNewImage] = useState(null);
-
+ // State for error messages
+  const [errors, setErrors] = useState({});
   // Fetch product data when the component mounts
   useEffect(() => {
     const fetchProductData = async () => {
@@ -81,7 +83,18 @@ const SingleProductPage = () => {
 
         console.log("Update Response:", updateResponse.data);
     } catch (error) {
-        console.error("Error updating product:", error);
+       const data = error.response?.data || {};
+
+       setErrors((prev) => ({
+        ...prev,
+        title: data.errors?.title?.message || "",
+        description: data.description?.category?.message || "",
+        excerpt: data.errors?.excerpt?.message || "",
+        price: data.errors?.price?.message || "",
+        discount: data.errors?.discount?.message || "",
+        quantity: data.errors?.quantity?.message || "",
+        category: data.errors?.category?.message || "",
+      }));
         // Show error message if the update fails
         toast.current.show({
             severity: "error",
@@ -118,6 +131,8 @@ const SingleProductPage = () => {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                 />
+                {errors.title && <small className="p-error">{errors.title}</small>}
+
               </div>
 
               {/* Price Input */}
@@ -131,6 +146,8 @@ const SingleProductPage = () => {
                   value={price}
                   onChange={(e) => setPrice(Number(e.target.value))} // Convert to number
                 />
+              {errors.price && <small className="p-error">{errors.price}</small>}
+
               </div>
 
               {/* Discount Input */}
@@ -144,6 +161,8 @@ const SingleProductPage = () => {
                   value={discount}
                   onChange={(e) => setDiscount(Number(e.target.value))} // Convert to number
                 />
+               {errors.discount && <small className="p-error">{errors.discount}</small>}
+
               </div>
 
               {/* Quantity Input */}
@@ -157,6 +176,8 @@ const SingleProductPage = () => {
                   value={quantity}
                   onChange={(e) => setQuantity(Number(e.target.value))} // Convert to number
                 />
+              {errors.quantity && <small className="p-error">{errors.quantity}</small>}
+
               </div>
 
               {/* Excerpt Input */}
@@ -170,6 +191,8 @@ const SingleProductPage = () => {
                   value={excerpt}
                   onChange={(e) => setExcerpt(e.target.value)}
                 />
+               {errors.excerpt && <small className="p-error">{errors.excerpt}</small>}
+
               </div>
 
               {/* Description Editor */}
@@ -179,6 +202,8 @@ const SingleProductPage = () => {
                   value={description}
                   onTextChange={(e) => setDescription(e.htmlValue)} // Ensure e.htmlValue is used correctly
                 />
+               {errors.description && <small className="p-error">{errors.description}</small>}
+
               </div>
 
               {/* Image Upload */}
@@ -195,6 +220,10 @@ const SingleProductPage = () => {
               {/* Submit Button */}
               <div className="pt-3 rounded-b-md sm:rounded-b-lg">
                 <div className="flex items-center justify-end">
+                <ActionButton 
+            type="delete" 
+            label="Delete" 
+          />
                   <Button label="Save Changes" size="normal" className="text-base" pt={buttonsStyle} />
                 </div>
               </div>
@@ -203,7 +232,7 @@ const SingleProductPage = () => {
         </div>
       </div>
 
-      <Toast ref={toast}></Toast>
+      <Toast ref={toast} position="bottom-left"></Toast>
     </Fragment>
   );
 };

@@ -10,11 +10,18 @@ import { Toast } from "primereact/toast";
 import MediaUpload from "../../../components/Admin/MediaUpload/MediaUpload";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { SelectButton } from "primereact/selectbutton";
+
+import "primeicons/primeicons.css";
 
 const AddCollection = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [image, setImage] = useState(null);
+  const [banner, setBanner] = useState(null);
+  const [isBannerVisible, setIsBannerVisible] = useState(false);
+  const showOptions = ["Show", "Hide"];
+  const [showValue, setShowValue] = useState(showOptions[1]);
   const toast = useRef(null);
   const navigate = useNavigate();
 
@@ -24,12 +31,24 @@ const AddCollection = () => {
       if (image) {
         URL.revokeObjectURL(image); // تنظيف مسار الصورة
       }
+      if (banner) {
+        URL.revokeObjectURL(banner); // تنظيف مسار الصورة
+      }
+      if (showValue == showOptions[0]) {
+        setIsBannerVisible(true);
+      } else {
+        setIsBannerVisible(false);
+      }
     };
-  }, [image]);
+  }, [image, banner]);
 
   const handleImageChange = (file) => {
     setImage(file);
-    console.log("File selected:", file);
+    console.log("Image selected:", file);
+  };
+  const handleBannerChange = (file) => {
+    setBanner(file);
+    console.log("banner selected:", file);
   };
 
   // submit the form
@@ -42,6 +61,7 @@ const AddCollection = () => {
         {
           title,
           description,
+          isBannerVisible,
         },
         {
           headers: {
@@ -56,13 +76,13 @@ const AddCollection = () => {
 
         // التحقق من وجود الصورة لرفعها
         if (image) {
-          const formData = new FormData();
-          formData.append("image", image);
+          const formImageData = new FormData();
+          formImageData.append("image", image);
 
           // رفع الصورة
           const imageResponse = await axios.patch(
             `http://localhost:5000/api/v1/categories/category-photo-upload/${collectionId}`,
-            formData,
+            formImageData,
             {
               withCredentials: true,
             }
@@ -81,7 +101,32 @@ const AddCollection = () => {
             );
           }
         }
+        if (banner) {
+          const formBannerData = new FormData();
+          formBannerData.append("banner", banner);
 
+          // رفع الصورة
+          const imageResponse = await axios.patch(
+            `http://localhost:5000/api/v1/categories/category-banner-upload/${collectionId}`,
+            formBannerData,
+            {
+              withCredentials: true,
+            }
+          );
+
+          if (imageResponse.data.status === "success") {
+            // toast.current.show({
+            //   severity: "success",
+            //   summary: "Success",
+            //   detail: "Image uploaded successfully",
+            //   life: 3000,
+            // });
+          } else {
+            throw new Error(
+              imageResponse.data.message || "Banner upload failed"
+            );
+          }
+        }
         toast.current.show({
           severity: "success",
           summary: "Success",
@@ -182,6 +227,29 @@ const AddCollection = () => {
                 </label>
                 <MediaUpload onChange={handleImageChange} maxFiles={1} />
               </div>
+              <div className="mb-2">
+                <label
+                  htmlFor="banner-upload"
+                  className="w-full mb-2 block text-black dark:text-white"
+                >
+                  Banner
+                </label>
+                <MediaUpload onChange={handleBannerChange} maxFiles={1} />
+              </div>
+              <div className="mb-2">
+                <label
+                  htmlFor="image-upload"
+                  className="w-full mb-2 block text-black dark:text-white"
+                >
+                  Show in Home page
+                </label>
+                <SelectButton
+                  value={showValue}
+                  onChange={(e) => setShowValue(e.value)}
+                  options={showOptions}
+                />
+              </div>
+
               <div className="pt-3 rounded-b-md sm:rounded-b-lg">
                 <div className="flex items-center justify-end">
                   <Button

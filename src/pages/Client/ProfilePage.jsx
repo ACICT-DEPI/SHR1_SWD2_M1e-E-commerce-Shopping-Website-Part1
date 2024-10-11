@@ -1,10 +1,9 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import ProfilePictureUpload from "../../components/Client/ProfilePictureUpload";
-import { Toast } from "primereact/toast"; 
+import { Toast } from "primereact/toast";
 import { AiOutlineLock, AiOutlineMail, AiOutlinePhone, AiOutlineUser } from "react-icons/ai";
-import { useNavigate } from "react-router-dom";
 
 const ProfilePage = () => {
   const { id } = useParams();
@@ -20,8 +19,6 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const navigate = useNavigate();
-
-
   const toast = useRef(null);
 
   useEffect(() => {
@@ -34,22 +31,20 @@ const ProfilePage = () => {
         setFirstName(userData.firstName);
         setLastName(userData.lastName);
         setEmail(userData.email);
-        setPhone(userData.phone); 
+        setPhone(userData.phone);
         setIsAuthenticated(true);
-
       } catch (error) {
         console.error("Error fetching user data:", error);
         toast.current.show({ severity: "error", summary: "Error", detail: "Failed to fetch user data", life: 3000 });
         setIsAuthenticated(false);
         navigate('/expired-invalid-token-page');
-
       } finally {
         setLoading(false);
       }
     };
 
     fetchUserData();
-  }, []);
+  }, [navigate]);
 
   const handleSaveProfile = async (e) => {
     e.preventDefault();
@@ -131,19 +126,18 @@ const ProfilePage = () => {
   return (
     <div className="bg-gray-100 dark:bg-gray-900 min-h-screen p-8 font-inter">
       <Toast ref={toast} position="bottom-left" aria-live="polite" />
-  
+
       <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg flex flex-col md:flex-row">
         <div className="w-full md:w-1/3 mb-4 md:mb-0 flex justify-center md:justify-start">
-          <ProfilePictureUpload className="w-24 h-24 md:w-32 md:h-32" /> {/* Adjust size here */}
+          <ProfilePictureUpload className="w-24 h-24 md:w-32 md:h-32" />
         </div>
-  
-        <div className="w-full md:w-2/3 mt-8 md:mt-16"> {/* Decrease margin here */}
+
+        <div className="w-full md:w-2/3 mt-8 md:mt-16">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Welcome, 
-            {`${firstName} ${lastName}`}
-          </h2>         
+            Welcome, {`${firstName} ${lastName}`}
+          </h2>
           <p className="text-gray-600 dark:text-gray-300 mb-6">Update your account's profile information and password.</p>
-  
+
           <div className="space-y-6 mb-8">
             <h3 className="font-bold text-lg text-gray-900 dark:text-white">Personal Information</h3>
             <form onSubmit={handleSaveProfile} className="space-y-4">
@@ -162,7 +156,7 @@ const ProfilePage = () => {
                 <AiOutlineUser className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
                 {errorMessages.firstName && <div className="text-red-500 dark:text-red-400">{errorMessages.firstName}</div>}
               </div>
-  
+
               {/* Last Name */}
               <div className="relative">
                 <label htmlFor="last-name" className="sr-only">Last Name</label>
@@ -178,7 +172,7 @@ const ProfilePage = () => {
                 <AiOutlineUser className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
                 {errorMessages.lastName && <div className="text-red-500 dark:text-red-400">{errorMessages.lastName}</div>}
               </div>
-  
+
               {/* Phone Number */}
               <div className="relative">
                 <label htmlFor="phone" className="sr-only">Phone Number</label>
@@ -194,7 +188,7 @@ const ProfilePage = () => {
                 <AiOutlinePhone className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
                 {errorMessages.phone && <div className="text-red-500 dark:text-red-400">{errorMessages.phone}</div>}
               </div>
-  
+
               {/* Email */}
               <div className="relative">
                 <label htmlFor="email" className="sr-only">Email</label>
@@ -210,19 +204,14 @@ const ProfilePage = () => {
                 <AiOutlineMail className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
                 {errorMessages.email && <div className="text-red-500 dark:text-red-400">{errorMessages.email}</div>}
               </div>
-  
-              {/* Save Profile Button */}
-              <button
-                type="submit"
-                className="w-full py-3 px-6 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition duration-200"
-                disabled={loading}
-              >
-                {loading ? "Saving..." : "Save Profile"}
+
+              <button type="submit" className="w-full bg-blue-600 text-white font-bold py-3 rounded-md hover:bg-blue-700 transition">
+                Save Profile
               </button>
             </form>
           </div>
-  
-          <div className="space-y-6 mb-8">
+
+          <div className="space-y-6">
             <h3 className="font-bold text-lg text-gray-900 dark:text-white">Change Password</h3>
             <form onSubmit={handleChangePassword} className="space-y-4">
               {/* Current Password */}
@@ -240,7 +229,7 @@ const ProfilePage = () => {
                 <AiOutlineLock className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
                 {errorMessages.currentPassword && <div className="text-red-500 dark:text-red-400">{errorMessages.currentPassword}</div>}
               </div>
-  
+
               {/* New Password */}
               <div className="relative">
                 <label htmlFor="new-password" className="sr-only">New Password</label>
@@ -256,30 +245,25 @@ const ProfilePage = () => {
                 <AiOutlineLock className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
                 {errorMessages.newPassword && <div className="text-red-500 dark:text-red-400">{errorMessages.newPassword}</div>}
               </div>
-  
+
               {/* Confirm New Password */}
               <div className="relative">
-                <label htmlFor="confirm-password" className="sr-only">Confirm New Password</label>
+                <label htmlFor="confirm-password" className="sr-only">Confirm Password</label>
                 <input
                   id="confirm-password"
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   onFocus={() => handleFocus("confirmPassword")}
-                  placeholder="Confirm New Password"
+                  placeholder="Confirm Password"
                   className={`w-full px-4 py-3 pl-10 border ${errorMessages.confirmPassword ? "border-red-500" : "border-gray-300"} dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500`}
                 />
                 <AiOutlineLock className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
                 {errorMessages.confirmPassword && <div className="text-red-500 dark:text-red-400">{errorMessages.confirmPassword}</div>}
               </div>
-  
-              {/* Change Password Button */}
-              <button
-                type="submit"
-                className="w-full py-3 px-6 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition duration-200"
-                disabled={loading}
-              >
-                {loading ? "Changing..." : "Change Password"}
+
+              <button type="submit" className="w-full bg-blue-600 text-white font-bold py-3 rounded-md hover:bg-blue-700 transition">
+                Change Password
               </button>
             </form>
           </div>
@@ -287,8 +271,6 @@ const ProfilePage = () => {
       </div>
     </div>
   );
-  
-  
 };
 
 export default ProfilePage;

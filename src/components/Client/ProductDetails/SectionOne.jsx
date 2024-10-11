@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { Button } from 'primereact/button';
 import { Rating } from 'primereact/rating';
 import ProductTabs from './ProductTap'; 
 import ControlledDemo from './ControlledDemo';
 import styled from 'styled-components';
 import ProductPrice from './ProductPrice';
+import ShoppingCartSidebar from '../SideBar/ShoppingCartSidebar'; // Import the Sidebar component
 import axios from 'axios';
-import { FaChevronRight } from 'react-icons/fa';
 
 const Paragraph = styled.p`
   font-size: 1.4rem;
@@ -19,88 +19,71 @@ const Overlay = styled.div`
   top: 0;
   left: 0;
   width: 100%;
-   height: 100%;
+  height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 999;
   backdrop-filter: blur(5px);
-`;
-
-const Sidebar = styled.div`
-  position: fixed;
-  top: 0;
-  right: 0;
-  width: 600px;
-  height: 100vh;
-  background-color: white;
-  z-index: 1000;
-  box-shadow: -2px 0px 8px rgba(0, 0, 0, 0.2);
-  transform: ${(props) => (props.isOpen ? 'translateX(0)' : 'translateX(100%)')};
-  transition: transform 0.3s ease;
-  padding: 20px;
-`;
-
-const CartItem = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
-  img {
-    width: 60px;
-    height: 60px;
-  }
-  p {
-    margin: 0;
-  }
 `;
 
 const SectionOne = () => {
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [isSidebarOpen, setSidebarOpen] = useState(false); 
-  const [newPrice, setNewPrice] = useState(0); // لحفظ السعر الجديد
-  const [subtotal, setSubtotal] = useState(0); // لحساب المجموع الفرعي
-  const [isProductInCart, setIsProductInCart] = useState(true); // لإدارة حالة المنتج في السلة
-  const {id} = useParams();
+  const [newPrice, setNewPrice] = useState(0); 
+  const [subtotal, setSubtotal] = useState(0); 
+  const { id } = useParams();
 
+  // Fetch product data based on the product ID
   useEffect(() => {
     const fetchProductData = async () => {
       try {
         const response = await axios.get(`http://localhost:5000/api/v1/products/${id}`);
         if (response.status === 200) {
           setProduct(response.data.data);
-          setSubtotal(response.data.data.newPrice * quantity); // حساب المجموع الفرعي
         }
       } catch (error) {
         console.error("Error fetching product data:", error);
       }
     };
-
     fetchProductData();
   }, [id]);
 
   useEffect(() => {
-    setSubtotal(newPrice * quantity);
- }, [newPrice, quantity]);
- 
+    if (product) {
+      setNewPrice(product.newPrice); // Update newPrice from the fetched product data
+    }
+  }, [product]);
 
+  useEffect(() => {
+    setSubtotal(newPrice * quantity); // Update subtotal when newPrice or quantity changes
+  }, [newPrice, quantity]);
 
   const handleAddToCart = () => {
-    setSidebarOpen(true);
-    setIsProductInCart(true); // عند إضافة المنتج للسلة
+    setSidebarOpen(true); // Open sidebar
   };
 
-
   const handleNewPriceUpdate = (calculatedPrice) => {
-    setNewPrice(calculatedPrice); // تحديث السعر الجديد
+    setNewPrice(calculatedPrice);
+  };
+
+  const handleQuantityChange = (newQuantity) => {
+    setQuantity(Number(newQuantity)); // Update local quantity
+    // Call the sidebar's method to update quantity
+    updateProductQuantity(product._id, Number(newQuantity));
+  };
+
+  const updateProductQuantity = (productId, newQuantity) => {
+    const updatedCartProducts = JSON.parse(localStorage.getItem("cartProducts")) || [];
+    const updatedProducts = updatedCartProducts.map(product => 
+      product._id === productId ? { ...product, quantity: newQuantity } : product
+    );
+    localStorage.setItem("cartProducts", JSON.stringify(updatedProducts));
+    // If you want to also update the cart in the sidebar directly, 
+    // you would have to pass a function to do that or use context/global state
   };
 
   const handleClickOutside = () => {
-    setSidebarOpen(false);
-  };
-
-  const handleRemoveProduct = () => {
-    setIsProductInCart(false); // إزالة المنتج من السلة
-    setSubtotal(0); // تصفير المجموع الفرعي
+    setSidebarOpen(false); // Close sidebar on outside click
   };
 
   if (!product) {
@@ -108,47 +91,47 @@ const SectionOne = () => {
   }
 
   return (
-    <div className="relative  ">
-      {isSidebarOpen && <Overlay onClick={handleClickOutside} />}
+    <div className="relative">
+      {isSidebarOpen && <Overlay onClick={handleClickOutside} />} {/* Blur background on sidebar open */}
 
-      <div className={isSidebarOpen ? 'blur-lg' : ''}>
+      <div className={isSidebarOpen ? 'blur-lg' : ''}> {/* Apply blur effect */}
         <div className="container mx-auto p-4">
           <div className="flex flex-col md:flex-row items-start">
-            {/* صورة المنتج الرئيسية */}
-            <div className="w-full md:w-1/2 mb-4 md:mb-0">
+            {/* Product Image */}
+            <div className="w-full md:w-1/2 mb-4 md:mb-0 dark:text-white">
               <ControlledDemo />
             </div>
 
-            {/* تفاصيل المنتج */}
+            {/* Product Details */}
             <div className="w-full md:w-1/2 md:pl-8">
-              <h1 className="text-5xl font-bold mb-4 pl-4 pt-12 pb-5">{product.title}</h1>
+              <h1 className="text-5xl font-bold mb-4 pl-4 pt-12 pb-5 dark:text-white">{product.title}</h1>
 
-              {/* السعر */}
+              {/* Price */}
               <ProductPrice product={product} onNewPrice={handleNewPriceUpdate} />
               
-              {/* التقييم */}
-              <div className="flex items-center mb-4 pb-5 pl-4">
+              {/* Rating */}
+              <div className="flex items-center mb-4 pb-5 pl-4 dark:text-white">
                 <Rating value={product.rating} readOnly stars={5} cancel={false} />
-                <span className="ml-5 text-gray-600">({product.numReviews} Reviews)</span>
+                <span className="ml-5 text-gray-600 dark:text-white">({product.numReviews} Reviews)</span>
               </div>
 
-              {/* Paragraph */}
-              <div className="mb-6 pl-4">
+              {/* Description */}
+              <div className="mb-6 pl-4 dark:text-white">
                 <Paragraph>{product.excerpt}</Paragraph>
               </div>
 
-              {/* زر الإضافة إلى السلة ومحدد الكمية */}
-              <div className="flex items-center space-x-4 mt-6 pl-4">
+              {/* Quantity Selector and Add to Cart Button */}
+              <div className="flex items-center space-x-4 mt-6 pl-4 dark:text-white">
                 <input
                   type="number"
                   value={quantity}
-                  onChange={(e) => setQuantity(e.target.value)}
+                  onChange={(e) => handleQuantityChange(e.target.value)} // Use the new handler
                   min="1"
-                  className="w-20 p-3 border border-gray-900 rounded-md text-center text-gray-900"
+                  className="w-20 p-3 border border-gray-900 rounded-md text-center text-gray-900" 
                 />
                 <Button
                   label="Add to Cart"
-                  className="p-button-success p-4 text-lg"
+                  className="p-button-success p-4 text-lg dark:text-white"
                   style={{ width: '400px' }}
                   onClick={handleAddToCart} 
                 />
@@ -158,68 +141,21 @@ const SectionOne = () => {
         </div>
       </div>
 
-      {/* الشريط الجانبي */}
-      <Sidebar isOpen={isSidebarOpen}  className="dark:bg-gray-900 relative ">
-        <h2 className="text-3xl font-bold mb-4 pb-5 ">Shopping Cart</h2>
-
-        {isProductInCart ? (
-          <CartItem 
-           className="text-lg font-bold pb-5"
-          >
-            <img src={product.image} alt={product.title} />
-            <div>
-              <p>{product.title}</p>
-              <p>Quantity: {quantity}</p>
-              <p>Price: {newPrice} $</p>
-            </div>
-            <button
-              className="text-blue-500 border-none"
-              onClick={handleRemoveProduct} 
-            >
-              Remove
-            </button>
-          </CartItem>
-        ) : (
-          <p className="text-center text-gray-500">No items in the cart</p> 
-        )}
-         
-        <div className="mt-auto pt-80">
-        <hr className="w-full  bg-gray-300" />
-          <p className="text-2xl font-bold pt-10">Subtotal: {subtotal.toFixed(2)} $</p>
-          <p>Shipping and taxes will be calculated at checkout.</p>
-
-          <Link to="/checkout">
-            <Button
-              label="Checkout"
-              className="p-button-warning w-full mt-4 text-lg"
-            />
-          </Link>
-
-          <div className="flex justify-center items-center my-2">
-            <span>Or</span>
-          </div>
-
-          <Link to="#"
-  className="flex items-center text-blue-500 hover:underline text-xl w-full justify-center"
-  onClick={(e) => {
-    e.preventDefault(); // منع الانتقال إلى الصفحة
-    setSidebarOpen(false); // أغلق الشريط الجانبي إذا كان مفتوحًا
-  }}
->
-  Continue Shopping
-  <FaChevronRight className="ml-2" /> {/* سهم يشير إلى اليمين */}
-</Link>
-        </div>
-      </Sidebar>
-      {/* ProductTabs */}
+      {/* Shopping Cart Sidebar */}
+      <ShoppingCartSidebar 
+    isSidebarOpen={isSidebarOpen} 
+    setSidebarOpen={setSidebarOpen} 
+    productId={id} 
+    newPrice={newPrice} // Add this line
+/>
+      
+      {/* Product Tabs */}
       <ProductTabs
          description={product.description}
-        reviews={product.reviews || []}
-        />
+         reviews={product.reviews || []}
+      />
     </div>
   );
 };
 
-export default SectionOne;
-
-
+export default SectionOne;  
