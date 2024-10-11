@@ -17,13 +17,13 @@ const Ahmed = () => {
         <OurCollectionSection />
         {/* <AllCollections /> */}
         {/* <CollectionProduct /> */}
-        <FeaturedItems
+        {/* <FeaturedItems
           title={"Feature Products"}
           productCount={8}
           topRating={false}
-        />
+        /> */}
         {/* <CollectionTopProducts productCount={8} topRating={true} /> */}
-        <AllCollectionsTopProducts />
+        {/* <AllCollectionsTopProducts /> */}
       </UserLayout>
     </Fragment>
   );
