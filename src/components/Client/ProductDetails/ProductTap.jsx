@@ -7,15 +7,15 @@ const ProductTabs = ({ description, reviews }) => {
 
   return (
     <div className="mt-6 p-10">
-      <div className="flex border-b">
+      <div className="flex border-b ">
         <button
-          className={`py-2 px-4 text-xl ${activeTab === 'description' ? 'border-b-2 border-blue-600 font-bold text-blue-600' : 'text-gray-600'}`} // زيادة حجم الخط وإضافة نمط عند التفعيل
+          className={`py-2 px-4 text-xl ${activeTab === 'description' ? 'border-b-2 border-blue-600 font-bold text-blue-600' : 'text-gray-600  dark:text-white'}`} // زيادة حجم الخط وإضافة نمط عند التفعيل
           onClick={() => setActiveTab('description')}
         >
           Description
         </button>
         <button
-          className={`py-2 px-4 text-xl ${activeTab === 'reviews' ? 'border-b-2 border-blue-600 font-bold text-blue-600' : 'text-gray-600'}`} // زيادة حجم الخط وإضافة نمط عند التفعيل
+          className={`py-2 px-4 text-xl ${activeTab === 'reviews' ? 'border-b-2 border-blue-600 font-bold text-blue-600' : 'text-gray-600  dark:text-white'}`} // زيادة حجم الخط وإضافة نمط عند التفعيل
           onClick={() => setActiveTab('reviews')}
         >
           Reviews
@@ -23,23 +23,23 @@ const ProductTabs = ({ description, reviews }) => {
       </div>
 
       {activeTab === 'description' && (
-        <div className="mt-4">
-          <p className="text-xl">{description}</p>
+        <div className="mt-4  dark:text-white">
+          <p className="text-xl  dark:text-white">{description}</p>
         </div>
       )}
 
       {activeTab === 'reviews' && (
-        <div className="mt-4 text-xl">
+        <div className="mt-4 text-xl ">
           {reviews.length > 0 ? (
             reviews.map((review, index) => (
-              <div key={index} className="border-b pb-2 mb-2">
-                <h4 className="font-semibold">{review.username}</h4>
+              <div key={index} className="border-b pb-2 mb-2  dark:text-white">
+                <h4 className="font-semibold  dark:text-white">{review.username}</h4>
                 <p>{review.comment}</p>
-                <p className="text-gray-500">{review.rating} Stars</p>
+                <p className="text-gray-500  dark:text-white">{review.rating} Stars</p>
               </div>
             ))
           ) : (
-            <p>No reviews available.</p>
+            <p className=' dark:text-white'>No reviews available.</p>
           )}
         </div>
       )}
