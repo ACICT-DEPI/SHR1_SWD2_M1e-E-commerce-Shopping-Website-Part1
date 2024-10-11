@@ -16,8 +16,8 @@ import EditOrderForm from "./Orders/EditOrderForm";
 import EditCustomerForm from "./Customers/EditCustomerForm";
 import { AdminProfile } from "./AdminProfile";
 import { ChangePassword } from "./ChangePassword";
-import AddProduct  from "./Products/AddProduct";
-import SingleProductPage from "./Products/SingleProductPage";
+import SingleProductDetails from "./Products/SingleProductPage";
+import  AddProduct  from "./Products/AddProduct";
 
 const AdminPage = () => {
   const [loading, setLoading] = useState(true);
@@ -34,7 +34,7 @@ const AdminPage = () => {
         <Route path="changepassword" element={<ChangePassword />} />
         <Route path="products" element={<Products />} />
         <Route path="products/add" element={<AddProduct />} />
-        <Route path="products/update/:id" element={<SingleProductPage />} />
+        <Route path="products/update/:id" element={<SingleProductDetails />} />
 
 
         <Route path="orders" element={<Orders />} />

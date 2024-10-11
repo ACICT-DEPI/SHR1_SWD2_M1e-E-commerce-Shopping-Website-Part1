@@ -1,7 +1,6 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
 import axios from "axios"; // Import axios for API requests
-import { useSelector } from "react-redux"; // Redux for state management
 import "primeicons/primeicons.css"; // PrimeReact icons
 import { FilterMatchMode } from "primereact/api";
 import { DataTable } from "primereact/datatable";
@@ -11,10 +10,15 @@ import { IconField } from "primereact/iconfield";
 import { InputIcon } from "primereact/inputicon";
 import { dataTabelStyle } from "../../../layout/dataTabelStyle"; // Custom styles
 import { inputTextStyle } from "../../../layout/inputTextStyle";
+import { Button } from "primereact/button";
+import { Toast } from "primereact/toast";
+import { ConfirmPopup, confirmPopup } from "primereact/confirmpopup";
+
 
 const ProductDataTabel = () => {
   const [allProducts, setAllProducts] = useState([]); // State to store fetched products
   const navigate = useNavigate(); // Initialize useNavigate for routing
+  const toast = useRef(null);
 
   // Fetch products from the API with credentials
   const fetchProducts = async () => {
@@ -48,6 +52,7 @@ const ProductDataTabel = () => {
     setFilter(_filter);
     setGlobalFilterValue(value);
   };
+  const priceBodyTemplate = (rowData) => `$${rowData.price.toFixed(2)}`;
 
   // Table header section
   const header = () => {
@@ -67,6 +72,58 @@ const ProductDataTabel = () => {
     );
   };
 
+  const handleDeleteProduct = async (id) => {
+    try {
+      const response = await axios.delete(`http://localhost:5000/api/v1/products/${id}`, {
+        withCredentials: true, // This allows credentials to be sent with the request
+        headers: {
+          'Content-Type': 'application/json', // Set content type if necessary
+        },
+      });
+      // Check if the response indicates success
+      if (response.status === 200) {
+        // Show success toast notification
+        toast.current.show({
+          severity: "success",
+          summary: "Success",
+          detail: "Order deleted successfully",
+          life: 2000,
+        });
+       
+        // Navigate to another page or refresh as needed
+        setTimeout(() => {
+          window.location.reload();
+     }, 2000)
+      } else {
+        throw new Error('Failed to delete the order');
+      }
+    } catch (error) {
+      // Handle any errors that occur during the Axios request
+      toast.current.show({
+        severity: "error",
+        summary: "Error",
+        detail: error.message || 'An error occurred while deleting the Product.',
+        life: 2000,
+      });
+    }
+  };
+  
+  const confirmDeleteProduct = (event, id) => {
+    confirmPopup({
+      target: event.currentTarget,
+      message: "Are you sure you want to delete this order?",
+      icon: "pi pi-exclamation-triangle",
+      accept: () => handleDeleteProduct(id),
+      reject: () =>
+        toast.current.show({
+          severity: "warn",
+          summary: "Canceled",
+          detail: "Product deletion was canceled",
+          life: 2000,
+        }),
+    });
+  };
+
   // Update paginator content
   useEffect(() => {
     document.querySelector(".nextPageButton").innerHTML =
@@ -74,13 +131,34 @@ const ProductDataTabel = () => {
     document.querySelector(".prevPageButton").innerHTML =
       " <i class='pi pi-angle-double-left mr-1'></i> Previous";
   }, []);
+  const actionBodyTemplate = (rowData) => (
+    <>
+      <Button
+        icon="pi pi-pencil"
+        rounded
+        outlined
+        className="mr-2"
+        aria-label="Edit order"
+        onClick={() => navigate(`/admin/products/update/${rowData._id}`)}
+      />
+      <Button
+        icon="pi pi-trash"
+        rounded
+        outlined
+        severity="danger"
+        aria-label="Delete order"
+        onClick={(e) => confirmDeleteProduct(e, rowData._id)}
+      />
+    </>
+  );
+
 
   // First row body template for product details
   const ProductBodyTemplate = (rowData) => {
     const handleTitleClick = () => {
       navigate(`/admin/products/update/${rowData._id}`); // Navigate to product update page
     };
-
+   
     return (
       <Fragment>
         <img
@@ -101,6 +179,8 @@ const ProductDataTabel = () => {
 
   return (
     <div>
+    <Toast ref={toast} position="bottom-right" />
+
       <DataTable
         value={allProducts}
         rows={5}
@@ -132,10 +212,18 @@ const ProductDataTabel = () => {
         <Column
           field="price"
           header="Price"
+          body={priceBodyTemplate}
           style={{ minWidth: "12rem" }}
           sortable
         />
+         <Column
+              body={actionBodyTemplate}
+              header="Actions"
+              style={{ minWidth: "12rem" }}
+            />
       </DataTable>
+      <ConfirmPopup />
+
     </div>
   );
 };
