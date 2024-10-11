@@ -33,7 +33,7 @@ const AddProduct = () => {
     const fetchCategories = async () => {
       setLoading(true);
       try {
-        const response = await axios.get('http://localhost:5000/api/v1/categories?limit=20', {
+        const response = await axios.get('http://localhost:5000/api/v1/categories', {
           withCredentials: true,
         });
         console.log("Response from categories:", response.data);
@@ -229,8 +229,6 @@ const AddProduct = () => {
                     id="price"
                     type="number"
                     placeholder="Enter product price"
-                    min={1}
-                    max={100}
                     className={`w-full ${errors.price ? 'border-red-500' : ''}`}
                     onChange={(e) => setPrice(e.target.value)}
                     pt={inputTextStyle}
@@ -248,7 +246,7 @@ const AddProduct = () => {
                     id="discount"
                     type="number"
                     placeholder="Enter discount percentage"
-                    min={1}
+                    min={0}
                     max={100}
                     className={`w-full ${errors.discount ? 'border-red-500' : ''}`}
                     onChange={(e) => setDiscount(e.target.value)}

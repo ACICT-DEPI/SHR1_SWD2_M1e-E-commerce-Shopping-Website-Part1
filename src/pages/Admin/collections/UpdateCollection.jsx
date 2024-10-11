@@ -5,6 +5,8 @@ import { inputTextStyle } from "../../../layout/inputTextStyle";
 import Cookies from "js-cookie";
 import { buttonsStyle } from "../../../layout/buttonsStyle";
 import { Button } from "primereact/button";
+import { SelectButton } from "primereact/selectbutton";
+
 import CustomEditor from "../../../components/Admin/CustomEditor";
 import { Toast } from "primereact/toast";
 import MediaUpload from "../../../components/Admin/MediaUpload/MediaUpload";
@@ -18,6 +20,13 @@ const UpdateCollection = () => {
   const [description, setDescription] = useState(""); // يتم التعامل معها كنص HTML
   const [existingImage, setExistingImage] = useState(null);
   const [newImage, setNewImage] = useState(null); // لحفظ الصورة الجديدة
+
+  const [existingBanner, setExistingBanner] = useState(null);
+  const [newBanner, setNewBanner] = useState(null);
+
+  const [isBannerVisible, setIsBannerVisible] = useState(false);
+  const showOptions = ["Show", "Hide"];
+  const [showValue, setShowValue] = useState(null);
   const toast = useRef(null);
 
   useEffect(() => {
@@ -27,10 +36,19 @@ const UpdateCollection = () => {
         const response = await axios.get(
           `http://localhost:5000/api/v1/categories/${id}`
         );
-        const { title, description, image } = response.data.data;
+        const { title, description, image, banner, isBannerVisible } =
+          response.data.data;
         setTitle(title);
         setDescription(description); // تعيين الوصف كـ HTML
         setExistingImage(image.url); // تعيين الصورة الموجودة
+        setExistingBanner(banner.url);
+        setIsBannerVisible(isBannerVisible);
+
+        if (isBannerVisible) {
+          setShowValue(showOptions[0]); // Show
+        } else {
+          setShowValue(showOptions[1]); // Hide
+        }
       } catch (error) {
         console.error("Error fetching collection data:", error);
       }
@@ -43,6 +61,19 @@ const UpdateCollection = () => {
     setNewImage(file); // تخزين الصورة الجديدة
     setExistingImage(URL.createObjectURL(file)); // عرض الصورة الجديدة في المعاينة
   };
+  const handleBannerChange = (file) => {
+    setNewBanner(file); // تخزين الصورة الجديدة
+    setExistingBanner(URL.createObjectURL(file)); // عرض الصورة الجديدة في المعاينة
+  };
+
+  const handleShowValueChange = (value) => {
+    setShowValue(value);
+    if (value === showOptions[0]) {
+      setIsBannerVisible(true); // Show
+    } else {
+      setIsBannerVisible(false); // Hide
+    }
+  };
 
   const submitForm = async (e) => {
     e.preventDefault();
@@ -52,8 +83,7 @@ const UpdateCollection = () => {
       const formData = new FormData();
       formData.append("title", title);
       formData.append("description", description); // إرسال الوصف كـ HTML
-
-      // تحديث البيانات باستخدام PUT أو PATCH
+      formData.append("isBannerVisible", isBannerVisible); // تحديث البيانات باستخدام PUT أو PATCH
       const updateResponse = await axios.patch(
         `http://localhost:5000/api/v1/categories/${id}`,
         formData,
@@ -74,6 +104,32 @@ const UpdateCollection = () => {
         const imageResponse = await axios.patch(
           `http://localhost:5000/api/v1/categories/category-photo-upload/${id}`,
           formData,
+          {
+            withCredentials: true,
+          }
+        );
+
+        if (imageResponse.data.status === "success") {
+          // toast.current.show({
+          //   severity: "success",
+          //   summary: "Success",
+          //   detail: "Image uploaded successfully",
+          //   life: 3000,
+          // });
+        } else {
+          throw new Error(imageResponse.data.message || "Image upload failed");
+        }
+      }
+      // الخطوة الثالثة: رفع البانر إذا تم اختيار صورة جديدة
+
+      if (newBanner) {
+        const formBannerData = new FormData();
+        formBannerData.append("banner", newBanner);
+
+        // رفع الصورة
+        const imageResponse = await axios.patch(
+          `http://localhost:5000/api/v1/categories/category-banner-upload/${id}`,
+          formBannerData,
           {
             withCredentials: true,
           }
@@ -167,7 +223,33 @@ const UpdateCollection = () => {
                   showImage={existingImage}
                 />
               </div>
-
+              <div className="mb-2">
+                <label
+                  htmlFor="banner-upload"
+                  className="w-full mb-2 block text-black dark:text-white"
+                >
+                  Banner
+                </label>
+                <MediaUpload
+                  onChange={handleBannerChange}
+                  maxFiles={1}
+                  existingImage={existingBanner} // تمرير الصورة الموجودة
+                  showImage={existingBanner}
+                />{" "}
+              </div>
+              <div className="mb-2">
+                <label
+                  htmlFor="image-upload"
+                  className="w-full mb-2 block text-black dark:text-white"
+                >
+                  Show in Home page
+                </label>
+                <SelectButton
+                  value={showValue}
+                  onChange={(e) => handleShowValueChange(e.value)}
+                  options={showOptions}
+                />
+              </div>
               <div className="pt-3 rounded-b-md sm:rounded-b-lg">
                 <div className="flex items-center justify-end">
                   <Button

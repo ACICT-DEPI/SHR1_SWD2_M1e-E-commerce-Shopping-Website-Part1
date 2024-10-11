@@ -123,14 +123,6 @@ const OrderDataTable = () => {
   const actionBodyTemplate = (rowData) => (
     <>
       <Button
-        icon="pi pi-pencil"
-        rounded
-        outlined
-        className="mr-2 dark:border-gray-400"
-        aria-label="Edit order"
-        onClick={() => navigate(`/admin/orders/edit/${rowData._id}`)}
-      />
-      <Button
         icon="pi pi-trash"
         rounded
         outlined
@@ -153,7 +145,7 @@ const OrderDataTable = () => {
 
   const nameTemplate = (rowData) => (
     <Link
-      to={`/customers/${rowData.user._id}`}
+      to={`admin/customers/${rowData.user._id}`}
       className="text-black dark:text-white font-semibold hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200"
     >
       {rowData.user.firstName} {rowData.user.lastName} 
