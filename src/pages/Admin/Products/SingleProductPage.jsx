@@ -18,44 +18,28 @@ const SingleProductPage = () => {
   const [title, setTitle] = useState("");
   const [price, setPrice] = useState(0);
   const [discount, setDiscount] = useState(0);
-  const [quantity, setQuantity] = useState("");
+  const [quantity, setQuantity] = useState(0);
   const [excerpt, setExcerpt] = useState("");
   const [description, setDescription] = useState("");
-  const [rating, setRating] = useState("");
-  const [numReviews, setNumReviews] = useState("");
   const [existingImage, setExistingImage] = useState(null);
   const [newImage, setNewImage] = useState(null);
-  const [isFeatured, setIsFeatured] = useState(false);
 
+  // Fetch product data when the component mounts
   useEffect(() => {
     const fetchProductData = async () => {
       try {
         const response = await axios.get(`http://localhost:5000/api/v1/products/${id}`, {
           withCredentials: true,
         });
-        const {
-          title,
-          description,
-          price,
-          discount,
-          quantity,
-          excerpt,
-          rating,
-          numReviews,
-          image,
-          isFeatured,
-        } = response.data.data;
 
-        setTitle(title);
-        setDescription(description);
-        setPrice(price);
-        setDiscount(discount);
-        setQuantity(quantity);
-        setExcerpt(excerpt);
-        setRating(rating);
-        setNumReviews(numReviews);
-        setIsFeatured(isFeatured);
-        setExistingImage(image?.url);
+        const product = response.data.data;
+        setTitle(product.title);
+        setDescription(product.description);
+        setPrice(product.price);
+        setDiscount(product.discount);
+        setQuantity(product.quantity);
+        setExcerpt(product.excerpt);
+        setExistingImage(product.image?.url);
       } catch (error) {
         console.error("Error fetching product data:", error);
         toast.current.show({
@@ -69,69 +53,36 @@ const SingleProductPage = () => {
     fetchProductData();
   }, [id]);
 
+  // Handle image changes
   const handleImageChange = (file) => {
     setNewImage(file);
     setExistingImage(URL.createObjectURL(file));
   };
 
+  // Submit form to update product data
   const submitForm = async (e) => {
     e.preventDefault();
 
     try {
-        const formData = new FormData();
-        formData.append("title", title);
-        formData.append("description", description);
-        formData.append("price", price);
-        formData.append("discount", discount);
-        formData.append("quantity", quantity);
-        formData.append("excerpt", excerpt);
-        formData.append("isFeatured", isFeatured);
-
-        console.log("Form Data:", Object.fromEntries(formData)); // For debugging
-
+        // Send PATCH request to update product
         const updateResponse = await axios.patch(
             `http://localhost:5000/api/v1/products/${id}`,
-            formData,
+            { title, description, excerpt, discount, price , quantity},
             {
                 withCredentials: true,
             }
         );
+        toast.current.show({ severity: "success", summary: "Success", detail: "Product updated successfully", life: 3000 });
+        window.location.reload();
+         // Navigate to another page or refresh as needed
+         setTimeout(() => {
+          navigate('/admin/products');
+      }, 2000);
 
-        if (updateResponse.data.status === "success") {
-            toast.current.show({
-                severity: "success",
-                summary: "Success",
-                detail: "Product updated successfully",
-            });
-
-            // Navigate to admin/products after showing the toast
-            setTimeout(() => {
-                navigate('/admin/products'); // Redirect to the products page
-                window.location.reload(); // Refresh the page
-            }, 2000); // Wait for 2 seconds
-
-            // Only upload the new image if it exists
-            if (newImage) {
-                const imageFormData = new FormData();
-                imageFormData.append("image", newImage);
-
-                const imageResponse = await axios.patch(
-                    `http://localhost:5000/api/v1/products/product-photo-upload/${id}`,
-                    imageFormData,
-                    {
-                        withCredentials: true,
-                    }
-                );
-
-                if (imageResponse.data.status !== "success") {
-                    throw new Error(imageResponse.data.message || "Image upload failed");
-                }
-            }
-        } else {
-            throw new Error("Failed to update product");
-        }
+        console.log("Update Response:", updateResponse.data);
     } catch (error) {
-        console.error("Error updating product:", error.response || error.message);
+        console.error("Error updating product:", error);
+        // Show error message if the update fails
         toast.current.show({
             severity: "error",
             summary: "Error",
@@ -154,10 +105,9 @@ const SingleProductPage = () => {
         <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
           <form encType="multipart/form-data" onSubmit={submitForm}>
             <div className="grid grid-cols-1 gap-4 p-6">
+              {/* Title Input */}
               <div className="mb-2">
-                <label htmlFor="title" className="w-full mb-2 block text-black dark:text-white">
-                  Title
-                </label>
+                <label htmlFor="title" className="w-full mb-2 block text-black dark:text-white">Title</label>
                 <InputText
                   id="title"
                   type="text"
@@ -170,52 +120,48 @@ const SingleProductPage = () => {
                 />
               </div>
 
+              {/* Price Input */}
               <div className="mb-2">
-                <label htmlFor="price" className="w-full mb-2 block text-black dark:text-white">
-                  Price
-                </label>
+                <label htmlFor="price" className="w-full mb-2 block text-black dark:text-white">Price</label>
                 <InputText
                   id="price"
                   type="number"
                   placeholder="Enter product price"
                   className="w-full"
                   value={price}
-                  onChange={(e) => setPrice(e.target.value)}
+                  onChange={(e) => setPrice(Number(e.target.value))} // Convert to number
                 />
               </div>
 
+              {/* Discount Input */}
               <div className="mb-2">
-                <label htmlFor="discount" className="w-full mb-2 block text-black dark:text-white">
-                  Discount
-                </label>
+                <label htmlFor="discount" className="w-full mb-2 block text-black dark:text-white">Discount</label>
                 <InputText
                   id="discount"
                   type="number"
                   placeholder="Enter discount percentage"
                   className="w-full"
                   value={discount}
-                  onChange={(e) => setDiscount(e.target.value)}
+                  onChange={(e) => setDiscount(Number(e.target.value))} // Convert to number
                 />
               </div>
 
+              {/* Quantity Input */}
               <div className="mb-2">
-                <label htmlFor="quantity" className="w-full mb-2 block text-black dark:text-white">
-                  Quantity
-                </label>
+                <label htmlFor="quantity" className="w-full mb-2 block text-black dark:text-white">Quantity</label>
                 <InputText
                   id="quantity"
                   type="number"
                   placeholder="Enter product quantity"
                   className="w-full"
                   value={quantity}
-                  onChange={(e) => setQuantity(e.target.value)}
+                  onChange={(e) => setQuantity(Number(e.target.value))} // Convert to number
                 />
               </div>
 
+              {/* Excerpt Input */}
               <div className="mb-2">
-                <label htmlFor="excerpt" className="w-full mb-2 block text-black dark:text-white">
-                  Excerpt
-                </label>
+                <label htmlFor="excerpt" className="w-full mb-2 block text-black dark:text-white">Excerpt</label>
                 <InputText
                   id="excerpt"
                   type="text"
@@ -226,20 +172,18 @@ const SingleProductPage = () => {
                 />
               </div>
 
+              {/* Description Editor */}
               <div className="mb-2">
-                <label htmlFor="description" className="w-full mb-2 block text-black dark:text-white">
-                  Description
-                </label>
+                <label htmlFor="description" className="w-full mb-2 block text-black dark:text-white">Description</label>
                 <CustomEditor
                   value={description}
-                  onTextChange={(e) => setDescription(e.htmlValue)}
+                  onTextChange={(e) => setDescription(e.htmlValue)} // Ensure e.htmlValue is used correctly
                 />
               </div>
 
+              {/* Image Upload */}
               <div className="mb-2">
-                <label htmlFor="image-upload" className="w-full mb-2 block text-black dark:text-white">
-                  Image
-                </label>
+                <label htmlFor="image-upload" className="w-full mb-2 block text-black dark:text-white">Image</label>
                 <MediaUpload
                   onChange={handleImageChange}
                   maxFiles={1}
@@ -248,6 +192,7 @@ const SingleProductPage = () => {
                 />
               </div>
 
+              {/* Submit Button */}
               <div className="pt-3 rounded-b-md sm:rounded-b-lg">
                 <div className="flex items-center justify-end">
                   <Button label="Save Changes" size="normal" className="text-base" pt={buttonsStyle} />
