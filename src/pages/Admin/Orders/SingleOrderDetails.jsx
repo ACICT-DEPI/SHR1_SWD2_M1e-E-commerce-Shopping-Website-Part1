@@ -1,185 +1,193 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { useDispatch, useSelector } from "react-redux";
-import { deleteOrder, editOrder } from "../../../redux/Action"; // Add markAsPaid action
-import "primereact/resources/themes/saga-blue/theme.css";
-import "primereact/resources/primereact.min.css";
-import "primeicons/primeicons.css";
-import ActionButton from "../../../components/Admin/Buttons/ActionButton";
-import { confirmPopup, ConfirmPopup } from "primereact/confirmpopup"; // Import confirmPopup and ConfirmPopup
-import GoBackButton from "../../../components/Admin/Buttons/GoBackButton"; // Ensure GoBackButton is imported
+import { useDispatch } from "react-redux";
+import { confirmPopup, ConfirmPopup } from "primereact/confirmpopup";
+import GoBackButton from "../../../components/Admin/Buttons/GoBackButton";
 import { dataTabelStyle } from "../../../layout/dataTabelStyle";
-import { useParams } from "react-router-dom";
-import EditButton from "../../../components/Admin/Buttons/EditButton";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import axios from "axios"; 
+import { Button } from "primereact/button"; // Button for delete action
+import { Toast } from "primereact/toast";
+
 
 const SingleOrderDetails = () => {
   const dispatch = useDispatch();
-  const { id } = useParams(); // Extract the order ID from the URL
-  const order = useSelector((state) =>
-    state.allOrders.find((order) => order.id === Number(id))
+  const { id } = useParams(); 
+  const navigate = useNavigate();
+  const [order, setOrder] = useState(null); 
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const toast = useRef(null);
+
+
+  useEffect(() => {
+    const fetchOrderDetails = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5000/api/v1/orders/${id}`, {
+          withCredentials: true,
+        });
+        setOrder(response.data.data);
+      } catch (err) {
+        setError("Failed to fetch order details.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrderDetails();
+  }, [id]);
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>{error}</div>;
+  if (!order) return <div>No order found for ID: {id}</div>;
+
+  // Status Template
+  const statusTemplate = (rowData) => (
+    <span
+      className={`text-sm font-semibold ${
+        rowData.status === "completed" ? "text-green-600" :
+        rowData.status === "pending" ? "text-yellow-500" :
+        "text-red-500"
+      }`}
+    >
+      {rowData.status.charAt(0).toUpperCase() + rowData.status.slice(1)}
+    </span>
   );
-  
-  if (!order) {
-    return <div>No order found for ID: {id}</div>;
-  }
-  // Table templates for product
+
+  // Product template with link to product update page
   const productBodyTemplate = (rowData) => (
     <div className="flex items-center">
       <img
-        src={rowData.thumbnail || "default-thumbnail.png"}
-        alt={rowData.title || "Product"}
+        src={rowData.product.gallery[0]?.url || "default-thumbnail.png"}
+        alt={rowData.product.title || "Product"}
         className="w-12 h-12 object-cover rounded mr-4"
       />
-      <span>{rowData.title || "Untitled Product"}</span>
+      <Link
+        to={`/admin/products/update/${rowData.product._id}`}
+        className="text-black dark:text-white font-semibold hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200"
+      >
+        {rowData.product.title || "Untitled Product"}
+      </Link>
     </div>
   );
 
   const quantityBodyTemplate = (rowData) => (
     <span>{rowData.quantity || 0}</span>
   );
+
   const priceBodyTemplate = (rowData) => (
-    <span>${(rowData.price || 0).toFixed(2)}</span>
+    <span>${(rowData.product.price || 0).toFixed(2)}</span>
   );
+
   const subtotalBodyTemplate = (rowData) => (
-    <span>${(rowData.total || 0).toFixed(2)}</span>
+    <span>${(rowData.subTotalPriceAfterDiscount || 0).toFixed(2)}</span>
   );
-
-  // Payment data for the DataTable
-  const paymentData = [
-    { key: "Subtotal", value: `$${(order.subtotal || 0).toFixed(2)}` },
-    { key: "Shipping", value: `$${(order.shippingCost || 0).toFixed(2)}` },
-    { key: "Total", value: `$${(order.total || 0).toFixed(2)}` },
-  ];
-
-  // Customer data for the DataTable
-  const customerData = [
-    { key: "Name", value: order.customer?.name || "N/A" },
-    { key: "Email", value: order.customer?.email || "N/A" },
-    { key: "Phone", value: order.customer?.phone || "N/A" },
-    {
-      key: "Address",
-      value: order.customer?.address || "N/A",
-    },
-  ];
-
-  const keyTemplate = (rowData) => (
-    <span className="font-semibold">{rowData.key}</span>
-  );
-  const valueTemplate = (rowData) => <span>{rowData.value}</span>;
-
-  // Handle edit action
-  const handleEdit = () => {
-    dispatch(editOrder(order));
-    alert("Edit initiated");
+  const handleDeleteProduct = async (id) => {
+    try {
+      console.log(`Attempting to delete product with ID: ${id}`); // Log the ID
+  
+      // Sending delete request to the backend
+      const response = await axios.delete(`http://localhost:5000/api/v1/products/${id}`, {
+        withCredentials: true, // Include credentials
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      // Check if the response indicates success
+      if (response.status === 200) {
+        console.log("Product deleted successfully."); // Success log
+  
+        // Show success toast notification
+        toast.current.show({
+          severity: "success",
+          summary: "Success",
+          detail: "Product deleted successfully",
+          life: 2000,
+        });
+  
+        // Reload the page or refresh the product list
+        setTimeout(() => {
+          window.location.reload(); // Option to refresh the page
+        }, 2000);
+      } else {
+        console.error('Failed to delete the Product'); // Log if deletion failed
+        throw new Error('Failed to delete the Product');
+      }
+    } catch (error) {
+      console.error("Error during deletion:", error.response || error.message); // Log the actual error
+  
+      // Show error toast notification
+      toast.current.show({
+        severity: "error",
+        summary: "Error",
+        detail: error.response?.data.message || 'An error occurred while deleting the Product.',
+        life: 2000,
+      });
+    }
   };
-
-  // Handle delete action
-  const handleDelete = () => {
-    console.log("Deleting order:", order.id); // Check order id
-    dispatch(deleteOrder(order.id));
-  };
-
-  // Handle confirm click for deletion
-  const handleConfirmClick = (event) => {
-    console.log("Confirm Clicked"); // Check if this logs when you click
+  
+  
+  const confirmDeleteProduct = (event, id) => {
     confirmPopup({
       target: event.currentTarget,
       message: "Are you sure you want to delete this order?",
       icon: "pi pi-exclamation-triangle",
-      accept: handleDelete,
-      reject: () => console.log("Action canceled"),
+      accept: () => handleDeleteProduct(id),
+      reject: () =>
+        toast.current.show({
+          severity: "warn",
+          summary: "Canceled",
+          detail: "Product deletion was canceled",
+          life: 2000,
+        }),
     });
   };
 
-  // Handle Mark as Paid
-  const handleMarkAsPaid = () => {
-    alert("Order marked as paid");
-  };
+  // Delete button template for each order item
+  const deleteButtonTemplate = (rowData) => (
+    <Button
+    icon="pi pi-trash"
+    rounded
+    outlined
+    severity="danger"
+    aria-label="Delete order"
+    onClick={(e) => confirmDeleteProduct(e, rowData.product_id)}
+    className="dark:border-red-600"
+  />
+  );
 
   return (
-    <div className="flex flex-col">
-      {/* Header with Back, Edit, Delete, and Mark as Paid Buttons */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex justify-between w-full">
-          {/* Go Back Button and Order Title */}
-          <div className="flex items-center">
-            <GoBackButton />
-            <h1 className="inline-block ml-4 text-3xl dark:text-white">
-              Order #{order.id}
-            </h1>
-          </div>
+    <div>
+      <Toast ref={toast} position="bottom-left" />
 
-          {/* Edit, Delete, and Mark as Paid Buttons next to the title */}
-          <div className="flex space-x-4">
-          <EditButton label={"Edit"} path={`/admin/orders/edit/${order.id}`} />
-          <ActionButton
-              type="delete"
-              label="Delete"
-              onClick={handleConfirmClick} // Trigger confirmPopup here
-            />
-            <button className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg">
-              Mark as Paid
-            </button>
-          </div>
-        </div>
+      <GoBackButton />
+      <h2 className="text-2xl font-bold mb-4">Order Details</h2>
+
+      <div className="mb-4">
+        <h3 className="text-xl">Customer Information</h3>
+        <p><strong>Name:</strong> {order.user.firstName} {order.user.lastName}</p>
+        <p><strong>Phone:</strong> {order.phone}</p>
+        <p><strong>Address:</strong> {order.shippingAddress1}, {order.shippingAddress2}, {order.city}, {order.zip}, {order.country}</p>
       </div>
 
-      {/* ConfirmPopup component */}
+      <div className="mb-4">
+        <h3 className="text-xl">Order Summary</h3>
+        <p><strong>Status:</strong> {statusTemplate(order)}</p> 
+        <p><strong>Total Price:</strong> ${order.totalPrice.toFixed(2)}</p>
+        <p><strong>Total Price After Discount:</strong> ${order.totalPriceAfterDiscount.toFixed(2)}</p>
+      </div>
+
+      <DataTable value={order.orderItems} style={dataTabelStyle}>
+        <Column field="product.title" header="Product" body={productBodyTemplate} />
+        <Column field="quantity" header="Quantity" body={quantityBodyTemplate} />
+        <Column field="product.price" header="Price" body={priceBodyTemplate} />
+        <Column field="subTotalPriceAfterDiscount" header="Subtotal" body={subtotalBodyTemplate} />
+        <Column body={deleteButtonTemplate} header="Actions" /> {/* Delete action column */}
+      </DataTable>
+
       <ConfirmPopup />
-
-      {/* Paid and Shipped Labels */}
-      <div className="flex space-x-2 mb-4">
-        <span className="bg-blue-100 text-blue-800 text-sm font-bold px-3 py-1 rounded-lg text-lg">
-          Paid
-        </span>
-        <span className="bg-green-100 text-green-800 text-sm font-bold px-3 py-1 rounded-lg text-lg">
-          Shipped
-        </span>
-      </div>
-
-      {/* DataTable for Products */}
-      <div className="mb-6">
-        <DataTable
-          value={order.products || []}
-          responsiveLayout="scroll"
-          className="mt-4"
-          pt={dataTabelStyle}
-        >
-          <Column field="product" header="Product" body={productBodyTemplate} />
-          <Column field="quantity" header="QTY" body={quantityBodyTemplate} />
-          <Column field="price" header="Price" body={priceBodyTemplate} />
-          <Column field="total" header="Subtotal" body={subtotalBodyTemplate} />
-        </DataTable>
-      </div>
-
-      {/* Payment Section as DataTable */}
-      <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg mb-6">
-        <h3 className="text-lg font-semibold mb-4">Payment</h3>
-        <DataTable
-          value={paymentData}
-          responsiveLayout="scroll"
-          className="mt-4"
-          pt={dataTabelStyle}
-        >
-          <Column field="key" header="Description" body={keyTemplate} />
-          <Column field="value" header="Amount" body={valueTemplate} />
-        </DataTable>
-      </div>
-
-      {/* Customer Section as DataTable */}
-      <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-        <h3 className="text-lg font-semibold mb-4">Customer</h3>
-        <DataTable
-          value={customerData}
-          responsiveLayout="scroll"
-          className="mt-4"
-          pt={dataTabelStyle}
-        >
-          <Column field="key" header="Details" body={keyTemplate} />
-          <Column field="value" header="Information" body={valueTemplate} />
-        </DataTable>
-      </div>
     </div>
   );
 };

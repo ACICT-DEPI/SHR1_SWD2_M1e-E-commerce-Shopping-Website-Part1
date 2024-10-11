@@ -86,7 +86,7 @@ const ProductDataTabel = () => {
         toast.current.show({
           severity: "success",
           summary: "Success",
-          detail: "Order deleted successfully",
+          detail: "Product deleted successfully",
           life: 2000,
         });
        
@@ -95,7 +95,7 @@ const ProductDataTabel = () => {
           window.location.reload();
      }, 2000)
       } else {
-        throw new Error('Failed to delete the order');
+        throw new Error('Failed to delete the Product');
       }
     } catch (error) {
       // Handle any errors that occur during the Axios request
