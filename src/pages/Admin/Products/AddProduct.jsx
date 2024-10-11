@@ -20,33 +20,34 @@ const AddProduct = () => {
   const [category, setCategory] = useState("");
   const [image, setImage] = useState(null);
   const [gallery, setGallery] = useState([]);
-  const [categories, setCategories] = useState([]); // State for categories
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // State for error messages
+  const [errors, setErrors] = useState({});
 
   const toast = useRef(null);
   const navigate = useNavigate();
 
-  // Fetch categories from API
   useEffect(() => {
     const fetchCategories = async () => {
+      setLoading(true);
       try {
-        const response = await axios.get("http://localhost:5000/api/v1/categories", {
+        const response = await axios.get('http://localhost:5000/api/v1/categories?limit=20', {
           withCredentials: true,
         });
-        // Update categories state based on the response structure
-        setCategories(response.data.data.categories); // Access categories directly
+        console.log("Response from categories:", response.data);
+        setCategories(response.data.data.categories);
       } catch (error) {
-        toast.current.show({
-          severity: "error",
-          summary: "Error",
-          detail: "Failed to fetch categories",
-          life: 3000,
-        });
+        console.error("Error fetching categories:", error);
+        showErrorToast(error.response?.data?.message || "Failed to fetch categories");
+      } finally {
+        setLoading(false);
       }
     };
     fetchCategories();
   }, []);
-
-  // Clean up image URL when unmounted
+  
   useEffect(() => {
     return () => {
       if (image) {
@@ -57,7 +58,6 @@ const AddProduct = () => {
 
   const handleImageChange = (file) => {
     setImage(file);
-    console.log("File selected:", file);
   };
 
   const handleGalleryChange = (files) => {
@@ -66,106 +66,95 @@ const AddProduct = () => {
 
   const submitForm = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setErrors({}); // Clear previous errors
+
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/v1/products", // Update the URL to your products API
-        {
-          title,
-          description,
-          excerpt,
-          price,
-          discount,
-          quantity,
-          category,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        }
+        "http://localhost:5000/api/v1/products",
+        { title, description, excerpt, price, discount, quantity, category },
+        { headers: { "Content-Type": "application/json" }, withCredentials: true }
       );
-  
+
       if (response.data.status === "success") {
         const productId = response.data.data._id;
-  
-        // Upload image if present
-        if (image) {
-          const formData = new FormData();
-          formData.append("image", image);
-  
-          const imageResponse = await axios.patch(
-            `http://localhost:5000/api/v1/products/product-photo-upload/${productId}`,
-            formData,
-            { withCredentials: true }
-          );
-  
-          if (imageResponse.data.status !== "success") {
-            throw new Error(imageResponse.data.message || "Image upload failed");
-          }
-        }
-  
-        // Upload gallery if present
-        if (gallery.length > 0) {
-          const galleryFormData = new FormData();
-          gallery.forEach((file) => galleryFormData.append("gallery", file));
-  
-          const galleryResponse = await axios.patch(
-            `http://localhost:5000/api/v1/products/product-gallery-upload/${productId}`,
-            galleryFormData,
-            { withCredentials: true }
-          );
-  
-          if (galleryResponse.data.status !== "success") {
-            throw new Error(galleryResponse.data.message || "Gallery upload failed");
-          }
-        }
-  
-        // Show success toast
-        toast.current.show({
-          severity: "success",
-          summary: "Success",
-          detail: "Product created successfully",
-          life: 3000, // Show toast for 3 seconds
-        });
-  
-        // Wait for the toast duration and then navigate
+        await uploadImage(productId);
+        await uploadGallery(productId);
+
+        showSuccessToast("Product created successfully");
         setTimeout(() => {
-          navigate(`/admin/products`); // Navigate to admin/products
+          navigate(`/admin/products`);
         }, 3000);
-      } else {
-        handleErrors(response.data);
-      }
+      } 
     } catch (error) {
-      toast.current.show({
-        severity: "error",
-        summary: "Error",
-        detail: error.response?.data.message || "An error occurred",
-        life: 3000,
-      });
+      const data = error.response?.data || {};
+      showErrorToast("Failed to fetch categories");
+      setErrors((prev) => ({
+        ...prev,
+        title: data.errors?.title?.message || "",
+        description: data.description?.category?.message || "",
+        excerpt: data.errors?.excerpt?.message || "",
+        price: data.errors?.price?.message || "",
+        discount: data.errors?.discount?.message || "",
+        quantity: data.errors?.quantity?.message || "",
+        category: data.errors?.category?.message || "",
+      }));
+      showErrorToast(error.response?.data.message || "An error occurred");
+    } finally {
+      setLoading(false);
     }
   };
-  
 
-  const handleErrors = (data) => {
-    const errorMessage = data.message || "An error occurred";
-    const errorDetails = data.errors || {};
+  const uploadImage = async (productId) => {
+    if (image) {
+      const formData = new FormData();
+      formData.append("image", image);
 
+      const imageResponse = await axios.patch(
+        `http://localhost:5000/api/v1/products/product-photo-upload/${productId}`,
+        formData,
+        { withCredentials: true }
+      );
+
+      if (imageResponse.data.status !== "success") {
+        throw new Error(imageResponse.data.message || "Image upload failed");
+      }
+    }
+  };
+
+  const uploadGallery = async (productId) => {
+    if (gallery.length > 0) {
+      const galleryFormData = new FormData();
+      gallery.forEach((file) => galleryFormData.append("gallery", file));
+
+      const galleryResponse = await axios.patch(
+        `http://localhost:5000/api/v1/products/product-gallery-upload/${productId}`,
+        galleryFormData,
+        { withCredentials: true }
+      );
+
+      if (galleryResponse.data.status !== "success") {
+        throw new Error(galleryResponse.data.message || "Gallery upload failed");
+      }
+    }
+  };
+
+  const showSuccessToast = (message) => {
+    toast.current.show({
+      severity: "success",
+      summary: "Success",
+      detail: message,
+      life: 3000,
+    });
+  };
+
+  const showErrorToast = (message) => {
     toast.current.show({
       severity: "error",
       summary: "Error",
-      detail: errorMessage,
+      detail: message,
       life: 3000,
     });
-
-    if (errorDetails.title) {
-      toast.current.show({
-        severity: "error",
-        summary: "Error",
-        detail: `Title error: ${errorDetails.title.message}`,
-        life: 3000,
-      });
-    }
   };
 
   return (
@@ -173,9 +162,7 @@ const AddProduct = () => {
       <div className="flex flex-nowrap justify-between mb-5">
         <div>
           <GoBackButton />
-          <h1 className="inline-block ml-4 text-3xl dark:text-white">
-            Add Product
-          </h1>
+          <h1 className="inline-block ml-4 text-3xl dark:text-white">Add Product</h1>
         </div>
       </div>
 
@@ -183,154 +170,154 @@ const AddProduct = () => {
         <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
           <form onSubmit={submitForm}>
             <div className="grid grid-cols-1 gap-4 p-6">
+              {/* Title Field */}
               <div className="mb-2">
-                <label
-                  htmlFor="title"
-                  className="w-full mb-2 block text-black dark:text-white"
-                >
+                <label htmlFor="title" className="w-full mb-2 block text-black dark:text-white">
                   Title
                 </label>
                 <InputText
                   id="title"
                   type="text"
                   placeholder="Enter product name"
-                  className="w-full"
+                  className={`w-full ${errors.title ? 'border-red-500' : ''}`}
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   pt={inputTextStyle}
                   unstyled={true}
                 />
+                {errors.title && <small className="p-error">{errors.title}</small>}
               </div>
 
+              {/* Description Field */}
               <div className="mb-2">
-                <label
-                  htmlFor="description"
-                  className="w-full mb-2 block text-black dark:text-white"
-                >
+                <label htmlFor="description" className="w-full mb-2 block text-black dark:text-white">
                   Description
                 </label>
                 <CustomEditor
                   value={description}
                   onTextChange={(e) => setDescription(e.htmlValue)}
                 />
+                {errors.description && <small className="p-error">{errors.description}</small>}
               </div>
 
+              {/* Excerpt Field */}
               <div className="mb-2">
-                <label
-                  htmlFor="excerpt"
-                  className="w-full mb-2 block text-black dark:text-white"
-                >
+                <label htmlFor="excerpt" className="w-full mb-2 block text-black dark:text-white">
                   Excerpt
                 </label>
                 <InputText
                   id="excerpt"
                   type="text"
                   placeholder="Enter product excerpt"
-                  className="w-full"
+                  className={`w-full ${errors.excerpt ? 'border-red-500' : ''}`}
                   value={excerpt}
                   onChange={(e) => setExcerpt(e.target.value)}
                   pt={inputTextStyle}
                   unstyled={true}
                 />
+                {errors.excerpt && <small className="p-error">{errors.excerpt}</small>}
               </div>
 
+              {/* Price, Discount and Quantity Fields on the same line */}
+              <div className="mb-2 grid grid-cols-3 gap-4">
+                {/* Price Field */}
+                <div>
+                  <label htmlFor="price" className="w-full mb-2 block text-black dark:text-white">
+                    Price ($)
+                  </label>
+                  <InputText
+                    id="price"
+                    type="number"
+                    placeholder="Enter product price"
+                    min={1}
+                    max={100}
+                    className={`w-full ${errors.price ? 'border-red-500' : ''}`}
+                    onChange={(e) => setPrice(e.target.value)}
+                    pt={inputTextStyle}
+                    unstyled={true}
+                  />
+                  {errors.price && <small className="p-error">{errors.price}</small>}
+                </div>
+
+                {/* Discount Field */}
+                <div>
+                  <label htmlFor="discount" className="w-full mb-2 block text-black dark:text-white">
+                    Discount (%)
+                  </label>
+                  <InputText
+                    id="discount"
+                    type="number"
+                    placeholder="Enter discount percentage"
+                    min={1}
+                    max={100}
+                    className={`w-full ${errors.discount ? 'border-red-500' : ''}`}
+                    onChange={(e) => setDiscount(e.target.value)}
+                    pt={inputTextStyle}
+                    unstyled={true}
+                  />
+                  {errors.discount && <small className="p-error">{errors.discount}</small>}
+                </div>
+
+                {/* Quantity Field */}
+                <div>
+                  <label htmlFor="quantity" className="w-full mb-2 block text-black dark:text-white">
+                    Quantity
+                  </label>
+                  <InputText
+                    id="quantity"
+                    type="number"
+                    placeholder="Enter product quantity"
+                    min={1}
+                    max={100}
+                    className={`w-full ${errors.quantity ? 'border-red-500' : ''}`}
+                    onChange={(e) => setQuantity(e.target.value)}
+                    pt={inputTextStyle}
+                    unstyled={true}
+                  />
+                  {errors.quantity && <small className="p-error">{errors.quantity}</small>}
+                </div>
+              </div>
+
+              {/* Category Selection */}
               <div className="mb-2">
-                <label
-                  htmlFor="price"
-                  className="w-full mb-2 block text-black dark:text-white"
-                >
-                  Price
+                <label htmlFor="category" className="w-full mb-2 block text-black dark:text-white">
+                  Category
                 </label>
-                <InputText
-                  id="price"
-                  type="number"
-                  placeholder="Enter product price"
-                  className="w-full"
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                  pt={inputTextStyle}
-                  unstyled={true}
-                />
-              </div>
-
-              <div className="mb-2">
-                <label
-                  htmlFor="discount"
-                  className="w-full mb-2 block text-black dark:text-white"
+                <select
+                  id="category"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className={`w-full ${errors.category ? 'border-red-500' : ''}`}
                 >
-                  Discount
-                </label>
-                <InputText
-                  id="discount"
-                  type="number"
-                  placeholder="Enter discount percentage"
-                  className="w-full"
-                  value={discount}
-                  onChange={(e) => setDiscount(e.target.value)}
-                  pt={inputTextStyle}
-                  unstyled={true}
-                />
+                  <option value="">Select category</option>
+                  {categories.map((cat) => (
+                    <option key={cat._id} value={cat._id}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+                {errors.category && <small className="p-error">{errors.category}</small>}
               </div>
 
+              {/* Image Upload */}
               <div className="mb-2">
-                <label
-                  htmlFor="quantity"
-                  className="w-full mb-2 block text-black dark:text-white"
-                >
-                  Quantity
-                </label>
-                <InputText
-                  id="quantity"
-                  type="number"
-                  placeholder="Enter product quantity"
-                  className="w-full"
-                  value={quantity}
-                  onChange={(e) => setQuantity(e.target.value)}
-                  pt={inputTextStyle}
-                  unstyled={true}
-                />
+                <MediaUpload onImageChange={handleImageChange} />
               </div>
 
+              {/* Gallery Upload */}
               <div className="mb-2">
-  <label
-    htmlFor="category"
-    className="w-full mb-2 block text-black dark:text-white"
-  >
-    Category
-  </label>
-  <select
-    id="category"
-    className={`w-full p-2 border rounded ${
-      category ? 'bg-white dark:bg-gray-800 text-black dark:text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-    } border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400`}
-    value={category}
-    onChange={(e) => setCategory(e.target.value)}
-  >
-    <option value="" disabled>Select a category</option>
-    {categories.map((cat) => (
-      <option key={cat._id} value={cat._id}>
-        {cat.title}
-      </option>
-    ))}
-  </select>
-</div>
+                <label className="w-full mb-2 block text-black dark:text-white">Gallery</label>
+                <MediaUpload onGalleryChange={handleGalleryChange} multiple />
+              </div>
 
-
-              <MediaUpload
-                onImageChange={handleImageChange}
-                onGalleryChange={handleGalleryChange}
-              />
-
-              <Button
-                type="submit"
-                label="Add Product"
-                className={`w-full mt-4 ${buttonsStyle}`}
-              />
+              {/* Submit Button */}
+              <Button label="Add Product" type="submit" loading={loading} className={buttonsStyle} />
             </div>
           </form>
         </div>
       </div>
-      <Toast ref={toast} />
+
+      <Toast ref={toast} position="bottom-left" />
     </Fragment>
   );
 };
