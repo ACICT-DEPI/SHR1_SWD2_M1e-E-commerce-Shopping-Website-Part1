@@ -41,7 +41,7 @@ const AdminPage = () => {
         <Route path="orders/edit/:id" element={<EditOrderForm />} />
         <Route path="/orders/:id" element={<SingleOrderDetails />} />
         <Route path="customers" element={<Customers />} />
-        <Route path="customers/:name" element={<SingleCustomerDetails />} />
+        <Route path="customers/:id" element={<SingleCustomerDetails />} />
         <Route path="customers/edit/:name" element={<EditCustomerForm />} />
         <Route path="reviews" element={<Reviews />} />
         <Route path="collections" element={<Collections />} />

@@ -9,7 +9,6 @@ import { Toast } from "primereact/toast";
 import MediaUpload from "../../../components/Admin/MediaUpload/MediaUpload";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import ActionButton from "../../../components/Admin/Buttons/ActionButton";
 
 const SingleProductPage = () => {
   const { id } = useParams();
@@ -61,6 +60,7 @@ const SingleProductPage = () => {
     setExistingImage(URL.createObjectURL(file));
   };
 
+
   // Submit form to update product data
   const submitForm = async (e) => {
     e.preventDefault();
@@ -105,6 +105,10 @@ const SingleProductPage = () => {
 };
 
 
+
+
+
+
   return (
     <Fragment>
       <div className="flex flex-nowrap justify-between mb-5">
@@ -125,7 +129,7 @@ const SingleProductPage = () => {
                   id="title"
                   type="text"
                   placeholder="Enter product title"
-                  className="w-full"
+                  className={`w-full ${errors.title ? 'border-red-500' : ''}`}
                   pt={inputTextStyle}
                   unstyled={true}
                   value={title}
@@ -135,49 +139,66 @@ const SingleProductPage = () => {
 
               </div>
 
-              {/* Price Input */}
-              <div className="mb-2">
-                <label htmlFor="price" className="w-full mb-2 block text-black dark:text-white">Price</label>
-                <InputText
-                  id="price"
-                  type="number"
-                  placeholder="Enter product price"
-                  className="w-full"
-                  value={price}
-                  onChange={(e) => setPrice(Number(e.target.value))} // Convert to number
-                />
-              {errors.price && <small className="p-error">{errors.price}</small>}
+ {/* Price, Discount and Quantity Fields on the same line */}
+ <div className="mb-2 grid grid-cols-3 gap-4">
+                {/* Price Field */}
+                <div>
+                  <label htmlFor="price" className="w-full mb-2 block text-black dark:text-white">
+                    Price ($)
+                  </label>
+                  <InputText
+                    id="price"
+                    type="number"
+                    value={price}
+                    placeholder="Enter product price"
+                    
+                    className={`w-full ${errors.price ? 'border-red-500' : ''}`}
+                    onChange={(e) => setPrice(e.target.value)}
+                    pt={inputTextStyle}
+                    unstyled={true}
+                  />
+                  {errors.price && <small className="p-error">{errors.price}</small>}
+                </div>
 
-              </div>
+                {/* Discount Field */}
+                <div>
+                  <label htmlFor="discount" className="w-full mb-2 block text-black dark:text-white">
+                    Discount (%)
+                  </label>
+                  <InputText
+                    id="discount"
+                    type="number"
+                    value={discount}
+                    placeholder="Enter discount percentage"
+                    min={0}
+                    max={100}
+                    className={`w-full ${errors.discount ? 'border-red-500' : ''}`}
+                    onChange={(e) => setDiscount(e.target.value)}
+                    pt={inputTextStyle}
+                    unstyled={true}
+                  />
+                  {errors.discount && <small className="p-error">{errors.discount}</small>}
+                </div>
 
-              {/* Discount Input */}
-              <div className="mb-2">
-                <label htmlFor="discount" className="w-full mb-2 block text-black dark:text-white">Discount</label>
-                <InputText
-                  id="discount"
-                  type="number"
-                  placeholder="Enter discount percentage"
-                  className="w-full"
-                  value={discount}
-                  onChange={(e) => setDiscount(Number(e.target.value))} // Convert to number
-                />
-               {errors.discount && <small className="p-error">{errors.discount}</small>}
-
-              </div>
-
-              {/* Quantity Input */}
-              <div className="mb-2">
-                <label htmlFor="quantity" className="w-full mb-2 block text-black dark:text-white">Quantity</label>
-                <InputText
-                  id="quantity"
-                  type="number"
-                  placeholder="Enter product quantity"
-                  className="w-full"
-                  value={quantity}
-                  onChange={(e) => setQuantity(Number(e.target.value))} // Convert to number
-                />
-              {errors.quantity && <small className="p-error">{errors.quantity}</small>}
-
+                {/* Quantity Field */}
+                <div>
+                  <label htmlFor="quantity" className="w-full mb-2 block text-black dark:text-white">
+                    Quantity
+                  </label>
+                  <InputText
+                    id="quantity"
+                    type="number"
+                    value={quantity}
+                    placeholder="Enter product quantity"
+                    min={1}
+                    max={100}
+                    className={`w-full ${errors.quantity ? 'border-red-500' : ''}`}
+                    onChange={(e) => setQuantity(e.target.value)}
+                    pt={inputTextStyle}
+                    unstyled={true}
+                  />
+                  {errors.quantity && <small className="p-error">{errors.quantity}</small>}
+                </div>
               </div>
 
               {/* Excerpt Input */}
@@ -187,7 +208,7 @@ const SingleProductPage = () => {
                   id="excerpt"
                   type="text"
                   placeholder="Enter product excerpt"
-                  className="w-full"
+                  className={`w-full ${errors.excerpt ? 'border-red-500' : ''}`}
                   value={excerpt}
                   onChange={(e) => setExcerpt(e.target.value)}
                 />
@@ -197,7 +218,7 @@ const SingleProductPage = () => {
 
               {/* Description Editor */}
               <div className="mb-2">
-                <label htmlFor="description" className="w-full mb-2 block text-black dark:text-white">Description</label>
+                <label htmlFor="description" className={`w-full mb-2 block text-black dark:text-white ${errors.category ? 'border-red-500' : ''}`}>Description</label>
                 <CustomEditor
                   value={description}
                   onTextChange={(e) => setDescription(e.htmlValue)} // Ensure e.htmlValue is used correctly
@@ -220,10 +241,6 @@ const SingleProductPage = () => {
               {/* Submit Button */}
               <div className="pt-3 rounded-b-md sm:rounded-b-lg">
                 <div className="flex items-center justify-end">
-                <ActionButton 
-            type="delete" 
-            label="Delete" 
-          />
                   <Button label="Save Changes" size="normal" className="text-base" pt={buttonsStyle} />
                 </div>
               </div>

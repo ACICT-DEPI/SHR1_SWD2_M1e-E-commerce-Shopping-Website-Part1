@@ -1,5 +1,6 @@
 import React, { Fragment, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios"; // Import axios
 import "primeicons/primeicons.css";
 import { FilterMatchMode } from "primereact/api";
 import { DataTable } from "primereact/datatable";
@@ -10,32 +11,46 @@ import { InputIcon } from "primereact/inputicon";
 import { dataTabelStyle } from "../../../layout/dataTabelStyle";
 import { inputTextStyle } from "../../../layout/inputTextStyle";
 import { Button } from "primereact/button";
-import SingleCustomerDetails from "./SingleCustomerDetails";
 import { ConfirmPopup, confirmPopup } from 'primereact/confirmpopup'; 
 
 export const Customers = () => {
-  const customers = [
-    {
-      id: 1, // Added an id for each customer for better handling
-      customer: {
-        name: "John Doe",
-        email: "john@example.com",
-        phone: "123-456-7890",
-        address: "123 Main St, Cityville, ST 12345",
-        image: "path_to_image/john_doe.jpg", // Placeholder for an image
-        orders: "3"
-      }
-    },
-    // ... other customers
-  ];
-
+  const [customers, setCustomers] = useState([]); // State for customers
   const [filter, setFilter] = useState({
     "customer.name": { value: null, matchMode: FilterMatchMode.STARTS_WITH },
   });
   const [globalFilterValue, setGlobalFilterValue] = useState("");
-  const [selectedCustomer, setSelectedCustomer] = useState(null);
-  const [showCustomerDetails, setShowCustomerDetails] = useState(false);
   const navigate = useNavigate(); // Use navigate from react-router-dom
+
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/v1/admins', {
+          withCredentials: true,
+        });
+        if (response.data.status === "success") {
+          // Filter out admin users and map response data
+          const allUsers = response.data.data.allUsers
+            .filter(user => !user.isAdmin) // Filter out admin users
+            .map(user => ({
+              id: user._id,
+              customer: {
+                name: `${user.firstName} ${user.lastName}`,
+                email: user.email,
+                phone: user.phone,
+                address: user.address || "N/A", // Adjust based on your data
+                image: user.avatar.url,
+                orders: "0" // Placeholder; update as needed
+              }
+            }));
+          setCustomers(allUsers);
+        }
+      } catch (error) {
+        console.error("Error fetching customer data:", error);
+      }
+    };
+
+    fetchCustomers(); // Fetch customers when component mounts
+  }, []); // Empty dependency array means this runs once on mount
 
   const onGlobalFilterChange = (e) => {
     const value = e.target.value;
@@ -46,27 +61,13 @@ export const Customers = () => {
     setGlobalFilterValue(value);
   };
 
-  const handleCustomerClick = (customer) => {
-    navigate(`/admin/customers/${customer.customer.name}`); // Navigate to the customer details page
-  };
-
-  const handleDeleteCustomer = (id) => {
-    console.log("deleted");
-  };
-
-  const handleEditCustomer = (customer) => {
-    navigate(`/admin/customers/edit/${customer.customer.name}`); // Navigate to the customer details page
-  };
-
-  const confirmDeleteCustomer = (event, id) => {
-    confirmPopup({
-      target: event.currentTarget,
-      message: "Are you sure you want to delete this order?",
-      icon: 'pi pi-exclamation-triangle',
-      accept: () => handleDeleteCustomer(id),
-      reject: () => console.log("Action canceled"),
-    });
-  };
+  // Update paginator content
+  useEffect(() => {
+    document.querySelector(".nextPageButton").innerHTML =
+      "Next <i class='pi pi-angle-double-right ml-1'></i>";
+    document.querySelector(".prevPageButton").innerHTML =
+      " <i class='pi pi-angle-double-left mr-1'></i> Previous";
+  }, []);
 
   const header = () => {
     return (
@@ -85,20 +86,7 @@ export const Customers = () => {
     );
   };
 
-  const actionBodyTemplate = (rowData) => {
-    return (
-      <React.Fragment>
-        <Button icon="pi pi-pencil" rounded outlined className="mr-2" onClick={() => handleEditCustomer(rowData)} />
-        <Button icon="pi pi-trash" rounded outlined severity="danger" 
-        onClick={(e) => confirmDeleteCustomer(e, rowData.id)} 
-        />
-      </React.Fragment>
-    );
-  };
-
-  const totalBodyTemplate = (rowData) => {
-    return `$${rowData.total}`; // Ensure `total` is a valid field in your data
-  };
+ 
 
   const customerTemplate = (rowData) => {
     return (
@@ -109,11 +97,7 @@ export const Customers = () => {
           className="w-10 h-10 rounded-full border-2 border-gray-300 dark:border-gray-600"
         />
         <Link
-          to={`/admin/customers/${rowData.customer.name}`} // This can still be used for styling
-          onClick={(e) => {
-            e.preventDefault();
-            handleCustomerClick(rowData); // Navigate on click
-          }}
+          to={`/admin/customers/${rowData.id}`} // Link to single customer details
           className="text-black dark:text-white font-semibold hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200"
         >
           {rowData.customer.name}
@@ -121,13 +105,6 @@ export const Customers = () => {
       </div>
     );
   };
-
-  useEffect(() => {
-    document.querySelector(".nextPageButton").innerHTML =
-      "Next <i class='pi pi-angle-double-right ml-1'></i>";
-    document.querySelector(".prevPageButton").innerHTML =
-      "<i class='pi pi-angle-double-left mr-1'></i> Previous";
-  }, []);
 
   return (
     <div>
@@ -152,9 +129,7 @@ export const Customers = () => {
             pt={dataTabelStyle}
           >
             <Column field="customer" header="Customer" body={customerTemplate} />
-            <Column field="customer.orders" header="Orders" style={{ minWidth: "12rem" }} />
-            <Column field="total" header="Amount spent" body={totalBodyTemplate} />
-            <Column body={actionBodyTemplate} header="Actions" style={{ minWidth: "12rem" }} />
+            <Column field="orders" header="Orders" />
           </DataTable>
         </div>
       </Fragment>

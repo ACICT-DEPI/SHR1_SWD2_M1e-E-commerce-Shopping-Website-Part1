@@ -1,5 +1,5 @@
-import React, { Fragment, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import React, { Fragment, useEffect, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios"; // استيراد axios
 
 // import prime react icon and components
@@ -10,15 +10,19 @@ import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
 import { IconField } from "primereact/iconfield";
 import { InputIcon } from "primereact/inputicon";
+import { Toast } from "primereact/toast";
+import { ConfirmPopup, confirmPopup } from "primereact/confirmpopup";
 
 // import Custome style
 import { dataTabelStyle } from "../../../layout/dataTabelStyle";
 import { inputTextStyle } from "../../../layout/inputTextStyle";
+import { Button } from "primereact/button";
 
 const CollectionsDataTabel = () => {
-  //  تخزين البيانات التي يتم جلبها من الـ API
   const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true); // حالة التحميل
+  const [loading, setLoading] = useState(true); 
+  const navigate = useNavigate(); 
+  const toast = useRef(null);
 
   // for filtering data on table
   const [filter, setFilter] = useState({
@@ -26,25 +30,73 @@ const CollectionsDataTabel = () => {
   });
   const [globalFilterValue, setGlobalFilterValue] = useState("");
 
-  // جلب البيانات من الـ API عند تحميل المكون
-  useEffect(() => {
-    const fetchCategories = async () => {
-      setLoading(true);
-      try {
-        const response = await axios.get(
-          "http://localhost:5000/api/v1/categories"
-        );
-        const fetchedCategories = response.data.data.categories; // جلب الفئات
-        setCategories(fetchedCategories); // تعيين الفئات في الحالة
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Function to fetch categories data
+  const fetchCategories = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get("http://localhost:5000/api/v1/categories");
+      const fetchedCategories = response.data.data.categories;
+      setCategories(fetchedCategories); 
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchCategories(); // استدعاء الدالة لجلب البيانات
-  }, []); // سيتم جلب البيانات مرة واحدة عند تحميل المكون
+  // Call fetchCategories on component load
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const handleDeleteCollection = async (id) => {
+    try {
+      const response = await axios.delete(`http://localhost:5000/api/v1/categories/${id}`, {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json', 
+        },
+      });
+
+      if (response.status === 200) {
+        toast.current.show({
+          severity: "success",
+          summary: "Success",
+          detail: "Collection deleted successfully",
+          life: 2000,
+        });
+
+        // Fetch the updated categories after deletion
+        fetchCategories();
+
+      } else {
+        throw new Error('Failed to delete the Collection');
+      }
+    } catch (error) {
+      toast.current.show({
+        severity: "error",
+        summary: "Error",
+        detail: error.message || 'An error occurred while deleting the Collection.',
+        life: 2000,
+      });
+    }
+  };
+
+  const confirmDeleteCollection = (event, id) => {
+    confirmPopup({
+      target: event.currentTarget,
+      message: "Are you sure you want to delete this Collection?",
+      icon: "pi pi-exclamation-triangle",
+      accept: () => handleDeleteCollection(id),
+      reject: () =>
+        toast.current.show({
+          severity: "warn",
+          summary: "Canceled",
+          detail: "Collection deletion was canceled",
+          life: 2000,
+        }),
+    });
+  };
 
   const onGlobalFilterChange = (e) => {
     const value = e.target.value;
@@ -82,14 +134,35 @@ const CollectionsDataTabel = () => {
       " <i class='pi pi-angle-double-left mr-1'></i> Previous";
   }, []);
 
-  // body template for the first row
+  const actionBodyTemplate = (rowData) => (
+    <>
+      <Button
+        icon="pi pi-pencil"
+        rounded
+        outlined
+        className="mr-2 dark:border-gray-400"
+        aria-label="Edit order"
+        onClick={() => navigate(`/admin/collections/${rowData._id}`)}
+      />
+      <Button
+        icon="pi pi-trash"
+        rounded
+        outlined
+        severity="danger"
+        aria-label="Delete order"
+        onClick={(e) => confirmDeleteCollection(e, rowData._id)}
+        className="dark:border-red-600"
+      />
+    </>
+  );
+
   const cllectionBodyTemplate = (rowData) => {
     return (
       <Fragment>
         <img
           src={`${rowData.image.url}`}
           alt={rowData.title}
-          className="h-12.5 w-15 rounded-md	inline-block	mr-5"
+          className="h-12.5 w-15 rounded-md inline-block mr-5"
           style={{ width: "64px" }}
         />
         <Link
@@ -104,6 +177,8 @@ const CollectionsDataTabel = () => {
 
   return (
     <div>
+      <Toast ref={toast} position="bottom-left" />
+
       <DataTable
         value={categories}
         rows={5}
@@ -118,7 +193,7 @@ const CollectionsDataTabel = () => {
         currentPageReportTemplate=" Showing {first} to {last} of {totalRecords} results"
         className="custom-paginator"
         pt={dataTabelStyle}
-        loading={loading} // إظهار حالة التحميل
+        loading={loading}
       >
         <Column
           field="title"
@@ -141,7 +216,13 @@ const CollectionsDataTabel = () => {
             />
           )}
         />
+        <Column
+          body={actionBodyTemplate}
+          header="Actions"
+          style={{ minWidth: "12rem" }}
+        />
       </DataTable>
+      <ConfirmPopup />
     </div>
   );
 };

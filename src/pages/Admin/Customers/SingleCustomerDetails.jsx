@@ -10,35 +10,40 @@ import { dataTabelStyle } from "../../../layout/dataTabelStyle";
 import { useParams } from 'react-router-dom'; // Import useParams to get URL parameters
 import GoBackButton from "../../../components/Admin/Buttons/GoBackButton";
 import EditButton from "../../../components/Admin/Buttons/EditButton";
+import axios from "axios"; // Import axios for API calls
 
 const SingleCustomerDetails = () => {
-  const { name } = useParams(); // Get the customer name from the URL
+  const { id } = useParams(); // Get the customer ID from the URL
   const [customer, setCustomer] = useState(null);
 
   useEffect(() => {
-    // Fetch customer data based on the name
+    // Fetch customer data based on the ID
     const fetchCustomerData = async () => {
-      // Simulate fetching data (replace this with actual fetch logic)
-      const customerData = {
-        customer: {
-          name: "John Doe",
-          email: "john@example.com",
-          phone: "123-456-7890",
-          address: "123 Main St, Cityville, ST 12345",
-          image: "path_to_image/john_doe.jpg", // Placeholder for an image
-        },
-        orders: [
-          { orderId: "001", status: "Completed", total: 20.5 },
-          { orderId: "002", status: "Pending", total: 15.0 },
-        ]
-      };
+      try {
+        const response = await axios.get(`http://localhost:5000/api/v1/admins/${id}`, {
+          withCredentials: true,
+        });
 
-      // This would typically be an API call
-      setCustomer(customerData);
+        if (response.data.status === "success") {
+          const customerData = {
+            customer: {
+              name: `${response.data.data.firstName} ${response.data.data.lastName}`,
+              email: response.data.data.email,
+              phone: response.data.data.phone,
+              address: response.data.data.address || "N/A", // Assuming address can be present in your data
+              image: response.data.data.avatar.url,
+            },
+            orders: [], // You might need to fetch orders separately if available
+          };
+          setCustomer(customerData);
+        }
+      } catch (error) {
+        console.error("Error fetching customer data:", error);
+      }
     };
 
     fetchCustomerData();
-  }, [name]); // Fetch data when the name changes
+  }, [id]); // Fetch data when the id changes
 
   if (!customer) {
     return <div className="text-center text-red-500">No customer details available.</div>;
@@ -57,7 +62,6 @@ const SingleCustomerDetails = () => {
   const handleDelete = () => {
     console.log("Deleting customer:", customer.customer.name);
     // Logic to delete the customer goes here
-    
   };
 
   const handleConfirmClick = (event) => {
@@ -75,18 +79,10 @@ const SingleCustomerDetails = () => {
       <div className="flex items-center justify-between mb-6">
         {/* Go Back Button and Order Title */}
         <div className="flex items-center">
-            <GoBackButton />
-            <h1 className="inline-block ml-4 text-3xl dark:text-white">
-              {customer.customer.name}
-            </h1>
-          </div>
-        <div className="flex space-x-4">
-        <EditButton label={"Edit"} path={`/admin/customers/edit/${customer.customer.name}`} />
-        <ActionButton 
-            type="delete" 
-            label="Delete" 
-            onClick={handleConfirmClick} 
-          />
+          <GoBackButton />
+          <h1 className="inline-block ml-4 text-3xl dark:text-white">
+            {customer.customer.name}
+          </h1>
         </div>
       </div>
 
@@ -97,6 +93,7 @@ const SingleCustomerDetails = () => {
         <p><strong>Email:</strong> {customer.customer.email}</p>
         <p><strong>Phone:</strong> {customer.customer.phone}</p>
         <p><strong>Address:</strong> {customer.customer.address}</p>
+        <img src={customer.customer.image} alt={customer.customer.name} className="w-24 h-24 rounded-full mt-4" />
       </div>
 
       <div className="mb-6">
