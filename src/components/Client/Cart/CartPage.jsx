@@ -1,9 +1,10 @@
+
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "primereact/button";
 import { FaChevronRight } from "react-icons/fa";
 import axios from "axios";
-import ProductPrice from '../../../components/Client/ProductDetails/ProductPrice';
+import ProductPrice from '../ProductDetails/ProductPrice';
 
 const CartPage = ({ productId }) => {
   const [cartProducts, setCartProducts] = useState([]);
@@ -105,7 +106,7 @@ const CartPage = ({ productId }) => {
         </p>
         <p>Shipping and taxes will be calculated at checkout.</p>
 
-        <Link to="/checkout">
+        <Link to="/ChackOut">
           <Button label="Checkout" className="p-button-warning w-full mt-4 text-lg dark:text-white" />
         </Link>
 
@@ -114,7 +115,7 @@ const CartPage = ({ productId }) => {
         </div>
 
         <Link
-          to="/shop"
+          to="/"
           className="flex items-center text-blue-500 hover:underline text-xl w-full justify-center dark:text-white"
         >
           Continue Shopping
@@ -126,4 +127,3 @@ const CartPage = ({ productId }) => {
 };
 
 export default CartPage;
-

@@ -108,3 +108,9 @@ const SearchComponent = ({ onClose }) => {
 };
 
 export default SearchComponent;
+
+
+
+
+
+

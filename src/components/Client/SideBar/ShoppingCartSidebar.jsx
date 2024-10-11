@@ -114,7 +114,7 @@ const ShoppingCartSidebar = ({ isSidebarOpen, setSidebarOpen, productId }) => {
         </p>
         <p>Shipping and taxes will be calculated at checkout.</p>
 
-        <Link to="/checkout">
+        <Link to="/ChackOut">
           <Button label="Checkout" className="p-button-warning w-full mt-4 text-lg dark:text-white" />
         </Link>
 
