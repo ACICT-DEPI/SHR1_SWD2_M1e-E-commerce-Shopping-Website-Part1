@@ -15,8 +15,7 @@ import UnauthorizedPage from "../pages/Client/UnauthorizedPage";
 import ExpiredOrInvalidTokenPage from "../pages/Client/ExpiredOrInvalidTokenPage";
 import TokenValidation from "../pages/Client/TokenValidation";
 import UserLayout from "../layout/UserLayout";
-import Cart from "../components/Client/Cart";
-import Checkout from "../components/Client/Checkout";
+
 function UserRoutes() {
   return (
     <UserLayout>
@@ -34,8 +33,6 @@ function UserRoutes() {
           element={<ResetPassword />}
         />
         <Route path="/profile/:fullname" element={<ProfilePage />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/checkout" element={<Checkout />} />
         <Route path="/product/:id" element={<ProductDetails />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/collections" element={<AllCollectionsPage />} />
