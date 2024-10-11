@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
 const ImageSlider = () => {
@@ -69,12 +69,12 @@ const ImageSlider = () => {
           <div className="slide-content">
             <h1   className='text-3xl font-bold tracking-tight text-white sm:text-4xl'>{slide.title}</h1>
             <h2>{slide.description}</h2>
-            <a
-              href="/collections"
-              className="mb-20 block w-full rounded-md border border-transparent bg-white px-8 py-3 text-base font-medium text-slate-900 hover:bg-slate-100 sm:w-auto "
-            >
-              {slide.buttonText}
-            </a>
+            <Link
+  to={`/collections/${slide.category._id}`}  // Dynamic category link
+  className="mb-20 block w-full rounded-md border border-transparent bg-white px-8 py-3 text-base font-medium text-slate-900 hover:bg-slate-100 sm:w-auto"
+>
+  {slide.buttonText}
+</Link>
           </div>
         </motion.div>
       ))}
@@ -99,7 +99,7 @@ const ImageSlider = () => {
 
           .slide-image {
             width: 100%;
-            height: 700px; /* Set to auto to maintain aspect ratio */
+            height: 650px; /* Set to auto to maintain aspect ratio */
             object-fit: cover; /* Cover to maintain image aspect ratio */
           }
 
