@@ -10,21 +10,30 @@ import FeaturedItems from "../../components/Client/FeaturedItems";
 import UserLayout from "../../layout/UserLayout";
 import CollectionTopProducts from "../../components/Client/Collections/CollectionTopProducts";
 import AllCollectionsTopProducts from "../../components/Client/Collections/AllCollectionsTopProducts";
+import CardSection from "../../components/Admin/Dashboard/CardSection";
+import ChartSection from "../../components/Admin/Dashboard/ChartSection";
+import TabelSection from "../../components/Admin/Dashboard/TabelSection";
+
 const Ahmed = () => {
   return (
     <Fragment>
-      <UserLayout>
+      {/* <UserLayout>
         <OurCollectionSection />
-        {/* <AllCollections /> */}
-        {/* <CollectionProduct /> */}
-        {/* <FeaturedItems
+        <AllCollections />
+        <CollectionProduct />
+        <FeaturedItems
           title={"Feature Products"}
           productCount={8}
           topRating={false}
-        /> */}
-        {/* <CollectionTopProducts productCount={8} topRating={true} /> */}
-        {/* <AllCollectionsTopProducts /> */}
-      </UserLayout>
+        />
+        <CollectionTopProducts productCount={8} topRating={true} />
+        <AllCollectionsTopProducts />
+      </UserLayout> */}
+      <DefaultLayout>
+        <CardSection />
+        <ChartSection />
+        <TabelSection />
+      </DefaultLayout>
     </Fragment>
   );
 };
