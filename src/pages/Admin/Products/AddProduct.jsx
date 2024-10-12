@@ -9,6 +9,10 @@ import { Toast } from "primereact/toast";
 import MediaUpload from "../../../components/Admin/MediaUpload/MediaUpload";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { Dropdown } from "primereact/dropdown";
+import 'primereact/resources/themes/saga-blue/theme.css'; // or any other PrimeReact theme
+import 'primereact/resources/primereact.min.css';
+import 'primeicons/primeicons.css';
 
 const AddProduct = () => {
   const [title, setTitle] = useState("");
@@ -276,26 +280,35 @@ const AddProduct = () => {
                 </div>
               </div>
 
-              {/* Category Selection */}
-              <div className="mb-2">
-                <label htmlFor="category" className="w-full mb-2 block text-black dark:text-white">
-                  Category
-                </label>
-                <select
-                  id="category"
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className={`w-full ${errors.category ? 'border-red-500' : ''}`}
-                >
-                  <option value="">Select category</option>
-                  {categories.map((cat) => (
-                    <option key={cat._id} value={cat._id}>
-                      {cat.name}
-                    </option>
-                  ))}
-                </select>
-                {errors.category && <small className="p-error">{errors.category}</small>}
-              </div>
+             {/* Category Selection */}
+            
+             <div className="mb-4">
+      <label htmlFor="category" className="block text-lg font-semibold mb-2 text-black dark:text-white">
+        Category
+      </label>
+      <Dropdown
+        id="category"
+        value={category}
+        options={categories}
+        onChange={(e) => setCategory(e.value)}
+        placeholder="Select category"
+        optionLabel="title" // Display property for dropdown options
+        className={`w-full ${errors.category ? 'border-red-500' : 'border-gray-300'}`}
+        panelClassName="bg-white dark:bg-gray-800 border dark:border-gray-600" // Dropdown panel styling
+        itemTemplate={(option) => (
+          <div className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 transition duration-200">
+            {option.title}
+          </div>
+        )}
+        style={{
+          backgroundColor: 'var(--background-color)', // Custom variable for background
+          border: errors.category ? '1px solid #e3342f' : '1px solid #d1d5db', // Error handling
+          borderRadius: '0.375rem',
+        }}
+      />
+      {errors.category && <small className="text-red-500 mt-1">{errors.category}</small>}
+    </div>
+
 
               {/* Image Upload */}
               <div className="mb-2">

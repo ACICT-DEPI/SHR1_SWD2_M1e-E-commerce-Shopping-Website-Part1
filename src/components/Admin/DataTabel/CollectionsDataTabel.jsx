@@ -140,9 +140,9 @@ const CollectionsDataTabel = () => {
         icon="pi pi-pencil"
         rounded
         outlined
-        className="mr-2 dark:border-gray-400"
+        className="mr-2"
         aria-label="Edit order"
-        onClick={() => navigate(`/admin/collections/${rowData._id}`)}
+        onClick={() => navigate(`/admin/products/update/${rowData._id}`)}
       />
       <Button
         icon="pi pi-trash"
@@ -151,10 +151,10 @@ const CollectionsDataTabel = () => {
         severity="danger"
         aria-label="Delete order"
         onClick={(e) => confirmDeleteCollection(e, rowData._id)}
-        className="dark:border-red-600"
       />
     </>
   );
+
 
   const cllectionBodyTemplate = (rowData) => {
     return (

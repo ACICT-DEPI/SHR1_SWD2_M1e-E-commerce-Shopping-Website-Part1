@@ -7,6 +7,8 @@ import { CiStar } from "react-icons/ci";
 import { GoArrowLeft } from "react-icons/go";
 import { MdOutlinePeopleAlt } from "react-icons/md";
 import { HiOutlineCollection } from "react-icons/hi";
+import { FaImages } from 'react-icons/fa'; // Import from react-icons
+
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const location = useLocation();
@@ -100,6 +102,15 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                 Collections
               </NavLink>
             </li>
+            <li>
+            <NavLink
+          to="/admin/carousels"
+          className="flex items-center gap-4 text-lg text-bodydark1 mb-2 py-2 px-4 font-semibold hover:bg-graydark rounded-sm duration-300 ease-in-out"
+        >
+          <FaImages /> 
+          Carousels
+        </NavLink>
+                  </li>
           </ul>
         </nav>
       </div>

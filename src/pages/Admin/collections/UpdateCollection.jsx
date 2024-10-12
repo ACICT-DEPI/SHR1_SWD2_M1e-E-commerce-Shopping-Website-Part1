@@ -28,6 +28,7 @@ const UpdateCollection = () => {
   const showOptions = ["Show", "Hide"];
   const [showValue, setShowValue] = useState(null);
   const toast = useRef(null);
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     // استدعاء بيانات المجموعة عند تحميل المكون
@@ -153,6 +154,14 @@ const UpdateCollection = () => {
         life: 3000,
       });
     } catch (error) {
+      const data = error.response?.data || {};
+
+      setErrors((prev) => ({
+       ...prev,
+       title: data.errors?.title?.message || "",
+       description: data.errors?.description?.message || "",
+       
+     }));
       console.error("Error updating collection:", error);
       toast.current.show({
         severity: "error",
@@ -188,12 +197,14 @@ const UpdateCollection = () => {
                   id="title"
                   type="text"
                   placeholder="Enter collection name"
-                  className="w-full"
+                  className={`w-full ${errors.title ? 'border-red-500' : ''}`}
                   pt={inputTextStyle}
                   unstyled={true}
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                 />
+            {errors.title && <small className="p-error">{errors.title}</small>}
+
               </div>
 
               <div className="mb-2">
@@ -207,6 +218,8 @@ const UpdateCollection = () => {
                   value={description}
                   onTextChange={(e) => setDescription(e.htmlValue)} // التحديث بـ HTML
                 />
+           {errors.description && <small className="p-error">{errors.description}</small>}
+
               </div>
 
               <div className="mb-2">
@@ -265,7 +278,7 @@ const UpdateCollection = () => {
         </div>
       </div>
 
-      <Toast ref={toast}></Toast>
+      <Toast ref={toast} position="bottom-left"></Toast>
     </Fragment>
   );
 };

@@ -12,12 +12,13 @@ import AddCollection from "./collections/AddCollection";
 import UpdateCollection from "./collections/UpdateCollection";
 import SingleOrderDetails from "./Orders/SingleOrderDetails";
 import SingleCustomerDetails from "./Customers/SingleCustomerDetails";
-import EditOrderForm from "./Orders/EditOrderForm";
-import EditCustomerForm from "./Customers/EditCustomerForm";
 import { AdminProfile } from "./AdminProfile";
 import { ChangePassword } from "./ChangePassword";
 import SingleProductDetails from "./Products/SingleProductPage";
 import  AddProduct  from "./Products/AddProduct";
+import { CarouselsPage } from "./Carousels/CarouselsPage";
+import  UpdateCarousels  from "./Carousels/UpdateCarousels";
+import  AddCarousels  from "./Carousels/AddCarousels";
 
 const AdminPage = () => {
   const [loading, setLoading] = useState(true);
@@ -36,17 +37,19 @@ const AdminPage = () => {
         <Route path="products/add" element={<AddProduct />} />
         <Route path="products/update/:id" element={<SingleProductDetails />} />
 
-
         <Route path="orders" element={<Orders />} />
-        <Route path="orders/edit/:id" element={<EditOrderForm />} />
         <Route path="/orders/:id" element={<SingleOrderDetails />} />
         <Route path="customers" element={<Customers />} />
         <Route path="customers/:id" element={<SingleCustomerDetails />} />
-        <Route path="customers/edit/:name" element={<EditCustomerForm />} />
         <Route path="reviews" element={<Reviews />} />
         <Route path="collections" element={<Collections />} />
         <Route path="collections/add" element={<AddCollection />} />
         <Route path="collections/:id" element={<UpdateCollection />} />
+        <Route path="carousels" element={<CarouselsPage />} />
+        <Route path="carousels/:id" element={<UpdateCarousels />} />
+        <Route path="carousels/add" element={<AddCarousels />} />
+
+
       </Routes>
     </DefaultLayout>
   );

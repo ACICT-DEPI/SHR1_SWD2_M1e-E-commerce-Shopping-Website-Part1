@@ -14,7 +14,7 @@ import { SelectButton } from "primereact/selectbutton";
 
 import "primeicons/primeicons.css";
 
-const AddCollection = () => {
+const AddCarousels = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [image, setImage] = useState(null);
@@ -25,40 +25,40 @@ const AddCollection = () => {
   const toast = useRef(null);
   const navigate = useNavigate();
   const [errors, setErrors] = useState({});
+  const [imageError, setImageError] = useState(""); // State for image upload error
+  const [bannerError, setBannerError] = useState(""); // State for banner upload error
 
-  // لتحديث مسار الصورة عند إلغاء المكون
+  // Update the image path on component unmount
   useEffect(() => {
     return () => {
       if (image) {
-        URL.revokeObjectURL(image); // تنظيف مسار الصورة
+        URL.revokeObjectURL(image); // Clean up the image URL
       }
       if (banner) {
-        URL.revokeObjectURL(banner); // تنظيف مسار الصورة
+        URL.revokeObjectURL(banner); // Clean up the banner URL
       }
-      if (showValue == showOptions[0]) {
-        setIsBannerVisible(true);
-      } else {
-        setIsBannerVisible(false);
-      }
+      setIsBannerVisible(showValue === showOptions[0]);
     };
   }, [image, banner]);
 
   const handleImageChange = (file) => {
     setImage(file);
+    setImageError(""); // Clear the image error
     console.log("Image selected:", file);
   };
+
   const handleBannerChange = (file) => {
     setBanner(file);
-    console.log("banner selected:", file);
+    setBannerError(""); // Clear the banner error
+    console.log("Banner selected:", file);
   };
 
-  // submit the form
+  // Submit the form
   const submitForm = async (e) => {
     e.preventDefault();
     try {
-      // إرسال الطلب لإنشاء الـ category
       const response = await axios.post(
-        "http://localhost:5000/api/v1/categories",
+        "http://localhost:5000/api/v1/carousels", // Assuming the endpoint is /carousels
         {
           title,
           description,
@@ -72,85 +72,77 @@ const AddCollection = () => {
         }
       );
 
+      // Check the response status
       if (response.data.status === "success") {
-        const collectionId = response.data.data._id;
+        const { data } = response.data; // Destructure the data from the response
 
-        // التحقق من وجود الصورة لرفعها
+        // Handle image upload if present
         if (image) {
           const formImageData = new FormData();
           formImageData.append("image", image);
 
-          // رفع الصورة
-          const imageResponse = await axios.patch(
-            `http://localhost:5000/api/v1/categories/category-photo-upload/${collectionId}`,
-            formImageData,
-            {
-              withCredentials: true,
-            }
-          );
-
-          if (imageResponse.data.status === "success") {
-            // toast.current.show({
-            //   severity: "success",
-            //   summary: "Success",
-            //   detail: "Image uploaded successfully",
-            //   life: 3000,
-            // });
-          } else {
-            throw new Error(
-              imageResponse.data.message || "Image upload failed"
+          try {
+            const imageResponse = await axios.patch(
+              `http://localhost:5000/api/v1/carousels/carousel-photo-upload/${data._id}`,
+              formImageData,
+              {
+                withCredentials: true,
+              }
             );
+
+            if (imageResponse.data.status !== "success") {
+              throw new Error(imageResponse.data.message || "Image upload failed");
+            }
+          } catch (imageUploadError) {
+            setImageError(imageUploadError.response?.data.message || "Image upload failed"); // Set image error
+            throw imageUploadError; // Rethrow the error to handle it below
           }
         }
+
+        // Handle banner upload if present
         if (banner) {
           const formBannerData = new FormData();
           formBannerData.append("banner", banner);
 
-          // رفع الصورة
-          const imageResponse = await axios.patch(
-            `http://localhost:5000/api/v1/categories/category-banner-upload/${collectionId}`,
-            formBannerData,
-            {
-              withCredentials: true,
-            }
-          );
-
-          if (imageResponse.data.status === "success") {
-            // toast.current.show({
-            //   severity: "success",
-            //   summary: "Success",
-            //   detail: "Image uploaded successfully",
-            //   life: 3000,
-            // });
-          } else {
-            throw new Error(
-              imageResponse.data.message || "Banner upload failed"
+          try {
+            const bannerResponse = await axios.patch(
+              `http://localhost:5000/api/v1/carousels/carousel-banner-upload/${data._id}`,
+              formBannerData,
+              {
+                withCredentials: true,
+              }
             );
+
+            if (bannerResponse.data.status !== "success") {
+              throw new Error(bannerResponse.data.message || "Banner upload failed");
+            }
+          } catch (bannerUploadError) {
+            setBannerError(bannerUploadError.response?.data.message || "Banner upload failed"); // Set banner error
+            throw bannerUploadError; // Rethrow the error to handle it below
           }
         }
+
         toast.current.show({
           severity: "success",
           summary: "Success",
-          detail: "Collection created successfully",
+          detail: "Carousel created successfully",
           life: 3000,
         });
 
-        // الانتظار لمدة 3 ثوانٍ قبل إعادة التوجيه
+        // Wait for 3 seconds before navigating
         setTimeout(() => {
-          navigate(`/admin/collections/${collectionId}`);
+          navigate(`/admin/carousels/${data._id}`); // Redirect to the created carousel's detail page
         }, 3000);
       } else {
         handleErrors(response.data);
       }
     } catch (error) {
       const data = error.response?.data || {};
-
       setErrors((prev) => ({
-       ...prev,
-       title: data.errors?.title?.message || "",
-       description: data.errors?.description?.message || "",
-       
-     }));
+        ...prev,
+        title: data.errors?.title?.message || "",
+        description: data.errors?.description?.message || "",
+      }));
       toast.current.show({
         severity: "error",
         summary: "Error",
@@ -187,7 +179,7 @@ const AddCollection = () => {
         <div>
           <GoBackButton />
           <h1 className="inline-block ml-4 text-3xl dark:text-white">
-            Create Collection
+            Create Carousel
           </h1>
         </div>
       </div>
@@ -206,15 +198,14 @@ const AddCollection = () => {
                 <InputText
                   id="title"
                   type="text"
-                  placeholder="Enter collection name"
-                  className={`w-full ${errors.excerpt ? 'border-red-500' : ''}`}
+                  placeholder="Enter carousel title"
+                  className={`w-full ${errors.title ? 'border-red-500' : ''}`}
                   pt={inputTextStyle}
                   unstyled={true}
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                 />
-              {errors.title && <small className="p-error">{errors.title}</small>}
-
+                {errors.title && <small className="p-error">{errors.title}</small>}
               </div>
 
               <div className="mb-2">
@@ -228,9 +219,9 @@ const AddCollection = () => {
                   value={description}
                   onTextChange={(e) => setDescription(e.htmlValue)}
                 />
-              {errors.description && <small className="p-error">{errors.description}</small>}
-
+                {errors.description && <small className="p-error">{errors.description}</small>}
               </div>
+
               <div className="mb-2">
                 <label
                   htmlFor="image-upload"
@@ -239,7 +230,9 @@ const AddCollection = () => {
                   Image
                 </label>
                 <MediaUpload onChange={handleImageChange} maxFiles={1} />
+                {imageError && <small className="p-error">{imageError}</small>} {/* Display image error */}
               </div>
+
               <div className="mb-2">
                 <label
                   htmlFor="banner-upload"
@@ -248,39 +241,36 @@ const AddCollection = () => {
                   Banner
                 </label>
                 <MediaUpload onChange={handleBannerChange} maxFiles={1} />
+                {bannerError && <small className="p-error">{bannerError}</small>} {/* Display banner error */}
               </div>
+
               <div className="mb-2">
                 <label
-                  htmlFor="image-upload"
+                  htmlFor="show-in-home-page"
                   className="w-full mb-2 block text-black dark:text-white"
                 >
-                  Show in Home page
+                  Show in Home Page
                 </label>
                 <SelectButton
                   value={showValue}
                   onChange={(e) => setShowValue(e.value)}
-                  options={showOptions}
+                  options={showOptions.map((option) => ({ label: option, value: option }))}
                 />
               </div>
 
-              <div className="pt-3 rounded-b-md sm:rounded-b-lg">
-                <div className="flex items-center justify-end">
-                  <Button
-                    label="Add Collection"
-                    size="normal"
-                    className="text-base"
-                    pt={buttonsStyle}
-                  />
-                </div>
+              <div className="flex flex-row justify-end mt-4">
+                <Button type="button" className="mr-2" onClick={() => navigate(-1)}>
+                  Cancel
+                </Button>
+                <Button type="submit" label="Create" />
               </div>
             </div>
           </form>
         </div>
       </div>
-
-      <Toast ref={toast} position="bottom-left"></Toast>
+      <Toast ref={toast}  position="bottom-left"/>
     </Fragment>
   );
 };
 
-export default AddCollection;
+export default AddCarousels;
