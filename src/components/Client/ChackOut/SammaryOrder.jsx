@@ -7,7 +7,7 @@ const OrderSummary = () => {
   const [subtotal, setSubtotal] = useState(0);
 
   useEffect(() => {
-    const storedCartProducts = JSON.parse(localStorage.getItem("cartProducts")) || [];
+    const storedCartProducts = JSON.parse(localStorage.getItem("cartItems")) || [];
     setCartProducts(storedCartProducts);
     calculateSubtotal(storedCartProducts);
   }, []);

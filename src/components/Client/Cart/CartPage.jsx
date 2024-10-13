@@ -1,56 +1,18 @@
-
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "primereact/button";
 import { FaChevronRight } from "react-icons/fa";
-import axios from "axios";
 import ProductPrice from '../ProductDetails/ProductPrice';
 
-const CartPage = ({ productId }) => {
+const CartPage = () => {
   const [cartProducts, setCartProducts] = useState([]);
   const [subtotal, setSubtotal] = useState(0);
 
   useEffect(() => {
-    const storedCartProducts = JSON.parse(localStorage.getItem("cartProducts")) || [];
+    const storedCartProducts = JSON.parse(localStorage.getItem("cartItems")) || [];
     setCartProducts(storedCartProducts);
     calculateSubtotal(storedCartProducts);
   }, []);
-
-  useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        const response = await axios.get(`http://localhost:5000/api/v1/products/${productId}`);
-        const product = response.data.data;
-
-        const existingProducts = JSON.parse(localStorage.getItem("cartProducts")) || [];
-        const existingProduct = existingProducts.find(p => p._id === product._id);
-
-        if (existingProduct) {
-          const updatedProducts = existingProducts.map(p => {
-            if (p._id === product._id) {
-              return { ...p, quantity: p.quantity + 1 };
-            }
-            return p;
-          });
-          setCartProducts(updatedProducts);
-          localStorage.setItem("cartProducts", JSON.stringify(updatedProducts));
-          calculateSubtotal(updatedProducts);
-        } else {
-          const newProduct = { ...product, quantity: 1 };
-          const updatedCartProducts = [...existingProducts, newProduct];
-          setCartProducts(updatedCartProducts);
-          localStorage.setItem("cartProducts", JSON.stringify(updatedCartProducts));
-          calculateSubtotal(updatedCartProducts);
-        }
-      } catch (error) {
-        console.error("Error fetching product:", error);
-      }
-    };
-
-    if (productId) {
-      fetchProduct();
-    }
-  }, [productId]);
 
   const calculateSubtotal = (products) => {
     const total = products.reduce((acc, product) => {
@@ -65,7 +27,7 @@ const CartPage = ({ productId }) => {
   const handleRemoveProduct = (productId) => {
     const updatedProducts = cartProducts.filter(product => product._id !== productId);
     setCartProducts(updatedProducts);
-    localStorage.setItem("cartProducts", JSON.stringify(updatedProducts));
+    localStorage.setItem("cartItems", JSON.stringify(updatedProducts));
     calculateSubtotal(updatedProducts);
   };
 
@@ -97,16 +59,11 @@ const CartPage = ({ productId }) => {
       <div className="w-full max-w-4xl mt-10">
         <hr className="w-full bg-gray-300 dark:text-white" />
         <p className="text-2xl font-bold pt-10 dark:text-white">
-          Subtotal: {cartProducts.reduce((acc, product) => {
-            const discount = product.discount || 0;
-            const oldPrice = product.price;
-            const newPrice = oldPrice * (1 - discount / 100);
-            return acc + (newPrice * product.quantity);
-          }, 0).toFixed(2)} $
+          Subtotal: {subtotal.toFixed(2)} $
         </p>
         <p>Shipping and taxes will be calculated at checkout.</p>
 
-        <Link to="/ChackOut">
+        <Link to="/checkOut">
           <Button label="Checkout" className="p-button-warning w-full mt-4 text-lg dark:text-white" />
         </Link>
 

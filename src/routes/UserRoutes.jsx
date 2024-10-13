@@ -46,7 +46,7 @@ function UserRoutes() {
         />
         <Route path="*" element={<NotFoundPage />} />
         <Route path="/Cart" element={<Cart/>} />
-        <Route path="/ChackOut" element={<CheckoutPage/>} />
+        <Route path="/checkOut" element={<CheckoutPage />} />
       </Routes>
     </UserLayout> 
   );

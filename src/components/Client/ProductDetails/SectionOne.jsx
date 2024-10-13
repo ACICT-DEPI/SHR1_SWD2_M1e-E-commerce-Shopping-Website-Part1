@@ -6,7 +6,7 @@ import ProductTabs from './ProductTap';
 import ControlledDemo from './ControlledDemo';
 import styled from 'styled-components';
 import ProductPrice from './ProductPrice';
-import ShoppingCartSidebar from '../SideBar/ShoppingCartSidebar'; // Import the Sidebar component
+import ShoppingCartSidebar from '../SideBar/ShoppingCartSidebar';
 import axios from 'axios';
 
 const Paragraph = styled.p`
@@ -29,62 +29,62 @@ const SectionOne = () => {
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [isSidebarOpen, setSidebarOpen] = useState(false); 
-  const [newPrice, setNewPrice] = useState(0); 
-  const [subtotal, setSubtotal] = useState(0); 
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const { id } = useParams();
 
-  // Fetch product data based on the product ID
   useEffect(() => {
     const fetchProductData = async () => {
       try {
         const response = await axios.get(`http://localhost:5000/api/v1/products/${id}`);
         if (response.status === 200) {
           setProduct(response.data.data);
+          // Check localStorage for the product
+          const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+          const existingItem = cartItems.find(item => item._id === response.data.data._id);
+          if (existingItem) {
+            setQuantity(existingItem.quantity); // Set quantity from localStorage
+          }
         }
       } catch (error) {
+        setError("Error fetching product data");
         console.error("Error fetching product data:", error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchProductData();
   }, [id]);
 
-  useEffect(() => {
-    if (product) {
-      setNewPrice(product.newPrice); // Update newPrice from the fetched product data
-    }
-  }, [product]);
-
-  useEffect(() => {
-    setSubtotal(newPrice * quantity); // Update subtotal when newPrice or quantity changes
-  }, [newPrice, quantity]);
-
   const handleAddToCart = () => {
+    const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+    const newItem = { ...product, quantity }; // Add quantity to the product
+    const existingItemIndex = cartItems.findIndex(item => item._id === product._id);
+
+    if (existingItemIndex !== -1) {
+      // If the item already exists, update the quantity
+      cartItems[existingItemIndex].quantity = quantity; // Update quantity from input
+    } else {
+      // Otherwise, add the new item
+      cartItems.push(newItem);
+    }
+
+    localStorage.setItem('cartItems', JSON.stringify(cartItems)); // Save to localStorage
     setSidebarOpen(true); // Open sidebar
   };
 
-  const handleNewPriceUpdate = (calculatedPrice) => {
-    setNewPrice(calculatedPrice);
+  const handleQuantityChange = (e) => {
+    const newQuantity = Math.max(1, Number(e.target.value)); // Ensure quantity is at least 1
+    setQuantity(newQuantity);
   };
 
-  const handleQuantityChange = (newQuantity) => {
-    setQuantity(Number(newQuantity)); // Update local quantity
-    // Call the sidebar's method to update quantity
-    updateProductQuantity(product._id, Number(newQuantity));
-  };
+  if (loading) {
+    return <p>Loading...</p>;
+  }
 
-  const updateProductQuantity = (productId, newQuantity) => {
-    const updatedCartProducts = JSON.parse(localStorage.getItem("cartProducts")) || [];
-    const updatedProducts = updatedCartProducts.map(product => 
-      product._id === productId ? { ...product, quantity: newQuantity } : product
-    );
-    localStorage.setItem("cartProducts", JSON.stringify(updatedProducts));
-    // If you want to also update the cart in the sidebar directly, 
-    // you would have to pass a function to do that or use context/global state
-  };
-
-  const handleClickOutside = () => {
-    setSidebarOpen(false); // Close sidebar on outside click
-  };
+  if (error) {
+    return <p>{error}</p>;
+  }
 
   if (!product) {
     return <p>Product not found</p>;
@@ -92,40 +92,28 @@ const SectionOne = () => {
 
   return (
     <div className="relative">
-      {isSidebarOpen && <Overlay onClick={handleClickOutside} />} {/* Blur background on sidebar open */}
-
-      <div className={isSidebarOpen ? 'blur-lg' : ''}> {/* Apply blur effect */}
+      {isSidebarOpen && <Overlay onClick={() => setSidebarOpen(false)} />}
+      <div className={isSidebarOpen ? 'blur-lg' : ''}>
         <div className="container mx-auto p-4">
           <div className="flex flex-col md:flex-row items-start">
-            {/* Product Image */}
             <div className="w-full md:w-1/2 mb-4 md:mb-0 dark:text-white">
               <ControlledDemo />
             </div>
-
-            {/* Product Details */}
             <div className="w-full md:w-1/2 md:pl-8">
               <h1 className="text-5xl font-bold mb-4 pl-4 pt-12 pb-5 dark:text-white">{product.title}</h1>
-
-              {/* Price */}
-              <ProductPrice product={product} onNewPrice={handleNewPriceUpdate} />
-              
-              {/* Rating */}
+              <ProductPrice product={product} />
               <div className="flex items-center mb-4 pb-5 pl-4 dark:text-white">
                 <Rating value={product.rating} readOnly stars={5} cancel={false} />
                 <span className="ml-5 text-gray-600 dark:text-white">({product.numReviews} Reviews)</span>
               </div>
-
-              {/* Description */}
               <div className="mb-6 pl-4 dark:text-white">
                 <Paragraph>{product.excerpt}</Paragraph>
               </div>
-
-              {/* Quantity Selector and Add to Cart Button */}
               <div className="flex items-center space-x-4 mt-6 pl-4 dark:text-white">
                 <input
                   type="number"
                   value={quantity}
-                  onChange={(e) => handleQuantityChange(e.target.value)} // Use the new handler
+                  onChange={handleQuantityChange} // Update quantity on change
                   min="1"
                   className="w-20 p-3 border border-gray-900 rounded-md text-center text-gray-900" 
                 />
@@ -140,15 +128,10 @@ const SectionOne = () => {
           </div>
         </div>
       </div>
-
-      {/* Shopping Cart Sidebar */}
       <ShoppingCartSidebar 
-    isSidebarOpen={isSidebarOpen} 
-    setSidebarOpen={setSidebarOpen} 
-    productId={id} 
-    newPrice={newPrice} // Add this line
-/>
-      
+        isSidebarOpen={isSidebarOpen}
+        setSidebarOpen={setSidebarOpen} 
+      />
       {/* Product Tabs */}
       <ProductTabs
          description={product.description}
@@ -158,4 +141,4 @@ const SectionOne = () => {
   );
 };
 
-export default SectionOne;  
+export default SectionOne;
