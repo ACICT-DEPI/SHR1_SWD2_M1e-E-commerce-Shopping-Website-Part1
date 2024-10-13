@@ -21,7 +21,7 @@ const Hamis = () => {
     const checkAuth = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/v1/users/profile",
+          "https://server-esw.up.railway.app/api/v1/users/profile",
           {
             withCredentials: true,
           }

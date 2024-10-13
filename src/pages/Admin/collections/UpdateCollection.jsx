@@ -28,13 +28,14 @@ const UpdateCollection = () => {
   const showOptions = ["Show", "Hide"];
   const [showValue, setShowValue] = useState(null);
   const toast = useRef(null);
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     // استدعاء بيانات المجموعة عند تحميل المكون
     const fetchCollectionData = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:5000/api/v1/categories/${id}`
+          `https://server-esw.up.railway.app/api/v1/categories/${id}`
         );
         const { title, description, image, banner, isBannerVisible } =
           response.data.data;
@@ -85,7 +86,7 @@ const UpdateCollection = () => {
       formData.append("description", description); // إرسال الوصف كـ HTML
       formData.append("isBannerVisible", isBannerVisible); // تحديث البيانات باستخدام PUT أو PATCH
       const updateResponse = await axios.patch(
-        `http://localhost:5000/api/v1/categories/${id}`,
+        `https://server-esw.up.railway.app/api/v1/categories/${id}`,
         formData,
         {
           headers: {
@@ -102,7 +103,7 @@ const UpdateCollection = () => {
 
         // رفع الصورة
         const imageResponse = await axios.patch(
-          `http://localhost:5000/api/v1/categories/category-photo-upload/${id}`,
+          `https://server-esw.up.railway.app/api/v1/categories/category-photo-upload/${id}`,
           formData,
           {
             withCredentials: true,
@@ -128,7 +129,7 @@ const UpdateCollection = () => {
 
         // رفع الصورة
         const imageResponse = await axios.patch(
-          `http://localhost:5000/api/v1/categories/category-banner-upload/${id}`,
+          `https://server-esw.up.railway.app/api/v1/categories/category-banner-upload/${id}`,
           formBannerData,
           {
             withCredentials: true,
@@ -153,6 +154,14 @@ const UpdateCollection = () => {
         life: 3000,
       });
     } catch (error) {
+      const data = error.response?.data || {};
+
+      setErrors((prev) => ({
+       ...prev,
+       title: data.errors?.title?.message || "",
+       description: data.errors?.description?.message || "",
+       
+     }));
       console.error("Error updating collection:", error);
       toast.current.show({
         severity: "error",
@@ -188,12 +197,14 @@ const UpdateCollection = () => {
                   id="title"
                   type="text"
                   placeholder="Enter collection name"
-                  className="w-full"
+                  className={`w-full ${errors.title ? 'border-red-500' : ''}`}
                   pt={inputTextStyle}
                   unstyled={true}
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                 />
+            {errors.title && <small className="p-error">{errors.title}</small>}
+
               </div>
 
               <div className="mb-2">
@@ -207,6 +218,8 @@ const UpdateCollection = () => {
                   value={description}
                   onTextChange={(e) => setDescription(e.htmlValue)} // التحديث بـ HTML
                 />
+           {errors.description && <small className="p-error">{errors.description}</small>}
+
               </div>
 
               <div className="mb-2">
@@ -265,7 +278,7 @@ const UpdateCollection = () => {
         </div>
       </div>
 
-      <Toast ref={toast}></Toast>
+      <Toast ref={toast} position="bottom-left"></Toast>
     </Fragment>
   );
 };

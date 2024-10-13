@@ -1,747 +1,148 @@
-import React from "react";
+import React, { Fragment, useState, useEffect } from "react";
+import axios from "axios"; // تأكد من استيراد axios
+import CardSection from "../../components/Admin/Dashboard/CardSection";
+import ChartSection from "../../components/Admin/Dashboard/ChartSection";
+import TabelSection from "../../components/Admin/Dashboard/TabelSection";
 
 const Dashboard = () => {
+  const [product, setProduct] = useState(null); // متغير لتخزين البيانات
+  const [productCount, setProductCount] = useState(0); // متغير لتخزين عدد المنتجات
+  const [orders, setOrders] = useState([]); // متغير لتخزين الطلبات
+  const [orderCount, setOrderCount] = useState(0);
+  const [customerCount, setCustomerCount] = useState(0);
+  const [loading, setLoading] = useState(true); // متغير للتحكم بحالة التحميل
+  const [error, setError] = useState(null); // متغير لتخزين الأخطاء
+
+  const [totalPricesByMonth, setTotalPricesByMonth] = useState(Array(12).fill(0)); // مصفوفة لتخزين إجمالي الأسعار لكل شهر
+  const [orderStatusCounts, setOrderStatusCounts] = useState([0, 0, 0, 0]); // [Pending, Shipped, Completed, Cancelled]
+
+  // Fetch products and orders
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get("https://server-esw.up.railway.app/api/v1/products");
+        const products = response.data.data.products;
+        const count = response.data.data.count; // الحصول على عدد المنتجات
+
+        // نجلب البيانات من الـ API ونخزنها في product
+        setProduct(products);
+        setProductCount(count); // تخزين عدد المنتجات
+
+        setLoading(false); // ننهي حالة التحميل بعد جلب البيانات
+      } catch (err) {
+        setError(err.message); // تخزين الخطأ إن وجد
+        setLoading(false); // ننهي حالة التحميل حتى في حالة وجود خطأ
+      }
+    };
+
+    const fetchOrders = async () => {
+      try {
+        const response = await axios.get("capi/v1/orders", {
+          withCredentials: true,
+        });
+        const fetchedOrders = response.data.data.orders;
+        const fetchOrdersCount = response.data.data["Total Orders"]
+
+
+        // فرز الطلبات حسب createdAt (من الأحدث إلى الأقدم)
+        const sortedOrders = fetchedOrders.sort((a, b) =>
+          new Date(b.createdAt) - new Date(a.createdAt)
+        );
+
+        // تعيين أول 5 طلبات فقط
+        setOrders(sortedOrders.slice(0, 10));
+        setOrderCount(fetchOrdersCount)
+
+        // حساب إجمالي الأسعار لكل شهر
+        calculateTotalPricesByMonth(sortedOrders);
+
+        // حساب أعداد الطلبات حسب الحالة
+        const statusCounts = calculateOrderCountsByStatus(sortedOrders);
+        setOrderStatusCounts(statusCounts); // تحديث الحالة بالعد الجديد
+
+
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+        setLoading(false);
+      }
+    };
+
+    const fetchCustomers = async () => {
+      try {
+        const response = await axios.get("https://server-esw.up.railway.app/api/v1/admins", {
+          withCredentials: true,
+        });
+
+        // جلب جميع المستخدمين من الاستجابة
+        const fetchedUsers = response.data.data.allUsers;
+
+        // حساب عدد المستخدمين الذين لديهم دور "customer"
+        const customerCount = fetchedUsers.filter(user => user.role === "customer").length;
+
+        // تعيين عدد العملاء
+        setCustomerCount(customerCount);
+
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+        setLoading(false);
+      }
+    };
+
+    // دالة لحساب إجمالي الأسعار لكل شهر
+    const calculateTotalPricesByMonth = (orders) => {
+      const monthlyTotals = Array(12).fill(0); // مصفوفة تحتوي على 12 عنصر، كل عنصر مبدئيًا يساوي 0
+
+      orders.forEach(order => {
+        const orderDate = new Date(order.createdAt); // تحويل تاريخ الطلب إلى كائن Date
+        const month = orderDate.getMonth(); // الحصول على رقم الشهر (0-11)
+        // تحقق من قيمة totalPrice
+        const totalPrice = order.totalPrice;
+        // تحقق إذا كانت totalPrice متاحة وصحيحة
+        if (totalPrice != null) {
+          monthlyTotals[month] += totalPrice; // إضافة إجمالي السعر إلى المصفوفة الخاصة بالشهر المناسب
+        }
+      });
+
+      setTotalPricesByMonth(monthlyTotals); // تخزين إجمالي الأسعار في الحالة
+
+    };
+
+    const calculateOrderCountsByStatus = (orders) => {
+      // تعريف الحالات بالترتيب المطلوب
+      const statuses = ['Pending', 'Shipped', 'Completed', 'Cancelled'];
+
+      // إنشاء مصفوفة لتخزين الأعداد
+      const counts = Array(statuses.length).fill(0);
+
+      // المرور على كل الطلبات
+      orders.forEach(order => {
+        const statusIndex = statuses.indexOf(order.status);
+
+        if (statusIndex !== -1) {
+          counts[statusIndex] += 1; // زيادة العداد للحالة المناسبة
+        }
+      });
+
+      return counts;
+    };
+
+    // استدعاء كل من دوال جلب المنتجات والطلبات
+    fetchProducts();
+    fetchOrders();
+    fetchCustomers();
+  }, []); // الدالة تعمل مرة واحدة عند تحميل الـ component
+
+  if (loading) return <p>Loading...</p>; // عرض رسالة تحميل حتى يتم جلب البيانات
+  if (error) return <p>Error: {error}</p>; // عرض رسالة خطأ إن وجد
+
   return (
-    <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
-      <div class=" p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-white text-black dark:border-gray-700">
-        <svg
-          class="w-7 h-7 text-gray-500 dark:text-gray-400 mb-3"
-          aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-        >
-          <path d="M18 5h-.7c.229-.467.349-.98.351-1.5a3.5 3.5 0 0 0-3.5-3.5c-1.717 0-3.215 1.2-4.331 2.481C8.4.842 6.949 0 5.5 0A3.5 3.5 0 0 0 2 3.5c.003.52.123 1.033.351 1.5H2a2 2 0 0 0-2 2v3a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V7a2 2 0 0 0-2-2ZM8.058 5H5.5a1.5 1.5 0 0 1 0-3c.9 0 2 .754 3.092 2.122-.219.337-.392.635-.534.878Zm6.1 0h-3.742c.933-1.368 2.371-3 3.739-3a1.5 1.5 0 0 1 0 3h.003ZM11 13H9v7h2v-7Zm-4 0H2v5a2 2 0 0 0 2 2h3v-7Zm6 0v7h3a2 2 0 0 0 2-2v-5h-5Z" />
-        </svg>
-        <a href="#">
-          <h5 class="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">
-            Need a help in Claim?
-          </h5>
-        </a>
-        <p class="mb-3 font-normal text-gray-500 dark:text-gray-400">
-          Go to this step by step guideline process on how to certify for your
-          weekly benefits:
-        </p>
-        <a
-          href="#"
-          class="inline-flex font-medium items-center text-blue-600 hover:underline"
-        >
-          See our guideline
-          <svg
-            class="w-3 h-3 ms-2.5 rtl:rotate-[270deg]"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 18 18"
-          >
-            <path
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M15 11v4.833A1.166 1.166 0 0 1 13.833 17H2.167A1.167 1.167 0 0 1 1 15.833V4.167A1.166 1.166 0 0 1 2.167 3h4.618m4.447-2H17v5.768M9.111 8.889l7.778-7.778"
-            />
-          </svg>
-        </a>
-      </div>
-      <div class=" p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-white text-black dark:border-gray-700">
-        <svg
-          class="w-7 h-7 text-gray-500 dark:text-gray-400 mb-3"
-          aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-        >
-          <path d="M18 5h-.7c.229-.467.349-.98.351-1.5a3.5 3.5 0 0 0-3.5-3.5c-1.717 0-3.215 1.2-4.331 2.481C8.4.842 6.949 0 5.5 0A3.5 3.5 0 0 0 2 3.5c.003.52.123 1.033.351 1.5H2a2 2 0 0 0-2 2v3a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V7a2 2 0 0 0-2-2ZM8.058 5H5.5a1.5 1.5 0 0 1 0-3c.9 0 2 .754 3.092 2.122-.219.337-.392.635-.534.878Zm6.1 0h-3.742c.933-1.368 2.371-3 3.739-3a1.5 1.5 0 0 1 0 3h.003ZM11 13H9v7h2v-7Zm-4 0H2v5a2 2 0 0 0 2 2h3v-7Zm6 0v7h3a2 2 0 0 0 2-2v-5h-5Z" />
-        </svg>
-        <a href="#">
-          <h5 class="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">
-            Need a help in Claim?
-          </h5>
-        </a>
-        <p class="mb-3 font-normal text-gray-500 dark:text-gray-400">
-          Go to this step by step guideline process on how to certify for your
-          weekly benefits:
-        </p>
-        <a
-          href="#"
-          class="inline-flex font-medium items-center text-blue-600 hover:underline"
-        >
-          See our guideline
-          <svg
-            class="w-3 h-3 ms-2.5 rtl:rotate-[270deg]"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 18 18"
-          >
-            <path
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M15 11v4.833A1.166 1.166 0 0 1 13.833 17H2.167A1.167 1.167 0 0 1 1 15.833V4.167A1.166 1.166 0 0 1 2.167 3h4.618m4.447-2H17v5.768M9.111 8.889l7.778-7.778"
-            />
-          </svg>
-        </a>
-      </div>
-      <div class=" p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-white text-black dark:border-gray-700">
-        <svg
-          class="w-7 h-7 text-gray-500 dark:text-gray-400 mb-3"
-          aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-        >
-          <path d="M18 5h-.7c.229-.467.349-.98.351-1.5a3.5 3.5 0 0 0-3.5-3.5c-1.717 0-3.215 1.2-4.331 2.481C8.4.842 6.949 0 5.5 0A3.5 3.5 0 0 0 2 3.5c.003.52.123 1.033.351 1.5H2a2 2 0 0 0-2 2v3a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V7a2 2 0 0 0-2-2ZM8.058 5H5.5a1.5 1.5 0 0 1 0-3c.9 0 2 .754 3.092 2.122-.219.337-.392.635-.534.878Zm6.1 0h-3.742c.933-1.368 2.371-3 3.739-3a1.5 1.5 0 0 1 0 3h.003ZM11 13H9v7h2v-7Zm-4 0H2v5a2 2 0 0 0 2 2h3v-7Zm6 0v7h3a2 2 0 0 0 2-2v-5h-5Z" />
-        </svg>
-        <a href="#">
-          <h5 class="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">
-            Need a help in Claim?
-          </h5>
-        </a>
-        <p class="mb-3 font-normal text-gray-500 dark:text-gray-400">
-          Go to this step by step guideline process on how to certify for your
-          weekly benefits:
-        </p>
-        <a
-          href="#"
-          class="inline-flex font-medium items-center text-blue-600 hover:underline"
-        >
-          See our guideline
-          <svg
-            class="w-3 h-3 ms-2.5 rtl:rotate-[270deg]"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 18 18"
-          >
-            <path
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M15 11v4.833A1.166 1.166 0 0 1 13.833 17H2.167A1.167 1.167 0 0 1 1 15.833V4.167A1.166 1.166 0 0 1 2.167 3h4.618m4.447-2H17v5.768M9.111 8.889l7.778-7.778"
-            />
-          </svg>
-        </a>
-      </div>
-      <div class=" p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-white text-black dark:border-gray-700">
-        <svg
-          class="w-7 h-7 text-gray-500 dark:text-gray-400 mb-3"
-          aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-        >
-          <path d="M18 5h-.7c.229-.467.349-.98.351-1.5a3.5 3.5 0 0 0-3.5-3.5c-1.717 0-3.215 1.2-4.331 2.481C8.4.842 6.949 0 5.5 0A3.5 3.5 0 0 0 2 3.5c.003.52.123 1.033.351 1.5H2a2 2 0 0 0-2 2v3a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V7a2 2 0 0 0-2-2ZM8.058 5H5.5a1.5 1.5 0 0 1 0-3c.9 0 2 .754 3.092 2.122-.219.337-.392.635-.534.878Zm6.1 0h-3.742c.933-1.368 2.371-3 3.739-3a1.5 1.5 0 0 1 0 3h.003ZM11 13H9v7h2v-7Zm-4 0H2v5a2 2 0 0 0 2 2h3v-7Zm6 0v7h3a2 2 0 0 0 2-2v-5h-5Z" />
-        </svg>
-        <a href="#">
-          <h5 class="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">
-            Need a help in Claim?
-          </h5>
-        </a>
-        <p class="mb-3 font-normal text-gray-500 dark:text-gray-400">
-          Go to this step by step guideline process on how to certify for your
-          weekly benefits:
-        </p>
-        <a
-          href="#"
-          class="inline-flex font-medium items-center text-blue-600 hover:underline"
-        >
-          See our guideline
-          <svg
-            class="w-3 h-3 ms-2.5 rtl:rotate-[270deg]"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 18 18"
-          >
-            <path
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M15 11v4.833A1.166 1.166 0 0 1 13.833 17H2.167A1.167 1.167 0 0 1 1 15.833V4.167A1.166 1.166 0 0 1 2.167 3h4.618m4.447-2H17v5.768M9.111 8.889l7.778-7.778"
-            />
-          </svg>
-        </a>
-      </div>
-      <div class=" p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-white text-black dark:border-gray-700">
-        <svg
-          class="w-7 h-7 text-gray-500 dark:text-gray-400 mb-3"
-          aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-        >
-          <path d="M18 5h-.7c.229-.467.349-.98.351-1.5a3.5 3.5 0 0 0-3.5-3.5c-1.717 0-3.215 1.2-4.331 2.481C8.4.842 6.949 0 5.5 0A3.5 3.5 0 0 0 2 3.5c.003.52.123 1.033.351 1.5H2a2 2 0 0 0-2 2v3a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V7a2 2 0 0 0-2-2ZM8.058 5H5.5a1.5 1.5 0 0 1 0-3c.9 0 2 .754 3.092 2.122-.219.337-.392.635-.534.878Zm6.1 0h-3.742c.933-1.368 2.371-3 3.739-3a1.5 1.5 0 0 1 0 3h.003ZM11 13H9v7h2v-7Zm-4 0H2v5a2 2 0 0 0 2 2h3v-7Zm6 0v7h3a2 2 0 0 0 2-2v-5h-5Z" />
-        </svg>
-        <a href="#">
-          <h5 class="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">
-            Need a help in Claim?
-          </h5>
-        </a>
-        <p class="mb-3 font-normal text-gray-500 dark:text-gray-400">
-          Go to this step by step guideline process on how to certify for your
-          weekly benefits:
-        </p>
-        <a
-          href="#"
-          class="inline-flex font-medium items-center text-blue-600 hover:underline"
-        >
-          See our guideline
-          <svg
-            class="w-3 h-3 ms-2.5 rtl:rotate-[270deg]"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 18 18"
-          >
-            <path
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M15 11v4.833A1.166 1.166 0 0 1 13.833 17H2.167A1.167 1.167 0 0 1 1 15.833V4.167A1.166 1.166 0 0 1 2.167 3h4.618m4.447-2H17v5.768M9.111 8.889l7.778-7.778"
-            />
-          </svg>
-        </a>
-      </div>
-      <div class=" p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-white text-black dark:border-gray-700">
-        <svg
-          class="w-7 h-7 text-gray-500 dark:text-gray-400 mb-3"
-          aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-        >
-          <path d="M18 5h-.7c.229-.467.349-.98.351-1.5a3.5 3.5 0 0 0-3.5-3.5c-1.717 0-3.215 1.2-4.331 2.481C8.4.842 6.949 0 5.5 0A3.5 3.5 0 0 0 2 3.5c.003.52.123 1.033.351 1.5H2a2 2 0 0 0-2 2v3a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V7a2 2 0 0 0-2-2ZM8.058 5H5.5a1.5 1.5 0 0 1 0-3c.9 0 2 .754 3.092 2.122-.219.337-.392.635-.534.878Zm6.1 0h-3.742c.933-1.368 2.371-3 3.739-3a1.5 1.5 0 0 1 0 3h.003ZM11 13H9v7h2v-7Zm-4 0H2v5a2 2 0 0 0 2 2h3v-7Zm6 0v7h3a2 2 0 0 0 2-2v-5h-5Z" />
-        </svg>
-        <a href="#">
-          <h5 class="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">
-            Need a help in Claim?
-          </h5>
-        </a>
-        <p class="mb-3 font-normal text-gray-500 dark:text-gray-400">
-          Go to this step by step guideline process on how to certify for your
-          weekly benefits:
-        </p>
-        <a
-          href="#"
-          class="inline-flex font-medium items-center text-blue-600 hover:underline"
-        >
-          See our guideline
-          <svg
-            class="w-3 h-3 ms-2.5 rtl:rotate-[270deg]"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 18 18"
-          >
-            <path
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M15 11v4.833A1.166 1.166 0 0 1 13.833 17H2.167A1.167 1.167 0 0 1 1 15.833V4.167A1.166 1.166 0 0 1 2.167 3h4.618m4.447-2H17v5.768M9.111 8.889l7.778-7.778"
-            />
-          </svg>
-        </a>
-      </div>
-      <div class=" p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-white text-black dark:border-gray-700">
-        <svg
-          class="w-7 h-7 text-gray-500 dark:text-gray-400 mb-3"
-          aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-        >
-          <path d="M18 5h-.7c.229-.467.349-.98.351-1.5a3.5 3.5 0 0 0-3.5-3.5c-1.717 0-3.215 1.2-4.331 2.481C8.4.842 6.949 0 5.5 0A3.5 3.5 0 0 0 2 3.5c.003.52.123 1.033.351 1.5H2a2 2 0 0 0-2 2v3a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V7a2 2 0 0 0-2-2ZM8.058 5H5.5a1.5 1.5 0 0 1 0-3c.9 0 2 .754 3.092 2.122-.219.337-.392.635-.534.878Zm6.1 0h-3.742c.933-1.368 2.371-3 3.739-3a1.5 1.5 0 0 1 0 3h.003ZM11 13H9v7h2v-7Zm-4 0H2v5a2 2 0 0 0 2 2h3v-7Zm6 0v7h3a2 2 0 0 0 2-2v-5h-5Z" />
-        </svg>
-        <a href="#">
-          <h5 class="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">
-            Need a help in Claim?
-          </h5>
-        </a>
-        <p class="mb-3 font-normal text-gray-500 dark:text-gray-400">
-          Go to this step by step guideline process on how to certify for your
-          weekly benefits:
-        </p>
-        <a
-          href="#"
-          class="inline-flex font-medium items-center text-blue-600 hover:underline"
-        >
-          See our guideline
-          <svg
-            class="w-3 h-3 ms-2.5 rtl:rotate-[270deg]"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 18 18"
-          >
-            <path
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M15 11v4.833A1.166 1.166 0 0 1 13.833 17H2.167A1.167 1.167 0 0 1 1 15.833V4.167A1.166 1.166 0 0 1 2.167 3h4.618m4.447-2H17v5.768M9.111 8.889l7.778-7.778"
-            />
-          </svg>
-        </a>
-      </div>
-      <div class=" p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-white text-black dark:border-gray-700">
-        <svg
-          class="w-7 h-7 text-gray-500 dark:text-gray-400 mb-3"
-          aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-        >
-          <path d="M18 5h-.7c.229-.467.349-.98.351-1.5a3.5 3.5 0 0 0-3.5-3.5c-1.717 0-3.215 1.2-4.331 2.481C8.4.842 6.949 0 5.5 0A3.5 3.5 0 0 0 2 3.5c.003.52.123 1.033.351 1.5H2a2 2 0 0 0-2 2v3a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V7a2 2 0 0 0-2-2ZM8.058 5H5.5a1.5 1.5 0 0 1 0-3c.9 0 2 .754 3.092 2.122-.219.337-.392.635-.534.878Zm6.1 0h-3.742c.933-1.368 2.371-3 3.739-3a1.5 1.5 0 0 1 0 3h.003ZM11 13H9v7h2v-7Zm-4 0H2v5a2 2 0 0 0 2 2h3v-7Zm6 0v7h3a2 2 0 0 0 2-2v-5h-5Z" />
-        </svg>
-        <a href="#">
-          <h5 class="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">
-            Need a help in Claim?
-          </h5>
-        </a>
-        <p class="mb-3 font-normal text-gray-500 dark:text-gray-400">
-          Go to this step by step guideline process on how to certify for your
-          weekly benefits:
-        </p>
-        <a
-          href="#"
-          class="inline-flex font-medium items-center text-blue-600 hover:underline"
-        >
-          See our guideline
-          <svg
-            class="w-3 h-3 ms-2.5 rtl:rotate-[270deg]"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 18 18"
-          >
-            <path
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M15 11v4.833A1.166 1.166 0 0 1 13.833 17H2.167A1.167 1.167 0 0 1 1 15.833V4.167A1.166 1.166 0 0 1 2.167 3h4.618m4.447-2H17v5.768M9.111 8.889l7.778-7.778"
-            />
-          </svg>
-        </a>
-      </div>
-      <div class=" p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-white text-black dark:border-gray-700">
-        <svg
-          class="w-7 h-7 text-gray-500 dark:text-gray-400 mb-3"
-          aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-        >
-          <path d="M18 5h-.7c.229-.467.349-.98.351-1.5a3.5 3.5 0 0 0-3.5-3.5c-1.717 0-3.215 1.2-4.331 2.481C8.4.842 6.949 0 5.5 0A3.5 3.5 0 0 0 2 3.5c.003.52.123 1.033.351 1.5H2a2 2 0 0 0-2 2v3a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V7a2 2 0 0 0-2-2ZM8.058 5H5.5a1.5 1.5 0 0 1 0-3c.9 0 2 .754 3.092 2.122-.219.337-.392.635-.534.878Zm6.1 0h-3.742c.933-1.368 2.371-3 3.739-3a1.5 1.5 0 0 1 0 3h.003ZM11 13H9v7h2v-7Zm-4 0H2v5a2 2 0 0 0 2 2h3v-7Zm6 0v7h3a2 2 0 0 0 2-2v-5h-5Z" />
-        </svg>
-        <a href="#">
-          <h5 class="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">
-            Need a help in Claim?
-          </h5>
-        </a>
-        <p class="mb-3 font-normal text-gray-500 dark:text-gray-400">
-          Go to this step by step guideline process on how to certify for your
-          weekly benefits:
-        </p>
-        <a
-          href="#"
-          class="inline-flex font-medium items-center text-blue-600 hover:underline"
-        >
-          See our guideline
-          <svg
-            class="w-3 h-3 ms-2.5 rtl:rotate-[270deg]"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 18 18"
-          >
-            <path
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M15 11v4.833A1.166 1.166 0 0 1 13.833 17H2.167A1.167 1.167 0 0 1 1 15.833V4.167A1.166 1.166 0 0 1 2.167 3h4.618m4.447-2H17v5.768M9.111 8.889l7.778-7.778"
-            />
-          </svg>
-        </a>
-      </div>
-      <div class=" p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-white text-black dark:border-gray-700">
-        <svg
-          class="w-7 h-7 text-gray-500 dark:text-gray-400 mb-3"
-          aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-        >
-          <path d="M18 5h-.7c.229-.467.349-.98.351-1.5a3.5 3.5 0 0 0-3.5-3.5c-1.717 0-3.215 1.2-4.331 2.481C8.4.842 6.949 0 5.5 0A3.5 3.5 0 0 0 2 3.5c.003.52.123 1.033.351 1.5H2a2 2 0 0 0-2 2v3a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V7a2 2 0 0 0-2-2ZM8.058 5H5.5a1.5 1.5 0 0 1 0-3c.9 0 2 .754 3.092 2.122-.219.337-.392.635-.534.878Zm6.1 0h-3.742c.933-1.368 2.371-3 3.739-3a1.5 1.5 0 0 1 0 3h.003ZM11 13H9v7h2v-7Zm-4 0H2v5a2 2 0 0 0 2 2h3v-7Zm6 0v7h3a2 2 0 0 0 2-2v-5h-5Z" />
-        </svg>
-        <a href="#">
-          <h5 class="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">
-            Need a help in Claim?
-          </h5>
-        </a>
-        <p class="mb-3 font-normal text-gray-500 dark:text-gray-400">
-          Go to this step by step guideline process on how to certify for your
-          weekly benefits:
-        </p>
-        <a
-          href="#"
-          class="inline-flex font-medium items-center text-blue-600 hover:underline"
-        >
-          See our guideline
-          <svg
-            class="w-3 h-3 ms-2.5 rtl:rotate-[270deg]"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 18 18"
-          >
-            <path
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M15 11v4.833A1.166 1.166 0 0 1 13.833 17H2.167A1.167 1.167 0 0 1 1 15.833V4.167A1.166 1.166 0 0 1 2.167 3h4.618m4.447-2H17v5.768M9.111 8.889l7.778-7.778"
-            />
-          </svg>
-        </a>
-      </div>
-      <div class=" p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-white text-black dark:border-gray-700">
-        <svg
-          class="w-7 h-7 text-gray-500 dark:text-gray-400 mb-3"
-          aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-        >
-          <path d="M18 5h-.7c.229-.467.349-.98.351-1.5a3.5 3.5 0 0 0-3.5-3.5c-1.717 0-3.215 1.2-4.331 2.481C8.4.842 6.949 0 5.5 0A3.5 3.5 0 0 0 2 3.5c.003.52.123 1.033.351 1.5H2a2 2 0 0 0-2 2v3a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V7a2 2 0 0 0-2-2ZM8.058 5H5.5a1.5 1.5 0 0 1 0-3c.9 0 2 .754 3.092 2.122-.219.337-.392.635-.534.878Zm6.1 0h-3.742c.933-1.368 2.371-3 3.739-3a1.5 1.5 0 0 1 0 3h.003ZM11 13H9v7h2v-7Zm-4 0H2v5a2 2 0 0 0 2 2h3v-7Zm6 0v7h3a2 2 0 0 0 2-2v-5h-5Z" />
-        </svg>
-        <a href="#">
-          <h5 class="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">
-            Need a help in Claim?
-          </h5>
-        </a>
-        <p class="mb-3 font-normal text-gray-500 dark:text-gray-400">
-          Go to this step by step guideline process on how to certify for your
-          weekly benefits:
-        </p>
-        <a
-          href="#"
-          class="inline-flex font-medium items-center text-blue-600 hover:underline"
-        >
-          See our guideline
-          <svg
-            class="w-3 h-3 ms-2.5 rtl:rotate-[270deg]"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 18 18"
-          >
-            <path
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M15 11v4.833A1.166 1.166 0 0 1 13.833 17H2.167A1.167 1.167 0 0 1 1 15.833V4.167A1.166 1.166 0 0 1 2.167 3h4.618m4.447-2H17v5.768M9.111 8.889l7.778-7.778"
-            />
-          </svg>
-        </a>
-      </div>
-      <div class=" p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-white text-black dark:border-gray-700">
-        <svg
-          class="w-7 h-7 text-gray-500 dark:text-gray-400 mb-3"
-          aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-        >
-          <path d="M18 5h-.7c.229-.467.349-.98.351-1.5a3.5 3.5 0 0 0-3.5-3.5c-1.717 0-3.215 1.2-4.331 2.481C8.4.842 6.949 0 5.5 0A3.5 3.5 0 0 0 2 3.5c.003.52.123 1.033.351 1.5H2a2 2 0 0 0-2 2v3a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V7a2 2 0 0 0-2-2ZM8.058 5H5.5a1.5 1.5 0 0 1 0-3c.9 0 2 .754 3.092 2.122-.219.337-.392.635-.534.878Zm6.1 0h-3.742c.933-1.368 2.371-3 3.739-3a1.5 1.5 0 0 1 0 3h.003ZM11 13H9v7h2v-7Zm-4 0H2v5a2 2 0 0 0 2 2h3v-7Zm6 0v7h3a2 2 0 0 0 2-2v-5h-5Z" />
-        </svg>
-        <a href="#">
-          <h5 class="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">
-            Need a help in Claim?
-          </h5>
-        </a>
-        <p class="mb-3 font-normal text-gray-500 dark:text-gray-400">
-          Go to this step by step guideline process on how to certify for your
-          weekly benefits:
-        </p>
-        <a
-          href="#"
-          class="inline-flex font-medium items-center text-blue-600 hover:underline"
-        >
-          See our guideline
-          <svg
-            class="w-3 h-3 ms-2.5 rtl:rotate-[270deg]"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 18 18"
-          >
-            <path
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M15 11v4.833A1.166 1.166 0 0 1 13.833 17H2.167A1.167 1.167 0 0 1 1 15.833V4.167A1.166 1.166 0 0 1 2.167 3h4.618m4.447-2H17v5.768M9.111 8.889l7.778-7.778"
-            />
-          </svg>
-        </a>
-      </div>
-      <div class=" p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-white text-black dark:border-gray-700">
-        <svg
-          class="w-7 h-7 text-gray-500 dark:text-gray-400 mb-3"
-          aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-        >
-          <path d="M18 5h-.7c.229-.467.349-.98.351-1.5a3.5 3.5 0 0 0-3.5-3.5c-1.717 0-3.215 1.2-4.331 2.481C8.4.842 6.949 0 5.5 0A3.5 3.5 0 0 0 2 3.5c.003.52.123 1.033.351 1.5H2a2 2 0 0 0-2 2v3a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V7a2 2 0 0 0-2-2ZM8.058 5H5.5a1.5 1.5 0 0 1 0-3c.9 0 2 .754 3.092 2.122-.219.337-.392.635-.534.878Zm6.1 0h-3.742c.933-1.368 2.371-3 3.739-3a1.5 1.5 0 0 1 0 3h.003ZM11 13H9v7h2v-7Zm-4 0H2v5a2 2 0 0 0 2 2h3v-7Zm6 0v7h3a2 2 0 0 0 2-2v-5h-5Z" />
-        </svg>
-        <a href="#">
-          <h5 class="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">
-            Need a help in Claim?
-          </h5>
-        </a>
-        <p class="mb-3 font-normal text-gray-500 dark:text-gray-400">
-          Go to this step by step guideline process on how to certify for your
-          weekly benefits:
-        </p>
-        <a
-          href="#"
-          class="inline-flex font-medium items-center text-blue-600 hover:underline"
-        >
-          See our guideline
-          <svg
-            class="w-3 h-3 ms-2.5 rtl:rotate-[270deg]"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 18 18"
-          >
-            <path
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M15 11v4.833A1.166 1.166 0 0 1 13.833 17H2.167A1.167 1.167 0 0 1 1 15.833V4.167A1.166 1.166 0 0 1 2.167 3h4.618m4.447-2H17v5.768M9.111 8.889l7.778-7.778"
-            />
-          </svg>
-        </a>
-      </div>
-      <div class=" p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-white text-black dark:border-gray-700">
-        <svg
-          class="w-7 h-7 text-gray-500 dark:text-gray-400 mb-3"
-          aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-        >
-          <path d="M18 5h-.7c.229-.467.349-.98.351-1.5a3.5 3.5 0 0 0-3.5-3.5c-1.717 0-3.215 1.2-4.331 2.481C8.4.842 6.949 0 5.5 0A3.5 3.5 0 0 0 2 3.5c.003.52.123 1.033.351 1.5H2a2 2 0 0 0-2 2v3a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V7a2 2 0 0 0-2-2ZM8.058 5H5.5a1.5 1.5 0 0 1 0-3c.9 0 2 .754 3.092 2.122-.219.337-.392.635-.534.878Zm6.1 0h-3.742c.933-1.368 2.371-3 3.739-3a1.5 1.5 0 0 1 0 3h.003ZM11 13H9v7h2v-7Zm-4 0H2v5a2 2 0 0 0 2 2h3v-7Zm6 0v7h3a2 2 0 0 0 2-2v-5h-5Z" />
-        </svg>
-        <a href="#">
-          <h5 class="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">
-            Need a help in Claim?
-          </h5>
-        </a>
-        <p class="mb-3 font-normal text-gray-500 dark:text-gray-400">
-          Go to this step by step guideline process on how to certify for your
-          weekly benefits:
-        </p>
-        <a
-          href="#"
-          class="inline-flex font-medium items-center text-blue-600 hover:underline"
-        >
-          See our guideline
-          <svg
-            class="w-3 h-3 ms-2.5 rtl:rotate-[270deg]"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 18 18"
-          >
-            <path
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M15 11v4.833A1.166 1.166 0 0 1 13.833 17H2.167A1.167 1.167 0 0 1 1 15.833V4.167A1.166 1.166 0 0 1 2.167 3h4.618m4.447-2H17v5.768M9.111 8.889l7.778-7.778"
-            />
-          </svg>
-        </a>
-      </div>
-      <div class=" p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-white text-black dark:border-gray-700">
-        <svg
-          class="w-7 h-7 text-gray-500 dark:text-gray-400 mb-3"
-          aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-        >
-          <path d="M18 5h-.7c.229-.467.349-.98.351-1.5a3.5 3.5 0 0 0-3.5-3.5c-1.717 0-3.215 1.2-4.331 2.481C8.4.842 6.949 0 5.5 0A3.5 3.5 0 0 0 2 3.5c.003.52.123 1.033.351 1.5H2a2 2 0 0 0-2 2v3a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V7a2 2 0 0 0-2-2ZM8.058 5H5.5a1.5 1.5 0 0 1 0-3c.9 0 2 .754 3.092 2.122-.219.337-.392.635-.534.878Zm6.1 0h-3.742c.933-1.368 2.371-3 3.739-3a1.5 1.5 0 0 1 0 3h.003ZM11 13H9v7h2v-7Zm-4 0H2v5a2 2 0 0 0 2 2h3v-7Zm6 0v7h3a2 2 0 0 0 2-2v-5h-5Z" />
-        </svg>
-        <a href="#">
-          <h5 class="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">
-            Need a help in Claim?
-          </h5>
-        </a>
-        <p class="mb-3 font-normal text-gray-500 dark:text-gray-400">
-          Go to this step by step guideline process on how to certify for your
-          weekly benefits:
-        </p>
-        <a
-          href="#"
-          class="inline-flex font-medium items-center text-blue-600 hover:underline"
-        >
-          See our guideline
-          <svg
-            class="w-3 h-3 ms-2.5 rtl:rotate-[270deg]"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 18 18"
-          >
-            <path
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M15 11v4.833A1.166 1.166 0 0 1 13.833 17H2.167A1.167 1.167 0 0 1 1 15.833V4.167A1.166 1.166 0 0 1 2.167 3h4.618m4.447-2H17v5.768M9.111 8.889l7.778-7.778"
-            />
-          </svg>
-        </a>
-      </div>
-      <div class=" p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-white text-black dark:border-gray-700">
-        <svg
-          class="w-7 h-7 text-gray-500 dark:text-gray-400 mb-3"
-          aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-        >
-          <path d="M18 5h-.7c.229-.467.349-.98.351-1.5a3.5 3.5 0 0 0-3.5-3.5c-1.717 0-3.215 1.2-4.331 2.481C8.4.842 6.949 0 5.5 0A3.5 3.5 0 0 0 2 3.5c.003.52.123 1.033.351 1.5H2a2 2 0 0 0-2 2v3a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V7a2 2 0 0 0-2-2ZM8.058 5H5.5a1.5 1.5 0 0 1 0-3c.9 0 2 .754 3.092 2.122-.219.337-.392.635-.534.878Zm6.1 0h-3.742c.933-1.368 2.371-3 3.739-3a1.5 1.5 0 0 1 0 3h.003ZM11 13H9v7h2v-7Zm-4 0H2v5a2 2 0 0 0 2 2h3v-7Zm6 0v7h3a2 2 0 0 0 2-2v-5h-5Z" />
-        </svg>
-        <a href="#">
-          <h5 class="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">
-            Need a help in Claim?
-          </h5>
-        </a>
-        <p class="mb-3 font-normal text-gray-500 dark:text-gray-400">
-          Go to this step by step guideline process on how to certify for your
-          weekly benefits:
-        </p>
-        <a
-          href="#"
-          class="inline-flex font-medium items-center text-blue-600 hover:underline"
-        >
-          See our guideline
-          <svg
-            class="w-3 h-3 ms-2.5 rtl:rotate-[270deg]"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 18 18"
-          >
-            <path
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M15 11v4.833A1.166 1.166 0 0 1 13.833 17H2.167A1.167 1.167 0 0 1 1 15.833V4.167A1.166 1.166 0 0 1 2.167 3h4.618m4.447-2H17v5.768M9.111 8.889l7.778-7.778"
-            />
-          </svg>
-        </a>
-      </div>
-      <div class=" p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-white text-black dark:border-gray-700">
-        <svg
-          class="w-7 h-7 text-gray-500 dark:text-gray-400 mb-3"
-          aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-        >
-          <path d="M18 5h-.7c.229-.467.349-.98.351-1.5a3.5 3.5 0 0 0-3.5-3.5c-1.717 0-3.215 1.2-4.331 2.481C8.4.842 6.949 0 5.5 0A3.5 3.5 0 0 0 2 3.5c.003.52.123 1.033.351 1.5H2a2 2 0 0 0-2 2v3a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V7a2 2 0 0 0-2-2ZM8.058 5H5.5a1.5 1.5 0 0 1 0-3c.9 0 2 .754 3.092 2.122-.219.337-.392.635-.534.878Zm6.1 0h-3.742c.933-1.368 2.371-3 3.739-3a1.5 1.5 0 0 1 0 3h.003ZM11 13H9v7h2v-7Zm-4 0H2v5a2 2 0 0 0 2 2h3v-7Zm6 0v7h3a2 2 0 0 0 2-2v-5h-5Z" />
-        </svg>
-        <a href="#">
-          <h5 class="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">
-            Need a help in Claim?
-          </h5>
-        </a>
-        <p class="mb-3 font-normal text-gray-500 dark:text-gray-400">
-          Go to this step by step guideline process on how to certify for your
-          weekly benefits:
-        </p>
-        <a
-          href="#"
-          class="inline-flex font-medium items-center text-blue-600 hover:underline"
-        >
-          See our guideline
-          <svg
-            class="w-3 h-3 ms-2.5 rtl:rotate-[270deg]"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 18 18"
-          >
-            <path
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M15 11v4.833A1.166 1.166 0 0 1 13.833 17H2.167A1.167 1.167 0 0 1 1 15.833V4.167A1.166 1.166 0 0 1 2.167 3h4.618m4.447-2H17v5.768M9.111 8.889l7.778-7.778"
-            />
-          </svg>
-        </a>
-      </div>
-      <div class=" p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-white text-black dark:border-gray-700">
-        <svg
-          class="w-7 h-7 text-gray-500 dark:text-gray-400 mb-3"
-          aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-        >
-          <path d="M18 5h-.7c.229-.467.349-.98.351-1.5a3.5 3.5 0 0 0-3.5-3.5c-1.717 0-3.215 1.2-4.331 2.481C8.4.842 6.949 0 5.5 0A3.5 3.5 0 0 0 2 3.5c.003.52.123 1.033.351 1.5H2a2 2 0 0 0-2 2v3a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V7a2 2 0 0 0-2-2ZM8.058 5H5.5a1.5 1.5 0 0 1 0-3c.9 0 2 .754 3.092 2.122-.219.337-.392.635-.534.878Zm6.1 0h-3.742c.933-1.368 2.371-3 3.739-3a1.5 1.5 0 0 1 0 3h.003ZM11 13H9v7h2v-7Zm-4 0H2v5a2 2 0 0 0 2 2h3v-7Zm6 0v7h3a2 2 0 0 0 2-2v-5h-5Z" />
-        </svg>
-        <a href="#">
-          <h5 class="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">
-            Need a help in Claim?
-          </h5>
-        </a>
-        <p class="mb-3 font-normal text-gray-500 dark:text-gray-400">
-          Go to this step by step guideline process on how to certify for your
-          weekly benefits:
-        </p>
-        <a
-          href="#"
-          class="inline-flex font-medium items-center text-blue-600 hover:underline"
-        >
-          See our guideline
-          <svg
-            class="w-3 h-3 ms-2.5 rtl:rotate-[270deg]"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 18 18"
-          >
-            <path
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M15 11v4.833A1.166 1.166 0 0 1 13.833 17H2.167A1.167 1.167 0 0 1 1 15.833V4.167A1.166 1.166 0 0 1 2.167 3h4.618m4.447-2H17v5.768M9.111 8.889l7.778-7.778"
-            />
-          </svg>
-        </a>
-      </div>
-    </div>
+    <Fragment>
+      <CardSection productCount={productCount} ordersCount={orderCount} customersCount={customerCount} /> {/* تمرير عدد المنتجات لمكون CardSection */}
+      <ChartSection areaData={totalPricesByMonth} doughnutData={orderStatusCounts} />
+      <TabelSection data={{ orders: orders }} /> {/* تمرير الطلبات لمكون TabelSection */}
+    </Fragment>
   );
 };
 

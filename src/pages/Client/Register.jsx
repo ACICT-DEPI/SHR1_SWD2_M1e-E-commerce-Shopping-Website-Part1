@@ -40,7 +40,7 @@ const Register = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/v1/users/register",
+        "https://server-esw.up.railway.app/api/v1/users/register",
         userData,
         {
           headers: {
@@ -104,7 +104,7 @@ const Register = () => {
       
       <div className="w-full max-w-xl p-10 space-y-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
         <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white">
-          Register to Shopify
+          Register In Trade-Sphere
         </h2>
         <form onSubmit={handleRegister} className="space-y-4">
           {/* First Name */}

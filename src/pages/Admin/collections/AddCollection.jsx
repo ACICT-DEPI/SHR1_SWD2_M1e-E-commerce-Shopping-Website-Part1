@@ -24,6 +24,7 @@ const AddCollection = () => {
   const [showValue, setShowValue] = useState(showOptions[1]);
   const toast = useRef(null);
   const navigate = useNavigate();
+  const [errors, setErrors] = useState({});
 
   // لتحديث مسار الصورة عند إلغاء المكون
   useEffect(() => {
@@ -57,7 +58,7 @@ const AddCollection = () => {
     try {
       // إرسال الطلب لإنشاء الـ category
       const response = await axios.post(
-        "http://localhost:5000/api/v1/categories",
+        "https://server-esw.up.railway.app/api/v1/categories",
         {
           title,
           description,
@@ -81,7 +82,7 @@ const AddCollection = () => {
 
           // رفع الصورة
           const imageResponse = await axios.patch(
-            `http://localhost:5000/api/v1/categories/category-photo-upload/${collectionId}`,
+            `https://server-esw.up.railway.app/api/v1/categories/category-photo-upload/${collectionId}`,
             formImageData,
             {
               withCredentials: true,
@@ -107,7 +108,7 @@ const AddCollection = () => {
 
           // رفع الصورة
           const imageResponse = await axios.patch(
-            `http://localhost:5000/api/v1/categories/category-banner-upload/${collectionId}`,
+            `https://server-esw.up.railway.app/api/v1/categories/category-banner-upload/${collectionId}`,
             formBannerData,
             {
               withCredentials: true,
@@ -142,6 +143,14 @@ const AddCollection = () => {
         handleErrors(response.data);
       }
     } catch (error) {
+      const data = error.response?.data || {};
+
+      setErrors((prev) => ({
+       ...prev,
+       title: data.errors?.title?.message || "",
+       description: data.errors?.description?.message || "",
+       
+     }));
       toast.current.show({
         severity: "error",
         summary: "Error",
@@ -198,12 +207,14 @@ const AddCollection = () => {
                   id="title"
                   type="text"
                   placeholder="Enter collection name"
-                  className="w-full"
+                  className={`w-full ${errors.excerpt ? 'border-red-500' : ''}`}
                   pt={inputTextStyle}
                   unstyled={true}
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                 />
+              {errors.title && <small className="p-error">{errors.title}</small>}
+
               </div>
 
               <div className="mb-2">
@@ -217,6 +228,8 @@ const AddCollection = () => {
                   value={description}
                   onTextChange={(e) => setDescription(e.htmlValue)}
                 />
+              {errors.description && <small className="p-error">{errors.description}</small>}
+
               </div>
               <div className="mb-2">
                 <label
@@ -265,7 +278,7 @@ const AddCollection = () => {
         </div>
       </div>
 
-      <Toast ref={toast}></Toast>
+      <Toast ref={toast} position="bottom-left"></Toast>
     </Fragment>
   );
 };

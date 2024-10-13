@@ -20,7 +20,7 @@ const Login = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/v1/users/login",
+        "https://server-esw.up.railway.app/api/v1/users/login",
         {
           email,
           password,
@@ -58,7 +58,7 @@ const Login = () => {
       {/* PrimeReact Toast component */}
       <div className="w-full max-w-md p-8 space-y-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
         <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white">
-          Log In to Shopfiy
+          Log In Trade-Sphere
         </h2>
         <form onSubmit={handleLogin} className="space-y-4">
           {/* Email Field */}

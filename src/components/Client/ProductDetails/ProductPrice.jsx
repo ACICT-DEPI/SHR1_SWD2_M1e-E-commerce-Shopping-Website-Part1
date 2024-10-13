@@ -17,14 +17,14 @@ const ProductPrice = ({ product, onNewPrice }) => {
 
     return (
         <div className="flex items-center pb-5 pl-4 dark:text-white">
-            {/* السعر القديم */}
-            <p className="text-lg text-gray-500 line-through mr-4 dark:text-white">{oldPrice} $</p>
-
             {/* السعر الجديد */}
             <p className="text-xl text-gray font-semibold mr-4 dark:text-white">{newPrice} $</p>
 
+            {/* السعر القديم */}
+            <p className="text-md text-gray-500 line-through mr-4 dark:text-white">{oldPrice} $</p>
+
             {/* الخصم */}
-            <p className="text-lg text-red-500 font-semibold dark:text-white">{discount}% Off</p>
+            <p className="text-md text-white bg-red-600 w-16 rounded-md  text-center font-normal dark:text-white">{discount}% Off</p>
         </div>
     );
 };

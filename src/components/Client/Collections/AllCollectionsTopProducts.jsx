@@ -10,7 +10,7 @@ const AllCollectionsTopProducts = () => {
     const fetchCategories = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/v1/categories/"
+          "https://server-esw.up.railway.app/api/v1/categories/"
         );
         setCategories(response.data.data.categories); // تعيين الفئات
       } catch (error) {

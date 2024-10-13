@@ -24,7 +24,10 @@ const ProductTabs = ({ description, reviews }) => {
 
       {activeTab === 'description' && (
         <div className="mt-4  dark:text-white">
-          <p className="text-xl  dark:text-white">{description}</p>
+          <p className="text-xl  dark:text-white"
+            dangerouslySetInnerHTML={{
+              __html: description,
+            }}></p>
         </div>
       )}
 

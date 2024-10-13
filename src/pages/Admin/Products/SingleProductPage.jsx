@@ -9,30 +9,48 @@ import { Toast } from "primereact/toast";
 import MediaUpload from "../../../components/Admin/MediaUpload/MediaUpload";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
+import { Dropdown } from "primereact/dropdown";
 
 const SingleProductPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const toast = useRef(null);
-
   const [title, setTitle] = useState("");
   const [price, setPrice] = useState(0);
   const [discount, setDiscount] = useState(0);
   const [quantity, setQuantity] = useState(0);
   const [excerpt, setExcerpt] = useState("");
   const [description, setDescription] = useState("");
-  const [existingImage, setExistingImage] = useState(null);
-  const [newImage, setNewImage] = useState(null);
- // State for error messages
+  const [existingGallery, setExistingGallery] = useState([]);
+  const [newGallery, setNewGallery] = useState([]);
   const [errors, setErrors] = useState({});
+  const [category, setCategory] = useState("");
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get('https://server-esw.up.railway.app/api/v1/categories', { withCredentials: true });
+        setCategories(response.data.data.categories);
+      } catch (error) {
+        toast.current.show({
+          severity: "error",
+          summary: "Error",
+          detail: "Failed to fetch categories",
+        })
+      } finally {
+      }
+    };
+    fetchCategories();
+  }, []);
+
   // Fetch product data when the component mounts
   useEffect(() => {
     const fetchProductData = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/v1/products/${id}`, {
+        const response = await axios.get(`https://server-esw.up.railway.app/api/v1/products/${id}`, {
           withCredentials: true,
         });
-
         const product = response.data.data;
         setTitle(product.title);
         setDescription(product.description);
@@ -40,7 +58,8 @@ const SingleProductPage = () => {
         setDiscount(product.discount);
         setQuantity(product.quantity);
         setExcerpt(product.excerpt);
-        setExistingImage(product.image?.url);
+        setCategory(product.category); // Assuming category is a foreign key reference
+        setExistingGallery(product.gallery?.map(item => item.url) || []); // Assuming gallery is an array of objects
       } catch (error) {
         console.error("Error fetching product data:", error);
         toast.current.show({
@@ -50,64 +69,88 @@ const SingleProductPage = () => {
         });
       }
     };
-
     fetchProductData();
   }, [id]);
 
-  // Handle image changes
-  const handleImageChange = (file) => {
-    setNewImage(file);
-    setExistingImage(URL.createObjectURL(file));
+  // Handle gallery changes
+  const handleGalleryChange = (files) => {
+    setNewGallery(files);
+    // Set previews separately from existingGallery
+    setExistingGallery((prevGallery) => [
+      ...prevGallery, 
+      ...files.map(file => URL.createObjectURL(file))
+    ]);
   };
 
-
-  // Submit form to update product data
   const submitForm = async (e) => {
     e.preventDefault();
+    setErrors({}); // Reset errors
 
     try {
-        // Send PATCH request to update product
-        const updateResponse = await axios.patch(
-            `http://localhost:5000/api/v1/products/${id}`,
-            { title, description, excerpt, discount, price , quantity},
-            {
-                withCredentials: true,
-            }
-        );
-        toast.current.show({ severity: "success", summary: "Success", detail: "Product updated successfully", life: 3000 });
-        window.location.reload();
-         // Navigate to another page or refresh as needed
-         setTimeout(() => {
-          navigate('/admin/products');
-      }, 2000);
+      // Prepare form data for product update
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("description", description); // Send as HTML
+      formData.append("excerpt", excerpt); // Send as HTML
+      formData.append("price", price); // Send as HTML
+      formData.append("discount", discount); // Send as HTML
+      formData.append("quantity", quantity); // Send as HTML
+      formData.append("category", category); // Send as HTML
+      // Update product details
+      const updateResponse = await axios.patch(`https://server-esw.up.railway.app/api/v1/products/${id}`, formData, {
+        withCredentials: true,
+      });
 
-        console.log("Update Response:", updateResponse.data);
+      // Upload new gallery images if selected
+      if (newGallery.length > 0) {
+        const galleryFormData = new FormData();
+        newGallery.forEach((file) => {
+          galleryFormData.append("gallery", file);
+        });
+
+        const imageResponse = await axios.patch(`https://server-esw.up.railway.app/api/v1/products/product-photos-upload/${id}`, galleryFormData, {
+          withCredentials: true,
+        });
+
+        if (imageResponse.data.status === "success") {
+          toast.current.show({
+            severity: "success",
+            summary: "Success",
+            detail: "Images uploaded successfully",
+            life: 3000,
+          });
+        } else {
+          throw new Error(imageResponse.data.message || "Image upload failed");
+        }
+      }
+      toast.current.show({
+        severity: "success",
+        summary: "Success",
+        detail: "Product updated successfully",
+        life: 3000,
+      });
+      navigate("/admin/products"); // Redirect to products list
     } catch (error) {
-       const data = error.response?.data || {};
-
-       setErrors((prev) => ({
+      const data = error.response?.data || {};
+      setErrors((prev) => ({
         ...prev,
         title: data.errors?.title?.message || "",
-        description: data.description?.category?.message || "",
+        description: data.errors?.description?.message || "",
         excerpt: data.errors?.excerpt?.message || "",
         price: data.errors?.price?.message || "",
         discount: data.errors?.discount?.message || "",
         quantity: data.errors?.quantity?.message || "",
         category: data.errors?.category?.message || "",
+        gallery: data.errors?.gallery || [],
       }));
-        // Show error message if the update fails
-        toast.current.show({
-            severity: "error",
-            summary: "Error",
-            detail: error.response?.data?.message || "Failed to update product",
-        });
+
+      toast.current.show({
+        severity: "error",
+        summary: "Error",
+        detail: "Failed to update product",
+      });
     }
-};
-
-
-
-
-
+  };
 
   return (
     <Fragment>
@@ -136,24 +179,20 @@ const SingleProductPage = () => {
                   onChange={(e) => setTitle(e.target.value)}
                 />
                 {errors.title && <small className="p-error">{errors.title}</small>}
-
               </div>
 
- {/* Price, Discount and Quantity Fields on the same line */}
- <div className="mb-2 grid grid-cols-3 gap-4">
+              {/* Price, Discount, and Quantity Fields on the same line */}
+              <div className="mb-2 grid grid-cols-3 gap-4">
                 {/* Price Field */}
                 <div>
-                  <label htmlFor="price" className="w-full mb-2 block text-black dark:text-white">
-                    Price ($)
-                  </label>
+                  <label htmlFor="price" className="w-full mb-2 block text-black dark:text-white">Price ($)</label>
                   <InputText
                     id="price"
                     type="number"
                     value={price}
                     placeholder="Enter product price"
-                    
                     className={`w-full ${errors.price ? 'border-red-500' : ''}`}
-                    onChange={(e) => setPrice(e.target.value)}
+                    onChange={(e) => setPrice(Number(e.target.value))}
                     pt={inputTextStyle}
                     unstyled={true}
                   />
@@ -162,9 +201,7 @@ const SingleProductPage = () => {
 
                 {/* Discount Field */}
                 <div>
-                  <label htmlFor="discount" className="w-full mb-2 block text-black dark:text-white">
-                    Discount (%)
-                  </label>
+                  <label htmlFor="discount" className="w-full mb-2 block text-black dark:text-white">Discount (%)</label>
                   <InputText
                     id="discount"
                     type="number"
@@ -173,7 +210,7 @@ const SingleProductPage = () => {
                     min={0}
                     max={100}
                     className={`w-full ${errors.discount ? 'border-red-500' : ''}`}
-                    onChange={(e) => setDiscount(e.target.value)}
+                    onChange={(e) => setDiscount(Number(e.target.value))}
                     pt={inputTextStyle}
                     unstyled={true}
                   />
@@ -182,9 +219,7 @@ const SingleProductPage = () => {
 
                 {/* Quantity Field */}
                 <div>
-                  <label htmlFor="quantity" className="w-full mb-2 block text-black dark:text-white">
-                    Quantity
-                  </label>
+                  <label htmlFor="quantity" className="w-full mb-2 block text-black dark:text-white">Quantity</label>
                   <InputText
                     id="quantity"
                     type="number"
@@ -193,12 +228,28 @@ const SingleProductPage = () => {
                     min={1}
                     max={100}
                     className={`w-full ${errors.quantity ? 'border-red-500' : ''}`}
-                    onChange={(e) => setQuantity(e.target.value)}
+                    onChange={(e) => setQuantity(Number(e.target.value))}
                     pt={inputTextStyle}
                     unstyled={true}
                   />
                   {errors.quantity && <small className="p-error">{errors.quantity}</small>}
                 </div>
+              </div>
+                {/* Category Dropdown */}
+                
+              <div className="mb-4">
+                <label htmlFor="category" className="block text-lg font-semibold mb-2 text-black dark:text-white">
+                  Category
+                </label>
+                <Dropdown
+  id="category"
+  value={category} // State holding selected category ID
+  options={categories.map(cat => ({ label: cat.title, value: cat._id }))} // Mapping categories to required format
+  onChange={(e) => setCategory(e.value)} // Sets the selected category ID
+  placeholder="Select a category"
+  className={`w-full ${errors.category ? 'border-red-500' : ''}`}
+/>
+                {errors.category && <small className="text-red-500 mt-1">{errors.category}</small>}
               </div>
 
               {/* Excerpt Input */}
@@ -208,48 +259,44 @@ const SingleProductPage = () => {
                   id="excerpt"
                   type="text"
                   placeholder="Enter product excerpt"
-                  className={`w-full ${errors.excerpt ? 'border-red-500' : ''}`}
                   value={excerpt}
+                  className={`w-full ${errors.excerpt ? 'border-red-500' : ''}`}
                   onChange={(e) => setExcerpt(e.target.value)}
+                  pt={inputTextStyle}
+                  unstyled={true}
                 />
-               {errors.excerpt && <small className="p-error">{errors.excerpt}</small>}
-
+                {errors.excerpt && <small className="p-error">{errors.excerpt}</small>}
               </div>
 
               {/* Description Editor */}
               <div className="mb-2">
-                <label htmlFor="description" className={`w-full mb-2 block text-black dark:text-white ${errors.category ? 'border-red-500' : ''}`}>Description</label>
+                <label htmlFor="description" className="w-full mb-2 block text-black dark:text-white">Description</label>
                 <CustomEditor
                   value={description}
-                  onTextChange={(e) => setDescription(e.htmlValue)} // Ensure e.htmlValue is used correctly
+                  onTextChange={(content) => setDescription(content)}
                 />
-               {errors.description && <small className="p-error">{errors.description}</small>}
-
+                {errors.description && <small className="p-error">{errors.description}</small>}
               </div>
 
-              {/* Image Upload */}
+              {/* Media Upload Section */}
               <div className="mb-2">
-                <label htmlFor="image-upload" className="w-full mb-2 block text-black dark:text-white">Image</label>
+                <label className="w-full mb-2 block text-black dark:text-white">Gallery</label>
                 <MediaUpload
-                  onChange={handleImageChange}
-                  maxFiles={1}
-                  existingImage={existingImage}
-                  showImage={existingImage}
+                  existingImages={existingGallery} // Use existingGallery for displaying existing images
+                  onChange={handleGalleryChange} // Handle gallery image changes
                 />
+                {errors.gallery && <small className="p-error">{errors.gallery}</small>}
               </div>
 
               {/* Submit Button */}
-              <div className="pt-3 rounded-b-md sm:rounded-b-lg">
-                <div className="flex items-center justify-end">
-                  <Button label="Save Changes" size="normal" className="text-base" pt={buttonsStyle} />
-                </div>
-              </div>
+              <Button label="Update Product" type="submit" className={buttonsStyle} />
             </div>
           </form>
         </div>
       </div>
 
-      <Toast ref={toast} position="bottom-left"></Toast>
+      {/* Toast Notifications */}
+      <Toast ref={toast}  position="bottom-left"/>
     </Fragment>
   );
 };

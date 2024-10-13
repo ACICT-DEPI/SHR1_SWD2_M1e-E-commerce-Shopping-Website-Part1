@@ -34,7 +34,7 @@ const CollectionsDataTabel = () => {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const response = await axios.get("http://localhost:5000/api/v1/categories");
+      const response = await axios.get("https://server-esw.up.railway.app/api/v1/categories");
       const fetchedCategories = response.data.data.categories;
       setCategories(fetchedCategories); 
     } catch (error) {
@@ -51,7 +51,7 @@ const CollectionsDataTabel = () => {
 
   const handleDeleteCollection = async (id) => {
     try {
-      const response = await axios.delete(`http://localhost:5000/api/v1/categories/${id}`, {
+      const response = await axios.delete(`https://server-esw.up.railway.app/api/v1/categories/${id}`, {
         withCredentials: true,
         headers: {
           'Content-Type': 'application/json', 
@@ -140,9 +140,9 @@ const CollectionsDataTabel = () => {
         icon="pi pi-pencil"
         rounded
         outlined
-        className="mr-2 dark:border-gray-400"
+        className="mr-2"
         aria-label="Edit order"
-        onClick={() => navigate(`/admin/collections/${rowData._id}`)}
+        onClick={() => navigate(`/admin/products/update/${rowData._id}`)}
       />
       <Button
         icon="pi pi-trash"
@@ -151,10 +151,10 @@ const CollectionsDataTabel = () => {
         severity="danger"
         aria-label="Delete order"
         onClick={(e) => confirmDeleteCollection(e, rowData._id)}
-        className="dark:border-red-600"
       />
     </>
   );
+
 
   const cllectionBodyTemplate = (rowData) => {
     return (

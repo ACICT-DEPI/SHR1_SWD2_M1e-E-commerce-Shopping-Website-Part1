@@ -27,7 +27,7 @@ const CollectionProduct = ({ collection }) => {
       try {
         // طلب API باستخدام category title
         const response = await axios.get(
-          `http://localhost:5000/api/v1/categories/${param}`
+          `https://server-esw.up.railway.app/api/v1/categories/${param}`
         );
 
         if (response.data && response.data.data) {
@@ -74,7 +74,7 @@ const CollectionProduct = ({ collection }) => {
       try {
         // طلب API باستخدام pagination و category
         const response = await axios.get(
-          `http://localhost:5000/api/v1/products`,
+          `https://server-esw.up.railway.app/api/v1/products`,
           {
             params: {
               categories: param, // تمرير الفئة

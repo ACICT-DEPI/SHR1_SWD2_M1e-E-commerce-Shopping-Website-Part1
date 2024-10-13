@@ -1,13 +1,12 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { FaSearch, FaShoppingCart } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; 
 import SearchComponent from "./SearchComponent";
 import ClickOutside from "../ClickOutside";
 import axios from "axios";
 import AuthLinks from "./AuthLinks";
 import UserDropdown from "./UserDropDown";
 import DarkModeSwitcher from "../../Admin/Header/DarkModeSwitcher";
-import { useNavigate } from "react-router-dom";
 
 const UserHeader = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -16,8 +15,8 @@ const UserHeader = () => {
   const [avatarUrl, setAvatarUrl] = useState("");
   const [error, setError] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(0); // State for cart count
   const navigate = useNavigate();
-
 
   const searchButtonRef = useRef(null);
   const dropdownRef = useRef(null);
@@ -30,7 +29,7 @@ const UserHeader = () => {
     const checkAuth = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/v1/users/profile",
+          "https://server-esw.up.railway.app/api/v1/users/profile",
           { withCredentials: true }
         );
         setIsAuthenticated(true);
@@ -45,16 +44,24 @@ const UserHeader = () => {
       } catch (error) {
         setError(error.response ? error.response.data.message : error.message);
         setIsAuthenticated(false);
-
       }
     };
     checkAuth();
   }, []);
-  
+
+  // Update cart count
+  useEffect(() => {
+    const storedCartProducts = JSON.parse(localStorage.getItem("cartProducts")) || [];
+    const totalCount = storedCartProducts.reduce((acc, product) => acc + product.quantity, 0);
+    setCartCount(totalCount);
+  }, []);
+
+  const handleCartClick = () => {
+    navigate("/Cart");
+  };
 
   return (
     <header className="bg-white dark:bg-gray-900 w-full z-[999]">
-      {/* Second Row */}
       <div className="shadow-lg">
         <div className="container mx-auto flex justify-between items-center px-4 py-3 lg:px-[6rem] xl:px-[8rem] font-sans">
           {/* Logo and Shop Button */}
@@ -99,11 +106,13 @@ const UserHeader = () => {
                 onClick={toggleSearch}
               />
               {/* Cart Icon */}
-              <div className="relative">
+              <div className="relative" onClick={handleCartClick}>
                 <FaShoppingCart className="text-gray-700 dark:text-gray-300 text-2xl cursor-pointer" />
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-                  3
-                </span>
+                {cartCount > 0 && ( // Show cart count if greater than 0
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                    {cartCount}
+                  </span>
+                )}
               </div>
             </ul>
           </div>
@@ -119,10 +128,10 @@ const UserHeader = () => {
             setIsDropdownOpen(false); // Close dropdown when search is closed
           }}
         >
-          <SearchComponent onClose={() => setIsSearchOpen(false)}/>
+          <SearchComponent onClose={() => setIsSearchOpen(false)} />
         </ClickOutside>
       )}
-      
+
       {/* User Dropdown */}
       {isDropdownOpen && (
         <ClickOutside
@@ -132,8 +141,11 @@ const UserHeader = () => {
             setIsSearchOpen(false);   // Also close search if it was open
           }}
         >
-          {/* You can render the dropdown content here */}
-          <UserDropdown firstname={firstname} avatarUrl={avatarUrl} onClose={() => setIsDropdownOpen(false)} />
+          <UserDropdown
+            firstname={firstname}
+            avatarUrl={avatarUrl}
+            onClose={() => setIsDropdownOpen(false)}
+          />
         </ClickOutside>
       )}
     </header>

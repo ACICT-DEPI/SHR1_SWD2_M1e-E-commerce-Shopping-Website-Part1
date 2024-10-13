@@ -23,7 +23,7 @@ const ProductDataTabel = () => {
   // Fetch products from the API with credentials
   const fetchProducts = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/v1/products", {
+      const response = await axios.get("https://server-esw.up.railway.app/api/v1/products", {
         withCredentials: true, // Send credentials with the request
       });
       const products = response.data.data.products;
@@ -74,7 +74,7 @@ const ProductDataTabel = () => {
 
   const handleDeleteProduct = async (id) => {
     try {
-      const response = await axios.delete(`http://localhost:5000/api/v1/products/${id}`, {
+      const response = await axios.delete(`https://server-esw.up.railway.app/api/v1/products/${id}`, {
         withCredentials: true, // This allows credentials to be sent with the request
         headers: {
           'Content-Type': 'application/json', // Set content type if necessary
@@ -139,7 +139,7 @@ const ProductDataTabel = () => {
         outlined
         className="mr-2"
         aria-label="Edit order"
-        onClick={() => navigate(`/admin/products/update/${rowData._id}`)}
+        onClick={() => navigate(`/admin/products/${rowData._id}`)}
       />
       <Button
         icon="pi pi-trash"
@@ -156,7 +156,7 @@ const ProductDataTabel = () => {
   // First row body template for product details
   const ProductBodyTemplate = (rowData) => {
     const handleTitleClick = () => {
-      navigate(`/admin/products/update/${rowData._id}`); // Navigate to product update page
+      navigate(`/admin/products/${rowData._id}`); // Navigate to product update page
     };
    
     return (

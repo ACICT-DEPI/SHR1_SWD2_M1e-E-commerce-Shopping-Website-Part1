@@ -27,7 +27,7 @@ export default function ControlledDemo() {
     useEffect(() => {
                 const fetchImages = async () => {
                     try {
-                        const response = await axios.get(`http://localhost:5000/api/v1/products/${id}`);
+                        const response = await axios.get(`https://server-esw.up.railway.app/api/v1/products/${id}`);
                         if (response.status === 200) {
                             // Fetch images from API
                             const galleryImages = response.data.data.gallery.map(item => ({

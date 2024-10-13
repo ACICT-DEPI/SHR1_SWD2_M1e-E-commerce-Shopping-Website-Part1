@@ -15,7 +15,8 @@ import UnauthorizedPage from "../pages/Client/UnauthorizedPage";
 import ExpiredOrInvalidTokenPage from "../pages/Client/ExpiredOrInvalidTokenPage";
 import TokenValidation from "../pages/Client/TokenValidation";
 import UserLayout from "../layout/UserLayout";
-
+import Cart from "../pages/Client/Cart";
+import CheckoutPage from "../pages/Client/CheckoutPage";
 function UserRoutes() {
   return (
     <UserLayout>
@@ -44,6 +45,8 @@ function UserRoutes() {
           element={<ExpiredOrInvalidTokenPage />}
         />
         <Route path="*" element={<NotFoundPage />} />
+        <Route path="/Cart" element={<Cart/>} />
+        <Route path="/checkOut" element={<CheckoutPage />} />
       </Routes>
     </UserLayout> 
   );

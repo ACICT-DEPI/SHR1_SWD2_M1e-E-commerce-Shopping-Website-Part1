@@ -12,7 +12,6 @@ import { dataTabelStyle } from "../../../layout/dataTabelStyle";
 import { inputTextStyle } from "../../../layout/inputTextStyle";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
-import { ConfirmPopup, confirmPopup } from "primereact/confirmpopup";
 
 const OrderDataTable = () => {
   const [allOrders, setAllOrders] = useState([]); 
@@ -21,7 +20,7 @@ const OrderDataTable = () => {
 
   const fetchOrders = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/v1/orders", {
+      const response = await axios.get("https://server-esw.up.railway.app/api/v1/orders", {
         withCredentials: true, 
       });
       const orders = response.data.data.orders;
@@ -67,52 +66,8 @@ const OrderDataTable = () => {
     );
   };
 
-  const handleDeleteOrder = async (id) => {
-    try {
-      const response = await axios.delete(`http://localhost:5000/api/v1/orders/${id}`, {
-        withCredentials: true,
-        headers: {
-          'Content-Type': 'application/json', 
-        },
-      });
-
-      if (response.status === 200) {
-        toast.current.show({
-          severity: "success",
-          summary: "Success",
-          detail: "Order deleted successfully",
-          life: 2000,
-        });
-
-        fetchOrders();
-      } else {
-        throw new Error('Failed to delete the order');
-      }
-    } catch (error) {
-      toast.current.show({
-        severity: "error",
-        summary: "Error",
-        detail: error.message || 'An error occurred while deleting the order.',
-        life: 2000,
-      });
-    }
-  };
-
-  const confirmDeleteOrder = (event, id) => {
-    confirmPopup({
-      target: event.currentTarget,
-      message: "Are you sure you want to delete this order?",
-      icon: "pi pi-exclamation-triangle",
-      accept: () => handleDeleteOrder(id),
-      reject: () =>
-        toast.current.show({
-          severity: "warn",
-          summary: "Canceled",
-          detail: "Order deletion was canceled",
-          life: 2000,
-        }),
-    });
-  };
+  
+ 
  // Update paginator content
  useEffect(() => {
   document.querySelector(".nextPageButton").innerHTML =
@@ -120,19 +75,20 @@ const OrderDataTable = () => {
   document.querySelector(".prevPageButton").innerHTML =
     " <i class='pi pi-angle-double-left mr-1'></i> Previous";
 }, []);
-  const actionBodyTemplate = (rowData) => (
-    <>
-      <Button
-        icon="pi pi-trash"
-        rounded
-        outlined
-        severity="danger"
-        aria-label="Delete order"
-        onClick={(e) => confirmDeleteOrder(e, rowData._id)}
-        className="dark:border-red-600"
-      />
-    </>
-  );
+const actionBodyTemplate = (rowData) => (
+  <>
+    <Button
+      icon="pi pi-pencil"
+      rounded
+      outlined
+      className="mr-2"
+      aria-label="Edit order"
+      onClick={() => navigate(`/admin/orders/${rowData._id}`)}
+    />
+
+  </>
+);
+
 
   const idTemplate = (rowData) => (
     <Link
@@ -156,11 +112,15 @@ const OrderDataTable = () => {
   const statusTemplate = (rowData) => (
     <span
       className={`text-sm font-semibold ${
-        rowData.status === "completed"
+        rowData.status === "Completed"
           ? "text-green-600 dark:text-green-400"
-          : rowData.status === "pending"
+          : rowData.status === "Pending"
           ? "text-yellow-500 dark:text-yellow-400"
-          : "text-red-500 dark:text-red-400"
+          : rowData.status ==="Cancelled"
+          ?"text-red-500 dark:text-red-400"
+          :rowData.status ==="Shipped"
+          ? "text-blue-600 dark:text-blue-400"
+          : ""
       }`}
     >
       {rowData.status.charAt(0).toUpperCase() + rowData.status.slice(1)}
@@ -220,7 +180,6 @@ const OrderDataTable = () => {
           style={{ minWidth: "12rem" }}
         />
       </DataTable>
-      <ConfirmPopup />
     </div>
   );
 };

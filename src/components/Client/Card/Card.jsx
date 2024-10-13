@@ -34,6 +34,8 @@ const Card = ({ product }) => {
           $ {product.price}
         </p>
       </div>
+      {product.discount > 0 && (<div className="absolute w-9 text-center font-medium  border-2 border-red-600 text-red-600 rounded-md text-sm py-1 top-1 right-1">{product.discount}%</div>)}
+
     </div>
   );
 };
