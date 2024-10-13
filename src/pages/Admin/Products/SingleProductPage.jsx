@@ -9,24 +9,40 @@ import { Toast } from "primereact/toast";
 import MediaUpload from "../../../components/Admin/MediaUpload/MediaUpload";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
+import { Dropdown } from "primereact/dropdown";
 
 const SingleProductPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const toast = useRef(null);
-  const [previewUrl, setPreviewUrl] = useState('');
-  const [galleryPreviewUrls, setGalleryPreviewUrls] = useState([]);
   const [title, setTitle] = useState("");
   const [price, setPrice] = useState(0);
   const [discount, setDiscount] = useState(0);
   const [quantity, setQuantity] = useState(0);
   const [excerpt, setExcerpt] = useState("");
   const [description, setDescription] = useState("");
-  const [existingImage, setExistingImage] = useState(null);
-  const [newImage, setNewImage] = useState(null);
   const [existingGallery, setExistingGallery] = useState([]);
   const [newGallery, setNewGallery] = useState([]);
   const [errors, setErrors] = useState({});
+  const [category, setCategory] = useState("");
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/v1/categories', { withCredentials: true });
+        setCategories(response.data.data.categories);
+      } catch (error) {
+        toast.current.show({
+          severity: "error",
+          summary: "Error",
+          detail: "Failed to fetch categories",
+        })
+      } finally {
+      }
+    };
+    fetchCategories();
+  }, []);
 
   // Fetch product data when the component mounts
   useEffect(() => {
@@ -35,18 +51,15 @@ const SingleProductPage = () => {
         const response = await axios.get(`http://localhost:5000/api/v1/products/${id}`, {
           withCredentials: true,
         });
-        const { title, description, image, gallery, discount,quantity, excerpt } =
-          response.data.data;
-
-        // Populate state with product data
-        setTitle(title);
-        setDescription(description);
-        setPrice(price);
-        setDiscount(discount);
-        setQuantity(quantity);
-        setExcerpt(excerpt);
-        setExistingImage(image?.url);
-        setExistingGallery(gallery?.map(item => item.url) || []);
+        const product = response.data.data;
+        setTitle(product.title);
+        setDescription(product.description);
+        setPrice(product.price);
+        setDiscount(product.discount);
+        setQuantity(product.quantity);
+        setExcerpt(product.excerpt);
+        setCategory(product.category); // Assuming category is a foreign key reference
+        setExistingGallery(product.gallery?.map(item => item.url) || []); // Assuming gallery is an array of objects
       } catch (error) {
         console.error("Error fetching product data:", error);
         toast.current.show({
@@ -59,44 +72,34 @@ const SingleProductPage = () => {
     fetchProductData();
   }, [id]);
 
-  // Handle main image change
-  const handleImageChange = (file) => {
-    setNewImage(file);
-    setPreviewUrl(URL.createObjectURL(file)); // Show preview of the selected image
-  };
-
   // Handle gallery changes
   const handleGalleryChange = (files) => {
     setNewGallery(files);
-    setGalleryPreviewUrls(files.map(file => URL.createObjectURL(file))); // Show previews of the selected gallery images
+    // Set previews separately from existingGallery
+    setExistingGallery((prevGallery) => [
+      ...prevGallery, 
+      ...files.map(file => URL.createObjectURL(file))
+    ]);
   };
 
   const submitForm = async (e) => {
     e.preventDefault();
+    setErrors({}); // Reset errors
+
     try {
       // Prepare form data for product update
       const formData = new FormData();
       formData.append("title", title);
-      formData.append("description", description);
-      formData.append("excerpt", excerpt);
-      formData.append("price", price);
-      formData.append("discount", discount);
-      formData.append("quantity", quantity);
-
+      formData.append("description", description); // Send as HTML
+      formData.append("excerpt", excerpt); // Send as HTML
+      formData.append("price", price); // Send as HTML
+      formData.append("discount", discount); // Send as HTML
+      formData.append("quantity", quantity); // Send as HTML
+      formData.append("category", category); // Send as HTML
       // Update product details
-      await axios.patch(`http://localhost:5000/api/v1/products/${id}`, formData, {
+      const updateResponse = await axios.patch(`http://localhost:5000/api/v1/products/${id}`, formData, {
         withCredentials: true,
       });
-
-      // Upload new product image if selected
-      if (newImage) {
-        const imageFormData = new FormData();
-        imageFormData.append("image", newImage);
-
-        await axios.patch(`http://localhost:5000/api/v1/products/product-photos-upload/${id}`, imageFormData, {
-          withCredentials: true,
-        });
-      }
 
       // Upload new gallery images if selected
       if (newGallery.length > 0) {
@@ -105,11 +108,21 @@ const SingleProductPage = () => {
           galleryFormData.append("gallery", file);
         });
 
-        await axios.patch(`http://localhost:5000/api/v1/products/product-photos-upload/${id}`, galleryFormData, {
+        const imageResponse = await axios.patch(`http://localhost:5000/api/v1/products/product-photos-upload/${id}`, galleryFormData, {
           withCredentials: true,
         });
-      }
 
+        if (imageResponse.data.status === "success") {
+          toast.current.show({
+            severity: "success",
+            summary: "Success",
+            detail: "Images uploaded successfully",
+            life: 3000,
+          });
+        } else {
+          throw new Error(imageResponse.data.message || "Image upload failed");
+        }
+      }
       toast.current.show({
         severity: "success",
         summary: "Success",
@@ -119,15 +132,18 @@ const SingleProductPage = () => {
       navigate("/admin/products"); // Redirect to products list
     } catch (error) {
       const data = error.response?.data || {};
-      setErrors({
+      setErrors((prev) => ({
+        ...prev,
         title: data.errors?.title?.message || "",
         description: data.errors?.description?.message || "",
         excerpt: data.errors?.excerpt?.message || "",
         price: data.errors?.price?.message || "",
         discount: data.errors?.discount?.message || "",
         quantity: data.errors?.quantity?.message || "",
-      });
-      console.error("Error updating product:", error);
+        category: data.errors?.category?.message || "",
+        gallery: data.errors?.gallery || [],
+      }));
+
       toast.current.show({
         severity: "error",
         summary: "Error",
@@ -157,7 +173,8 @@ const SingleProductPage = () => {
                   type="text"
                   placeholder="Enter product title"
                   className={`w-full ${errors.title ? 'border-red-500' : ''}`}
-                  style={inputTextStyle}
+                  pt={inputTextStyle}
+                  unstyled={true}
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                 />
@@ -176,7 +193,8 @@ const SingleProductPage = () => {
                     placeholder="Enter product price"
                     className={`w-full ${errors.price ? 'border-red-500' : ''}`}
                     onChange={(e) => setPrice(Number(e.target.value))}
-                    style={inputTextStyle}
+                    pt={inputTextStyle}
+                    unstyled={true}
                   />
                   {errors.price && <small className="p-error">{errors.price}</small>}
                 </div>
@@ -193,7 +211,8 @@ const SingleProductPage = () => {
                     max={100}
                     className={`w-full ${errors.discount ? 'border-red-500' : ''}`}
                     onChange={(e) => setDiscount(Number(e.target.value))}
-                    style={inputTextStyle}
+                    pt={inputTextStyle}
+                    unstyled={true}
                   />
                   {errors.discount && <small className="p-error">{errors.discount}</small>}
                 </div>
@@ -210,10 +229,27 @@ const SingleProductPage = () => {
                     max={100}
                     className={`w-full ${errors.quantity ? 'border-red-500' : ''}`}
                     onChange={(e) => setQuantity(Number(e.target.value))}
-                    style={inputTextStyle}
+                    pt={inputTextStyle}
+                    unstyled={true}
                   />
                   {errors.quantity && <small className="p-error">{errors.quantity}</small>}
                 </div>
+              </div>
+                {/* Category Dropdown */}
+                
+              <div className="mb-4">
+                <label htmlFor="category" className="block text-lg font-semibold mb-2 text-black dark:text-white">
+                  Category
+                </label>
+                <Dropdown
+  id="category"
+  value={category} // State holding selected category ID
+  options={categories.map(cat => ({ label: cat.title, value: cat._id }))} // Mapping categories to required format
+  onChange={(e) => setCategory(e.value)} // Sets the selected category ID
+  placeholder="Select a category"
+  className={`w-full ${errors.category ? 'border-red-500' : ''}`}
+/>
+                {errors.category && <small className="text-red-500 mt-1">{errors.category}</small>}
               </div>
 
               {/* Excerpt Input */}
@@ -223,9 +259,11 @@ const SingleProductPage = () => {
                   id="excerpt"
                   type="text"
                   placeholder="Enter product excerpt"
-                  className={`w-full ${errors.excerpt ? 'border-red-500' : ''}`}
                   value={excerpt}
+                  className={`w-full ${errors.excerpt ? 'border-red-500' : ''}`}
                   onChange={(e) => setExcerpt(e.target.value)}
+                  pt={inputTextStyle}
+                  unstyled={true}
                 />
                 {errors.excerpt && <small className="p-error">{errors.excerpt}</small>}
               </div>
@@ -233,38 +271,32 @@ const SingleProductPage = () => {
               {/* Description Editor */}
               <div className="mb-2">
                 <label htmlFor="description" className="w-full mb-2 block text-black dark:text-white">Description</label>
-                <CustomEditor value={description} setValue={setDescription} />
+                <CustomEditor
+                  value={description}
+                  onTextChange={(content) => setDescription(content)}
+                />
                 {errors.description && <small className="p-error">{errors.description}</small>}
               </div>
 
-              {/* Image Upload Section */}
+              {/* Media Upload Section */}
               <div className="mb-2">
-                <label htmlFor="image" className="w-full mb-2 block text-black dark:text-white">Product Image</label>
-                <MediaUpload existingImage={existingImage} onChange={handleImageChange} />
-                {previewUrl && <img src={previewUrl} alt="Preview" className="w-full mt-2" />}
-              </div>
-
-              {/* Gallery Upload Section */}
-              <div className="mb-2">
-                <label htmlFor="gallery" className="w-full mb-2 block text-black dark:text-white">Gallery Images</label>
-                <MediaUpload existingImages={existingGallery} onChange={handleGalleryChange} multiple />
-                <div className="flex gap-2 mt-2">
-                  {galleryPreviewUrls.map((url, index) => (
-                    <img key={index} src={url} alt={`Gallery Preview ${index}`} className="w-1/4" />
-                  ))}
-                </div>
+                <label className="w-full mb-2 block text-black dark:text-white">Gallery</label>
+                <MediaUpload
+                  existingImages={existingGallery} // Use existingGallery for displaying existing images
+                  onChange={handleGalleryChange} // Handle gallery image changes
+                />
+                {errors.gallery && <small className="p-error">{errors.gallery}</small>}
               </div>
 
               {/* Submit Button */}
-              <div className="flex justify-end">
-                <Button label="Update Product" type="submit" style={buttonsStyle} />
-              </div>
+              <Button label="Update Product" type="submit" className={buttonsStyle} />
             </div>
           </form>
         </div>
       </div>
 
-      <Toast ref={toast} position="bottom-left" />
+      {/* Toast Notifications */}
+      <Toast ref={toast}  position="bottom-left"/>
     </Fragment>
   );
 };

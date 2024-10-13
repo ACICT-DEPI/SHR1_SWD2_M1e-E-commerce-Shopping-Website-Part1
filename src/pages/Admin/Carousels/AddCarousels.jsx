@@ -12,7 +12,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import "primeicons/primeicons.css";
 import { Dropdown } from "primereact/dropdown";
-import { SelectButton } from "primereact/selectbutton";
 
 const AddCarousels = () => {
   const [title, setTitle] = useState("");
@@ -20,11 +19,6 @@ const AddCarousels = () => {
   const [category, setCategory] = useState(""); 
   const [buttonText, setButtonText] = useState(""); 
   const [image, setImage] = useState(null);
-  const [isBannerVisible, setIsBannerVisible] = useState(false);
-
-  const [banner, setBanner] = useState(null);
-  const showOptions = ["Show", "Hide"];
-  const [showValue, setShowValue] = useState(showOptions[1]);
   const toast = useRef(null);
   const navigate = useNavigate();
   const [errors, setErrors] = useState({});
@@ -43,104 +37,94 @@ const AddCarousels = () => {
     };
     fetchCategories();
   }, []);
-// لتحديث مسار الصورة عند إلغاء المكون
-useEffect(() => {
-  return () => {
-    if (image) {
-      URL.revokeObjectURL(image); // تنظيف مسار الصورة
-    }
-    if (banner) {
-      URL.revokeObjectURL(banner); // تنظيف مسار الصورة
-    }
-    if (showValue == showOptions[0]) {
-      setIsBannerVisible(true);
-    } else {
-      setIsBannerVisible(false);
-    }
-  };
-}, [image, banner]);
+   // لتحديث مسار الصورة عند إلغاء المكون
+   useEffect(() => {
+    return () => {
+      if (image) {
+        URL.revokeObjectURL(image); // تنظيف مسار الصورة
+      }
+    };
+  }, [image]);
 
   const handleImageChange = (file) => {
     setImage(file);
+    console.log("Image selected:", file);  // Ensure the image file is logged correctly
+
   };
 
-  const handleBannerChange = (file) => {
-    setBanner(file);
-  };
 
   // Submit the form
-  const submitForm = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await axios.post(
-        "http://localhost:5000/api/v1/carousels", // Update the endpoint to use PUT
-        {
-          title,
-          description,
-          category,
-          buttonText,
-          isBannerVisible,
-
+const submitForm = async (e) => {
+  e.preventDefault();
+  
+  try {
+    // Step 1: Submit the form data (title, description, category, buttonText)
+    const response = await axios.post(
+      "http://localhost:5000/api/v1/carousels",
+      {
+        title,
+        description,
+        category,
+        buttonText,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
         },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        }
-      );
-
-      if (response.data.status === "success") {
-        const carouselId = response.data.data._id;
-
-        if (image) {
-          const formImageData = new FormData();
-          formImageData.append("image", image);
-          await axios.patch(
-            `http://localhost:5000/api/v1/carousels/carousel-photo-upload/${carouselId}`,
-            formImageData,
-            { withCredentials: true }
-          );
-        }
-
-        if (banner) {
-          const formBannerData = new FormData();
-          formBannerData.append("banner", banner);
-          await axios.patch(
-            `http://localhost:5000/api/v1/carousels/carousel-photo-upload/${carouselId}`,
-            formBannerData,
-            { withCredentials: true }
-          );
-        }
-
-        toast.current.show({
-          severity: "success",
-          summary: "Success",
-          detail: "Carousel created successfully",
-          life: 3000,
-        });
-
-        setTimeout(() => {
-          navigate("/admin/carousels");
-        }, 3000);
+        withCredentials: true,
       }
-    } catch (error) {
-      const data = error.response?.data || {};
-      setErrors((prev) => ({
-        ...prev,
-        title: data.errors?.title?.message || "",
-        description: data.errors?.description?.message || "",
-        buttonText: data.errors?.buttonText?.message || "",
-        category: data.errors?.category?.message || ""
-      }));
+    );
+
+    if (response.data.status === "success") {
+      const carouselId = response.data.data._id;
+
+      // Step 2: Upload the image, if present
+      if (image) {
+        const formImageData = new FormData();
+        formImageData.append("image", image);  // Append the image file to FormData
+
+        await axios.patch(
+          `http://localhost:5000/api/v1/carousels/carousel-photo-upload/${carouselId}`,
+          formImageData,
+          { 
+            withCredentials: true, // Allow credentials for cross-origin requests
+            headers: {
+              "Content-Type": "multipart/form-data", // Set Content-Type for file upload
+            },
+          }
+        );
+      }
+
+      // Step 3: Display success message and navigate to carousels list
       toast.current.show({
-        severity: "error",
-        summary: "Error",
-        detail: error.response?.data.message || "An error occurred",
+        severity: "success",
+        summary: "Success",
+        detail: "Carousel created successfully",
         life: 3000,
       });
-    }
-  };
+
+      setTimeout(() => {
+        navigate("/admin/carousels");
+      }, 3000);
+     }
+  } catch (error) {
+    const data = error.response?.data || {};
+    setErrors((prev) => ({
+      ...prev,
+      title: data.errors?.title?.message || "",
+      description: data.errors?.description?.message || "",
+      buttonText: data.errors?.buttonText?.message || "",
+      category: data.errors?.category?.message || ""
+    }));
+    toast.current.show({
+      severity: "error",
+      summary: "Error",
+      detail: error.response?.data.message || "An error occurred",
+      life: 3000,
+    });
+  }
+};
+
 
   return (
     <Fragment>
@@ -225,26 +209,9 @@ useEffect(() => {
                 />
                 {errors.buttonText && <small className="p-error">{errors.buttonText}</small>}
               </div>
-              <div className="mb-2">
-                <label
-                  htmlFor="image-upload"
-                  className="w-full mb-2 block text-black dark:text-white"
-                >
-                  Show in Home page
-                </label>
-                <SelectButton
-                  value={showValue}
-                  onChange={(e) => setShowValue(e.value)}
-                  options={showOptions}
-                />
-              </div>
+
               <MediaUpload
-                title="Image"
-                onFileChange={handleImageChange}
-              />
-              <MediaUpload
-                title="Banner"
-                onFileChange={handleBannerChange}
+                onChange={handleImageChange} 
               />
 
 <div className="pt-3 rounded-b-md sm:rounded-b-lg">

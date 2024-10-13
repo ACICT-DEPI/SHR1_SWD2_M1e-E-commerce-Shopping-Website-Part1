@@ -22,7 +22,6 @@ const AddProduct = () => {
   const [discount, setDiscount] = useState(0);
   const [quantity, setQuantity] = useState(0);
   const [category, setCategory] = useState("");
-  const [image, setImage] = useState(null);
   const [gallery, setGallery] = useState([]);
   const [categories, setCategories] = useState([]);
   const [errors, setErrors] = useState({});
@@ -37,7 +36,6 @@ const AddProduct = () => {
         setCategories(response.data.data.categories);
       } catch (error) {
         showErrorToast(error.response?.data?.message || "Failed to fetch categories");
-      } finally {
       }
     };
     fetchCategories();
@@ -45,80 +43,63 @@ const AddProduct = () => {
 
   useEffect(() => {
     return () => {
-      if (image) {
-        URL.revokeObjectURL(image);
-      }
       if (gallery) {
         URL.revokeObjectURL(gallery); 
       }
     };
-  }, [image,gallery]);
+  }, [gallery]);
 
-  const handleImageChange = (file) => setImage(file);
   const handleGalleryChange = (files) => setGallery(files);
 
   const submitForm = async (e) => {
-    e.preventDefault(); // Prevent default form submission
-    setErrors({}); // Clear previous errors
-  
-    console.log('Submitting form...'); // Debugging: Ensure form submission is triggered
-    console.log({ title, description, excerpt, price, discount, quantity, category });
-  
+    e.preventDefault();
+    setErrors({});
+
     try {
       const response = await axios.post("http://localhost:5000/api/v1/products", {
         title, description, excerpt, price, discount, quantity, category
       }, { headers: { "Content-Type": "application/json" }, withCredentials: true });
-  
-      console.log('Response:', response); // Debugging: Log the response
-  
+
       if (response.data.status === "success") {
         const productId = response.data.data._id;
-  
-        // Handle image upload if exists
-        if (image) {
-          const formImageData = new FormData();
-          formImageData.append("image", image);
-  
-          const imageResponse = await axios.patch(
-            `http://localhost:5000/api/v1/products/product-photos-upload/${productId}`,
-            formImageData,
-            { withCredentials: true }
-          );
-        }
-  
-        // Handle gallery upload if exists
+
         if (gallery.length > 0) {
           const formGalleryData = new FormData();
           gallery.forEach((file) => formGalleryData.append("gallery", file));
-  
+
           const galleryResponse = await axios.patch(
             `http://localhost:5000/api/v1/products/product-photos-upload/${productId}`,
             formGalleryData,
             { withCredentials: true }
-          );
-    
+          ); if (galleryResponse.data.status === "success") {
+            toast.current.show({
+              severity: "success",
+              summary: "Success",
+              detail: "Image uploaded successfully",
+              life: 3000,
+            });
+          } else {
+            throw new Error(
+              galleryResponse.data.message || "Image upload failed"
+            );
+          }
         }
-  
         toast.current.show({
           severity: "success",
           summary: "Success",
           detail: "Product created successfully",
           life: 3000,
         });
-
-  
-        // Delay the navigation for 3 seconds
         setTimeout(() => {
-          navigate("/admin/products");
+          navigate("/admin/products/");
         }, 3000);
-  
+
       } else {
         handleErrors(response.data);
       }
     } catch (error) {
-      console.error('Error:', error); // Log the full error for debugging
       const data = error.response?.data || {};
-  
+
       setErrors((prev) => ({
         ...prev,
         title: data.errors?.title?.message || "",
@@ -129,35 +110,35 @@ const AddProduct = () => {
         discount: data.errors?.discount?.message || "",
         category: data.errors?.category?.message || "",
       }));
-  
+
       toast.current.show({
         severity: "error",
         summary: "Error",
-        detail: error.response?.data?.message || "An error occurred",
+        detail: error.response?.data.message || "An error occurred",
         life: 3000,
-      });
-    }
+      });    }
   };
-  
+
   const handleErrors = (data) => {
     const errorMessage = data.message || "An error occurred";
     toast.current.show({ severity: "error", summary: "Error", detail: errorMessage, life: 3000 });
   };
 
-  const showSuccessToast = (message) => {
-    toast.current.show({ severity: "success", summary: "Success", detail: message, life: 3000 });
-  };
+  
 
   const showErrorToast = (message) => {
     toast.current.show({ severity: "error", summary: "Error", detail: message, life: 3000 });
   };
-  
+
   const handleFocus = (field) => {
     setErrors((prev) => ({ ...prev, [field]: "" }));
   };
 
   return (
     <Fragment>
+      {/* Add the Toast component */}
+      <Toast ref={toast} />
+
       <div className="flex flex-nowrap justify-between mb-5">
         <div>
           <GoBackButton />
@@ -181,15 +162,13 @@ const AddProduct = () => {
                   pt={inputTextStyle}
                   unstyled={true}
                   onFocus={() => handleFocus("title")}
-
                 />
                 {errors.title && <small className="p-error">{errors.title}</small>}
               </div>
               {/* Description Field */}
               <div className="mb-2">
                 <label htmlFor="description" className="w-full mb-2 block text-black dark:text-white">Description</label>
-                <CustomEditor value={description} onTextChange={(e) => setDescription(e.htmlValue)}
-                 />
+                <CustomEditor value={description} onTextChange={(e) => setDescription(e.htmlValue)} />
                 {errors.description && <small className="p-error">{errors.description}</small>}
               </div>
               {/* Excerpt Field */}
@@ -205,7 +184,6 @@ const AddProduct = () => {
                   pt={inputTextStyle}
                   unstyled={true}
                   onFocus={() => handleFocus("excerpt")}
-
                 />
                 {errors.excerpt && <small className="p-error">{errors.excerpt}</small>}
               </div>
@@ -260,31 +238,30 @@ const AddProduct = () => {
                   {errors.quantity && <small className="p-error">{errors.quantity}</small>}
                 </div>
               </div>
-              {/* Category Dropdown */}
+              {/* Category Field */}
               <div className="mb-2">
                 <label htmlFor="category" className="w-full mb-2 block text-black dark:text-white">Category</label>
                 <Dropdown
-  id="category"
-  value={category} // State holding selected category ID
-  options={categories.map(cat => ({ label: cat.title, value: cat._id }))} // Mapping categories to required format
-  onChange={(e) => setCategory(e.value)} // Sets the selected category ID
-  placeholder="Select a category"
-  className={`w-full ${errors.category ? 'border-red-500' : ''}`}
-/>
+                  id="category"
+                  value={category}
+                  options={categories.map(c => ({ label: c.title, value: c._id }))}
+                  onChange={(e) => setCategory(e.value)}
+                  placeholder="Select a category"
+                  className={`w-full ${errors.category ? 'border-red-500' : ''}`}
+                />
                 {errors.category && <small className="p-error">{errors.category}</small>}
               </div>
-              {/* Image Upload */}
-              <MediaUpload image={image} onImageChange={handleImageChange} />
               {/* Gallery Upload */}
-              <MediaUpload gallery={gallery} onGalleryChange={handleGalleryChange} />
+              <div className="mb-2">
+                <label className="w-full mb-2 block text-black dark:text-white">Gallery</label>
+                <MediaUpload onChange={handleGalleryChange} />
+              </div>
               {/* Submit Button */}
-              <Button label="Submit" type="submit" className={`${buttonsStyle} w-full`}  />
+              <Button type="submit" label="Add Product" icon="pi pi-check" className="mt-4" pt={buttonsStyle} unstyled={true} />
             </div>
           </form>
         </div>
       </div>
-      <Toast ref={toast}  position="bottom-left"/>
-
     </Fragment>
   );
 };
