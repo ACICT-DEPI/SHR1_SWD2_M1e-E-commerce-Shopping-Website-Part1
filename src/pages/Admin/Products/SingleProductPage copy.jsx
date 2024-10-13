@@ -6,10 +6,11 @@ import { buttonsStyle } from "../../../layout/buttonsStyle";
 import { Button } from "primereact/button";
 import CustomEditor from "../../../components/Admin/CustomEditor";
 import { Toast } from "primereact/toast";
+import MediaUpload from "../../../components/Admin/MediaUpload/MediaUpload";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { Dropdown } from "primereact/dropdown";
-import MediaUploadMultiple from "../../../components/Admin/MediaUpload/MediaUploadMultible"
+
 const SingleProductPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -20,13 +21,12 @@ const SingleProductPage = () => {
   const [quantity, setQuantity] = useState(0);
   const [excerpt, setExcerpt] = useState("");
   const [description, setDescription] = useState("");
-  const [existingGallery, setExistingGallery] = useState([]); // Updated to store image URLs
+  const [existingGallery, setExistingGallery] = useState([]);
   const [newGallery, setNewGallery] = useState([]);
   const [errors, setErrors] = useState({});
   const [category, setCategory] = useState("");
   const [categories, setCategories] = useState([]);
 
-  // Fetch categories
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -37,7 +37,8 @@ const SingleProductPage = () => {
           severity: "error",
           summary: "Error",
           detail: "Failed to fetch categories",
-        });
+        })
+      } finally {
       }
     };
     fetchCategories();
@@ -57,8 +58,8 @@ const SingleProductPage = () => {
         setDiscount(product.discount);
         setQuantity(product.quantity);
         setExcerpt(product.excerpt);
-        setCategory(product.category._id);
-        setExistingGallery(product.gallery?.map(item => item.url) || []); // Set existing gallery images
+        setCategory(product.category); // Assuming category is a foreign key reference
+        setExistingGallery(product.gallery?.map(item => item.url) || []); // Assuming gallery is an array of objects
       } catch (error) {
         console.error("Error fetching product data:", error);
         toast.current.show({
@@ -91,11 +92,10 @@ const SingleProductPage = () => {
       formData.append("title", title);
       formData.append("description", description); // Send as HTML
       formData.append("excerpt", excerpt); // Send as HTML
-      formData.append("price", price);
-      formData.append("discount", discount);
-      formData.append("quantity", quantity);
-      formData.append("category", category);
-
+      formData.append("price", price); // Send as HTML
+      formData.append("discount", discount); // Send as HTML
+      formData.append("quantity", quantity); // Send as HTML
+      formData.append("category", category); // Send as HTML
       // Update product details
       const updateResponse = await axios.patch(`https://server-esw.up.railway.app/api/v1/products/${id}`, formData, {
         withCredentials: true,
@@ -206,7 +206,9 @@ const SingleProductPage = () => {
                     id="discount"
                     type="number"
                     value={discount}
-                    placeholder="Enter discount"
+                    placeholder="Enter discount percentage"
+                    min={0}
+                    max={100}
                     className={`w-full ${errors.discount ? 'border-red-500' : ''}`}
                     onChange={(e) => setDiscount(Number(e.target.value))}
                     pt={inputTextStyle}
@@ -222,7 +224,9 @@ const SingleProductPage = () => {
                     id="quantity"
                     type="number"
                     value={quantity}
-                    placeholder="Enter quantity"
+                    placeholder="Enter product quantity"
+                    min={1}
+                    max={100}
                     className={`w-full ${errors.quantity ? 'border-red-500' : ''}`}
                     onChange={(e) => setQuantity(Number(e.target.value))}
                     pt={inputTextStyle}
@@ -231,62 +235,68 @@ const SingleProductPage = () => {
                   {errors.quantity && <small className="p-error">{errors.quantity}</small>}
                 </div>
               </div>
+                {/* Category Dropdown */}
+                
+              <div className="mb-4">
+                <label htmlFor="category" className="block text-lg font-semibold mb-2 text-black dark:text-white">
+                  Category
+                </label>
+                <Dropdown
+  id="category"
+  value={category} // State holding selected category ID
+  options={categories.map(cat => ({ label: cat.title, value: cat._id }))} // Mapping categories to required format
+  onChange={(e) => setCategory(e.value)} // Sets the selected category ID
+  placeholder="Select a category"
+  className={`w-full ${errors.category ? 'border-red-500' : ''}`}
+/>
+                {errors.category && <small className="text-red-500 mt-1">{errors.category}</small>}
+              </div>
 
-              {/* Excerpt */}
+              {/* Excerpt Input */}
               <div className="mb-2">
                 <label htmlFor="excerpt" className="w-full mb-2 block text-black dark:text-white">Excerpt</label>
-                <CustomEditor
-                  value={excerpt}
-                  onTextChange={setExcerpt}
+                <InputText
                   id="excerpt"
+                  type="text"
+                  placeholder="Enter product excerpt"
+                  value={excerpt}
+                  className={`w-full ${errors.excerpt ? 'border-red-500' : ''}`}
+                  onChange={(e) => setExcerpt(e.target.value)}
                   pt={inputTextStyle}
+                  unstyled={true}
                 />
                 {errors.excerpt && <small className="p-error">{errors.excerpt}</small>}
               </div>
 
-              {/* Description */}
+              {/* Description Editor */}
               <div className="mb-2">
                 <label htmlFor="description" className="w-full mb-2 block text-black dark:text-white">Description</label>
                 <CustomEditor
                   value={description}
-                  onTextChange={setDescription}
-                  id="description"
-                  pt={inputTextStyle}
+                  onTextChange={(content) => setDescription(content)}
                 />
                 {errors.description && <small className="p-error">{errors.description}</small>}
               </div>
 
-              {/* Category Dropdown */}
+              {/* Media Upload Section */}
               <div className="mb-2">
-                <label htmlFor="category" className="w-full mb-2 block text-black dark:text-white">Category</label>
-                <Dropdown
-                  value={category}
-                  options={categories.map((cat) => ({
-                    label: cat.title,
-                    value: cat._id,
-                  }))}
-                  onChange={(e) => setCategory(e.value)}
-                  className={`w-full ${errors.category ? 'border-red-500' : ''}`}
-                  placeholder="Select category"
+                <label className="w-full mb-2 block text-black dark:text-white">Gallery</label>
+                <MediaUpload
+                  existingImages={existingGallery} // Use existingGallery for displaying existing images
+                  onChange={handleGalleryChange} // Handle gallery image changes
                 />
-                {errors.category && <small className="p-error">{errors.category}</small>}
-              </div>
-
-              {/* Media Upload for Gallery */}
-              <div className="mb-2">
-                <label htmlFor="gallery" className="w-full mb-2 block text-black dark:text-white">Gallery</label>
-                <MediaUploadMultiple onUpload={handleGalleryChange} showImages={existingGallery} />
+                {errors.gallery && <small className="p-error">{errors.gallery}</small>}
               </div>
 
               {/* Submit Button */}
-              <div className="mb-6 flex justify-center">
-                <Button label="Update Product" type="submit" pt={buttonsStyle} unstyled={true} />
-              </div>
+              <Button label="Update Product" type="submit" className={buttonsStyle} />
             </div>
           </form>
         </div>
       </div>
-      <Toast ref={toast} />
+
+      {/* Toast Notifications */}
+      <Toast ref={toast}  position="bottom-left"/>
     </Fragment>
   );
 };

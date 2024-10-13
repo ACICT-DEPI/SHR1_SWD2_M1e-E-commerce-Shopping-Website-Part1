@@ -7,7 +7,6 @@ Chart.register(...registerables);
 
 const DoughnutChart = ({ chartdata }) => {
   // بيانات حالة الطلبات (مثال)
-  console.log(chartdata)
   const data = {
     labels: ['Pending', 'Shipped', 'Completed', 'Cancelled'],
     datasets: [

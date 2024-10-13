@@ -1,16 +1,16 @@
 import { Fragment, useState, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 
-const MediaUpload = ({ onChange, maxFiles, showImage }) => {
-  const [image, setImage] = useState(null);
-  const [preview, setPreview] = useState(null);
+const MediaUploadMultible = ({ onChange, maxFiles, showImages }) => {
+  const [images, setImages] = useState([]);
+  const [previews, setPreviews] = useState([]);
 
-  // استخدام useEffect لتحديث الـ preview بناءً على showImage
+  // تحديث الصور الممررة للمكون
   useEffect(() => {
-    if (showImage) {
-      setPreview(showImage);
+    if (showImages && showImages.length > 0) {
+      setPreviews(showImages);
     }
-  }, [showImage]);
+  }, [showImages]);
 
   const onDrop = (acceptedFiles, rejectedFiles) => {
     if (rejectedFiles.length > 0) {
@@ -19,31 +19,33 @@ const MediaUpload = ({ onChange, maxFiles, showImage }) => {
     }
 
     if (acceptedFiles.length > 0) {
-      const file = acceptedFiles[0];
-      setImage(file);
-      const previewUrl = URL.createObjectURL(file);
-      setPreview(previewUrl);
+      const newImages = [...images, ...acceptedFiles];
+      setImages(newImages);
+
+      // تحديث المعاينات (previews)
+      const newPreviews = newImages.map((file) =>
+        URL.createObjectURL(file)
+      );
+      setPreviews(newPreviews);
 
       if (onChange) {
-        onChange(file); // تمرير الملف إلى المكون الأب
+        onChange(newImages); // تمرير الصور الجديدة للمكون الأب
       }
     }
   };
 
   const { getRootProps, getInputProps, fileRejections } = useDropzone({
     onDrop,
-    accept: "image/*", // قبول فقط الصور
-    maxFiles: maxFiles, // تحديد عدد الملفات المسموح رفعها
+    accept: "image/*",
+    maxFiles: maxFiles || 5, // عدد الملفات المسموح بها افتراضيًا 5
   });
 
-  // استخدام useEffect لتنظيف مسار الـ preview عند إلغاء المكون أو تغيير الصورة
+  // تنظيف المعاينات عند إلغاء المكون أو تغيير الصور
   useEffect(() => {
     return () => {
-      if (preview && !showImage) {
-        URL.revokeObjectURL(preview); // تنظيف مسار الصورة عند إلغاء المكون
-      }
+      previews.forEach((preview) => URL.revokeObjectURL(preview));
     };
-  }, [preview, showImage]);
+  }, [previews]);
 
   return (
     <Fragment>
@@ -52,10 +54,14 @@ const MediaUpload = ({ onChange, maxFiles, showImage }) => {
         className="border-dashed border-2 border-form-strokedark p-4 text-center cursor-pointer hover:border-primary hover:text-blue-500"
       >
         <input {...getInputProps()} />
-        {preview ? (
-          <img src={preview} alt="Uploaded" className="mx-auto my-4 max-w-xs" />
+        {previews.length > 0 ? (
+          <div className="grid grid-cols-3 gap-2">
+            {previews.map((preview, index) => (
+              <img key={index} src={preview} alt="Uploaded" className="mx-auto my-4 max-w-xs" />
+            ))}
+          </div>
         ) : (
-          <p>Drag & drop an image, or click to select one</p>
+            <p>Drag & drop images, or click to select files</p>
         )}
       </div>
       {fileRejections.length > 0 && (
@@ -65,4 +71,4 @@ const MediaUpload = ({ onChange, maxFiles, showImage }) => {
   );
 };
 
-export default MediaUpload;
+export default MediaUploadMultible;
