@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { FaSearch, FaShoppingCart } from "react-icons/fa";
-import { Link, useNavigate } from "react-router-dom"; 
+import { Link, useNavigate } from "react-router-dom";
 import SearchComponent from "./SearchComponent";
 import ClickOutside from "../ClickOutside";
 import axios from "axios";
@@ -51,8 +51,12 @@ const UserHeader = () => {
 
   // Update cart count
   useEffect(() => {
-    const storedCartProducts = JSON.parse(localStorage.getItem("cartProducts")) || [];
-    const totalCount = storedCartProducts.reduce((acc, product) => acc + product.quantity, 0);
+    const storedCartProducts =
+      JSON.parse(localStorage.getItem("cartProducts")) || [];
+    const totalCount = storedCartProducts.reduce(
+      (acc, product) => acc + product.quantity,
+      0
+    );
     setCartCount(totalCount);
   }, []);
 
@@ -68,7 +72,7 @@ const UserHeader = () => {
           <div className="flex items-center space-x-8">
             <Link to="/" className="flex items-center">
               <img
-                src={require("../../../imgs/2.png")}
+                src={require("https://res.cloudinary.com/ducmzit0a/image/upload/v1728842399/d4lohst2hmfr6cwztldm.png")}
                 alt="Logo"
                 className="h-16 w-auto"
               />
@@ -138,7 +142,7 @@ const UserHeader = () => {
           exceptionRef={dropdownRef}
           onClick={() => {
             setIsDropdownOpen(false); // Close dropdown when clicking outside
-            setIsSearchOpen(false);   // Also close search if it was open
+            setIsSearchOpen(false); // Also close search if it was open
           }}
         >
           <UserDropdown
