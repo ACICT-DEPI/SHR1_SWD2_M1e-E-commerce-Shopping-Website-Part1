@@ -1,39 +1,11 @@
-import { Fragment, useState, useEffect } from "react";
-import axios from "axios";
+import { Fragment } from "react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { dataTabelStyle } from "../../../layout/dataTabelStyle";
 import { Link } from "react-router-dom";
 
-const NewOrderTable = () => {
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  // Fetch orders from API
-  useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const response = await axios.get("http://localhost:5000/api/v1/orders", {
-          withCredentials: true,
-        });
-        const fetchedOrders = response.data.data.orders;
-
-        // Sort orders by createdAt (newest to oldest)
-        const sortedOrders = fetchedOrders.sort((a, b) =>
-          new Date(b.createdAt) - new Date(a.createdAt)
-        );
-
-        // Set the first 5 orders
-        setOrders(sortedOrders.slice(0, 5));
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching orders:", error);
-        setLoading(false);
-      }
-    };
-
-    fetchOrders();
-  }, []);
+const NewOrderTable = ({ data }) => { // نقوم بتمرير البيانات هنا
+  const orders = data; // البيانات التي تم تمريرها من TabelSection
 
   // Format the date and time
   const formatDate = (dateString) => {
@@ -49,20 +21,29 @@ const NewOrderTable = () => {
     });
   };
 
+
   // Custom cell renderer for user info (name + image)
   const renderUserCell = (rowData) => {
-    const { firstName, lastName } = rowData.user; // Assuming 'avatarUrl' is the user's image URL
+    // استخراج الاسم الأول واسم العائلة من بيانات المستخدم
+    const { firstName, lastName, _id } = rowData.user;
+
     return (
-      <div className="flex items-center space-x-2">
-        <Link to={`customers/${rowData.user._id}`}>  <span className="hover:text-primary">{`${firstName} ${lastName}`}</span></Link>
+      <div className="truncate overflow-hidden w-full  inline-block">
+        {/* رابط لتحويل المستخدم إلى صفحة العميل */}
+        <Link to={`customers/${_id}`}>
+          <span className="hover:text-primary ">{`${firstName} ${lastName}`}</span>
+        </Link>
       </div>
     );
   };
+
   const renderOrderId = (rowData) => {
     return (
-      <div className="hover:text-primary"><Link to={`/orders/${rowData._id}`}>{rowData._id}</Link></div>
-    )
-  }
+      <div className="hover:text-primary truncate overflow-hidden w-full  inline-block">
+        <Link to={`orders/${rowData._id}`}>{rowData._id}</Link>
+      </div>
+    );
+  };
 
   const renderStatusCell = (rowData) => {
     const status = rowData.status;
@@ -70,64 +51,70 @@ const NewOrderTable = () => {
 
     switch (status) {
       case "Pending":
-        statusColor = "text-yellow-500"; // Tailwind color for pending
+        statusColor = "text-yellow-500"; 
         break;
       case "Shipped":
-        statusColor = "text-blue-500"; // Tailwind color for shipped
+        statusColor = "text-blue-500"; 
         break;
       case "Completed":
-        statusColor = "text-green-500"; // Tailwind color for completed
+        statusColor = "text-green-500"; 
         break;
       case "Cancelled":
-        statusColor = "text-red-500"; // Tailwind color for cancelled
+        statusColor = "text-red-500"; 
         break;
       default:
-        statusColor = "text-gray-500"; // Default color for unknown status
+        statusColor = "text-gray-500"; 
         break;
     }
 
     return <span className={statusColor}>{status}</span>;
   };
+
   // Render the table
   return (
     <Fragment>
-      {loading ? (
-        <p>Loading orders...</p>
+      {orders.length === 0 ? (
+        <p>No orders found.</p>
       ) : (
         <DataTable
           value={orders}
           rows={5}
-          size="large"
+            size="normal"
           dataKey="_id"
-          pt={dataTabelStyle} // Assuming you have a style object
+            pt={dataTabelStyle} 
         >
           <Column
             field="_id"
             header="OrderID"
-            body={renderOrderId} // Render the user info (name + image)
-            style={{ minWidth: "15rem" }}
+              body={renderOrderId}
+              style={{ minWidth: "10rem" }}
+              sortable
           />
           <Column
             header="User"
-            body={renderUserCell} // Render the user info (name + image)
+              body={renderUserCell}
             style={{ minWidth: "15rem" }}
+              sortable
           />
           <Column
             field="totalPrice"
             header="Total Price"
             style={{ minWidth: "10rem" }}
+              sortable
           />
           <Column
             field="status"
             header="Status"
             style={{ minWidth: "10rem" }}
             body={renderStatusCell}
+              sortable
           />
           <Column
             field="createdAt"
             header="Order Date"
-            body={(rowData) => formatDate(rowData.createdAt)} // Format the date
+              body={(rowData) => formatDate(rowData.createdAt)}
             style={{ minWidth: "15rem" }}
+              sortable
           />
         </DataTable>
       )}

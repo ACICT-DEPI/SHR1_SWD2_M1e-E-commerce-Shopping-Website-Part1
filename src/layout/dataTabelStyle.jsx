@@ -126,8 +126,8 @@ export const dataTabelStyle = {
       className: classNames(
         "ml-2",
         context.sorted
-          ? "text-blue-700 dark:text-white/80"
-          : "text-slate-700 dark:text-white/70"
+          ? "text-white/80 dark:text-white/80"
+          : "text-white/70 dark:text-white/70"
       ),
     }),
     sortbadge: {
