@@ -50,6 +50,7 @@ const UserHeader = () => {
   }, []);
 
   // Update cart count
+
   useEffect(() => {
     const storedCartProducts =
       JSON.parse(localStorage.getItem("cartProducts")) || [];
