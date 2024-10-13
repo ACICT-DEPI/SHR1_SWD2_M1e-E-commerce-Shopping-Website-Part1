@@ -8,15 +8,18 @@ import { Button } from "primereact/button";
 import CustomEditor from "../../../components/Admin/CustomEditor";
 import { Toast } from "primereact/toast";
 import MediaUpload from "../../../components/Admin/MediaUpload/MediaUpload";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { SelectButton } from "primereact/selectbutton";
-
 import "primeicons/primeicons.css";
+import { Dropdown } from "primereact/dropdown";
 
 const AddCarousels = () => {
+  const { carouselId } = useParams(); // Get carousel ID from URL parameters
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [category, setCategory] = useState(""); 
+  const [buttonText, setButtonText] = useState(""); 
   const [image, setImage] = useState(null);
   const [banner, setBanner] = useState(null);
   const [isBannerVisible, setIsBannerVisible] = useState(false);
@@ -25,44 +28,46 @@ const AddCarousels = () => {
   const toast = useRef(null);
   const navigate = useNavigate();
   const [errors, setErrors] = useState({});
-  const [imageError, setImageError] = useState(""); // State for image upload error
-  const [bannerError, setBannerError] = useState(""); // State for banner upload error
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  // Update the image path on component unmount
   useEffect(() => {
-    return () => {
-      if (image) {
-        URL.revokeObjectURL(image); // Clean up the image URL
+    const fetchCategories = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get('http://localhost:5000/api/v1/categories', {
+          withCredentials: true,
+        });
+        setCategories(response.data.data.categories);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      } finally {
+        setLoading(false);
       }
-      if (banner) {
-        URL.revokeObjectURL(banner); // Clean up the banner URL
-      }
-      setIsBannerVisible(showValue === showOptions[0]);
     };
-  }, [image, banner]);
+    fetchCategories();
+  }, []);
 
   const handleImageChange = (file) => {
     setImage(file);
-    setImageError(""); // Clear the image error
-    console.log("Image selected:", file);
   };
 
   const handleBannerChange = (file) => {
     setBanner(file);
-    setBannerError(""); // Clear the banner error
-    console.log("Banner selected:", file);
   };
 
   // Submit the form
   const submitForm = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(
-        "http://localhost:5000/api/v1/carousels", // Assuming the endpoint is /carousels
+      const response = await axios.patch(
+        `http://localhost:5000/api/v1/carousels/${carouselId}`, // Update the endpoint to use PUT
         {
           title,
           description,
-          isBannerVisible,
+          category,
+          buttonText,
+          isBannerVisible: showValue === "Show", // Convert showValue to boolean
         },
         {
           headers: {
@@ -72,69 +77,37 @@ const AddCarousels = () => {
         }
       );
 
-      // Check the response status
       if (response.data.status === "success") {
-        const { data } = response.data; // Destructure the data from the response
-
-        // Handle image upload if present
         if (image) {
           const formImageData = new FormData();
           formImageData.append("image", image);
-
-          try {
-            const imageResponse = await axios.patch(
-              `http://localhost:5000/api/v1/carousels/carousel-photo-upload/${data._id}`,
-              formImageData,
-              {
-                withCredentials: true,
-              }
-            );
-
-            if (imageResponse.data.status !== "success") {
-              throw new Error(imageResponse.data.message || "Image upload failed");
-            }
-          } catch (imageUploadError) {
-            setImageError(imageUploadError.response?.data.message || "Image upload failed"); // Set image error
-            throw imageUploadError; // Rethrow the error to handle it below
-          }
+          await axios.patch(
+            `http://localhost:5000/api/v1/carousels/carousel-photo-upload/${carouselId}`,
+            formImageData,
+            { withCredentials: true }
+          );
         }
 
-        // Handle banner upload if present
         if (banner) {
           const formBannerData = new FormData();
           formBannerData.append("banner", banner);
-
-          try {
-            const bannerResponse = await axios.patch(
-              `http://localhost:5000/api/v1/carousels/carousel-banner-upload/${data._id}`,
-              formBannerData,
-              {
-                withCredentials: true,
-              }
-            );
-
-            if (bannerResponse.data.status !== "success") {
-              throw new Error(bannerResponse.data.message || "Banner upload failed");
-            }
-          } catch (bannerUploadError) {
-            setBannerError(bannerUploadError.response?.data.message || "Banner upload failed"); // Set banner error
-            throw bannerUploadError; // Rethrow the error to handle it below
-          }
+          await axios.patch(
+            `http://localhost:5000/api/v1/carousels/carousel-photo-upload/${carouselId}`,
+            formBannerData,
+            { withCredentials: true }
+          );
         }
 
         toast.current.show({
           severity: "success",
           summary: "Success",
-          detail: "Carousel created successfully",
+          detail: "Carousel updated successfully",
           life: 3000,
         });
 
-        // Wait for 3 seconds before navigating
         setTimeout(() => {
-          navigate(`/admin/carousels/${data._id}`); // Redirect to the created carousel's detail page
+          navigate(`/admin/carousels/${carouselId}`);
         }, 3000);
-      } else {
-        handleErrors(response.data);
       }
     } catch (error) {
       const data = error.response?.data || {};
@@ -142,32 +115,13 @@ const AddCarousels = () => {
         ...prev,
         title: data.errors?.title?.message || "",
         description: data.errors?.description?.message || "",
+        buttonText: data.errors?.buttonText?.message || "",
+        category: data.errors?.category?.message || ""
       }));
       toast.current.show({
         severity: "error",
         summary: "Error",
         detail: error.response?.data.message || "An error occurred",
-        life: 3000,
-      });
-    }
-  };
-
-  const handleErrors = (data) => {
-    const errorMessage = data.message || "An error occurred";
-    const errorDetails = data.errors || {};
-
-    toast.current.show({
-      severity: "error",
-      summary: "Error",
-      detail: errorMessage,
-      life: 3000,
-    });
-
-    if (errorDetails.title) {
-      toast.current.show({
-        severity: "error",
-        summary: "Error",
-        detail: `Title error: ${errorDetails.title.message}`,
         life: 3000,
       });
     }
@@ -179,7 +133,7 @@ const AddCarousels = () => {
         <div>
           <GoBackButton />
           <h1 className="inline-block ml-4 text-3xl dark:text-white">
-            Create Carousel
+            Update Carousel
           </h1>
         </div>
       </div>
@@ -222,47 +176,83 @@ const AddCarousels = () => {
                 {errors.description && <small className="p-error">{errors.description}</small>}
               </div>
 
-              <div className="mb-2">
-                <label
-                  htmlFor="image-upload"
-                  className="w-full mb-2 block text-black dark:text-white"
-                >
-                  Image
+              <div className="mb-4">
+                <label htmlFor="category" className="block text-lg font-semibold mb-2 text-black dark:text-white">
+                  Category
                 </label>
-                <MediaUpload onChange={handleImageChange} maxFiles={1} />
-                {imageError && <small className="p-error">{imageError}</small>} {/* Display image error */}
+                <Dropdown
+                  id="category"
+                  value={category}
+                  options={categories}
+                  onChange={(e) => setCategory(e.value)}
+                  placeholder="Select category"
+                  optionLabel="title"
+                  className={`w-full ${errors.category ? 'border-red-500' : 'border-gray-300'}`}
+                  panelClassName="bg-white dark:bg-gray-800 border dark:border-gray-600"
+                  itemTemplate={(option) => (
+                    <div className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 transition duration-200">
+                      {option.title}
+                    </div>
+                  )}
+                  style={{
+                    backgroundColor: 'var(--background-color)',
+                    border: errors.category ? '1px solid #e3342f' : '1px solid #d1d5db',
+                    borderRadius: '0.375rem',
+                  }}
+                />
+                {errors.category && <small className="text-red-500 mt-1">{errors.category}</small>}
               </div>
 
               <div className="mb-2">
                 <label
-                  htmlFor="banner-upload"
+                  htmlFor="buttonText"
                   className="w-full mb-2 block text-black dark:text-white"
                 >
-                  Banner
+                  Button Text
                 </label>
-                <MediaUpload onChange={handleBannerChange} maxFiles={1} />
-                {bannerError && <small className="p-error">{bannerError}</small>} {/* Display banner error */}
+                <InputText
+                  id="buttonText"
+                  type="text"
+                  placeholder="Enter button text"
+                  className={`w-full ${errors.buttonText ? 'border-red-500' : ''}`}
+                  pt={inputTextStyle}
+                  unstyled={true}
+                  value={buttonText}
+                  onChange={(e) => setButtonText(e.target.value)}
+                />
+                {errors.buttonText && <small className="p-error">{errors.buttonText}</small>}
               </div>
 
-              <div className="mb-2">
-                <label
-                  htmlFor="show-in-home-page"
-                  className="w-full mb-2 block text-black dark:text-white"
-                >
-                  Show in Home Page
-                </label>
+              <div className="mb-4">
+                <span className="block mb-2 text-black dark:text-white">Show Banner</span>
                 <SelectButton
                   value={showValue}
-                  onChange={(e) => setShowValue(e.value)}
-                  options={showOptions.map((option) => ({ label: option, value: option }))}
+                  options={showOptions}
+                  onChange={(e) => {
+                    setShowValue(e.value);
+                    setIsBannerVisible(e.value === "Show");
+                  }}
                 />
               </div>
 
-              <div className="flex flex-row justify-end mt-4">
-                <Button type="button" className="mr-2" onClick={() => navigate(-1)}>
-                  Cancel
-                </Button>
-                <Button type="submit" label="Create" />
+              <MediaUpload
+                title="Image"
+                onFileChange={handleImageChange}
+              />
+              <MediaUpload
+                title="Banner"
+                onFileChange={handleBannerChange}
+              />
+
+<div className="pt-3 rounded-b-md sm:rounded-b-lg">
+                <div className="flex items-center justify-end">
+                  <Button
+                    label="Add Carousel"
+                    size="normal"
+                    className="text-base"
+                    pt={buttonsStyle}
+                  />
+                </div>
               </div>
             </div>
           </form>

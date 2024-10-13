@@ -24,7 +24,8 @@ const ContactPage = () => {
             Contact Information
           </h2>
           <p className="mb-2 text-gray-800 dark:text-gray-300">
-            <strong>Email:</strong> shopify@example.com
+            <strong>Email: </strong> 
+             tradesphere.ecomm@gmail.com
           </p>
           <p className="mb-2 text-gray-800 dark:text-gray-300">
             <strong>Phone:</strong> (123) 456-7890
