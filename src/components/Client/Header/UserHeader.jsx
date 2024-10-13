@@ -72,7 +72,7 @@ const UserHeader = () => {
           <div className="flex items-center space-x-8">
             <Link to="/" className="flex items-center">
               <img
-                src={require("https://res.cloudinary.com/ducmzit0a/image/upload/v1728842399/d4lohst2hmfr6cwztldm.png")}
+                src="https://res.cloudinary.com/ducmzit0a/image/upload/v1728842399/d4lohst2hmfr6cwztldm.png"
                 alt="Logo"
                 className="h-16 w-auto"
               />
