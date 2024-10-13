@@ -37,7 +37,7 @@ const Dashboard = () => {
 
     const fetchOrders = async () => {
       try {
-        const response = await axios.get("capi/v1/orders", {
+        const response = await axios.get("https://server-esw.up.railway.app/api/v1/orders", {
           withCredentials: true,
         });
         const fetchedOrders = response.data.data.orders;
