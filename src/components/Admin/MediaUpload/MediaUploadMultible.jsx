@@ -1,14 +1,15 @@
-import { Fragment, useState, useEffect } from "react";
-import { useDropzone } from "react-dropzone";
+import React, { Fragment, useEffect, useState } from 'react';
+import { useDropzone } from 'react-dropzone';
 
-const MediaUploadMultible = ({ onChange, maxFiles, showImages }) => {
+const MediaUploadMultiple = ({ onChange, maxFiles, showImages }) => {
   const [images, setImages] = useState([]);
   const [previews, setPreviews] = useState([]);
 
-  // تحديث الصور الممررة للمكون
+  // تحديث الصور المعروضة في المكون
   useEffect(() => {
     if (showImages && showImages.length > 0) {
       setPreviews(showImages);
+      setImages(showImages); // إذا كنت تريد الاحتفاظ بالصور
     }
   }, [showImages]);
 
@@ -23,9 +24,7 @@ const MediaUploadMultible = ({ onChange, maxFiles, showImages }) => {
       setImages(newImages);
 
       // تحديث المعاينات (previews)
-      const newPreviews = newImages.map((file) =>
-        URL.createObjectURL(file)
-      );
+      const newPreviews = newImages.map((file) => URL.createObjectURL(file));
       setPreviews(newPreviews);
 
       if (onChange) {
@@ -71,4 +70,4 @@ const MediaUploadMultible = ({ onChange, maxFiles, showImages }) => {
   );
 };
 
-export default MediaUploadMultible;
+export default MediaUploadMultiple;
