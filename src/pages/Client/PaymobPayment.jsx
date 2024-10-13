@@ -30,7 +30,7 @@ const PaymobPayment = () => {
     const initiatePayment = async () => {
       try {
         const response = await axios.post(
-          "https://9010-105-39-144-122.ngrok-free.app/api/v1/orders/make-order",
+          "https://server-esw.up.railway.app/api/v1/orders/make-order",
           orderData,
           { withCredentials: true }
         );
