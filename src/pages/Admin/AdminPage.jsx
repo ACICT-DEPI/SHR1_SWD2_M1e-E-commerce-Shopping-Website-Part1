@@ -14,11 +14,11 @@ import SingleOrderDetails from "./Orders/SingleOrderDetails";
 import SingleCustomerDetails from "./Customers/SingleCustomerDetails";
 import { AdminProfile } from "./AdminProfile";
 import { ChangePassword } from "./ChangePassword";
-import SingleProductDetails from "./Products/SingleProductPage";
 import  AddProduct  from "./Products/AddProduct";
 import { CarouselsPage } from "./Carousels/CarouselsPage";
 import  UpdateCarousels  from "./Carousels/UpdateCarousels";
 import  AddCarousels  from "./Carousels/AddCarousels";
+import SingleProductPage from "./Products/SingleProductPage";
 
 const AdminPage = () => {
   const [loading, setLoading] = useState(true);
@@ -35,7 +35,7 @@ const AdminPage = () => {
         <Route path="changepassword" element={<ChangePassword />} />
         <Route path="products" element={<Products />} />
         <Route path="products/add" element={<AddProduct />} />
-        <Route path="products/update/:id" element={<SingleProductDetails />} />
+        <Route path="products/:id" element={<SingleProductPage />} />
 
         <Route path="orders" element={<Orders />} />
         <Route path="/orders/:id" element={<SingleOrderDetails />} />

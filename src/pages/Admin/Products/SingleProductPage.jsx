@@ -35,15 +35,18 @@ const SingleProductPage = () => {
         const response = await axios.get(`http://localhost:5000/api/v1/products/${id}`, {
           withCredentials: true,
         });
-        const product = response.data.data;
-        setTitle(product.title);
-        setDescription(product.description);
-        setPrice(product.price);
-        setDiscount(product.discount);
-        setQuantity(product.quantity);
-        setExcerpt(product.excerpt);
-        setExistingImage(product.image?.url);
-        setExistingGallery(product.gallery?.map(item => item.url) || []); // Assuming gallery is an array of objects
+        const { title, description, image, gallery, discount,quantity, excerpt } =
+          response.data.data;
+
+        // Populate state with product data
+        setTitle(title);
+        setDescription(description);
+        setPrice(price);
+        setDiscount(discount);
+        setQuantity(quantity);
+        setExcerpt(excerpt);
+        setExistingImage(image?.url);
+        setExistingGallery(gallery?.map(item => item.url) || []);
       } catch (error) {
         console.error("Error fetching product data:", error);
         toast.current.show({
@@ -70,18 +73,18 @@ const SingleProductPage = () => {
 
   const submitForm = async (e) => {
     e.preventDefault();
-
     try {
       // Prepare form data for product update
       const formData = new FormData();
       formData.append("title", title);
-      formData.append("description", description); // Send as HTML
-      formData.append("excerpt", excerpt); // Send as HTML
-      formData.append("price", price); // Send as HTML
-      formData.append("discount", discount); // Send as HTML
-      formData.append("quantity", quantity); // Send as HTML
+      formData.append("description", description);
+      formData.append("excerpt", excerpt);
+      formData.append("price", price);
+      formData.append("discount", discount);
+      formData.append("quantity", quantity);
+
       // Update product details
-      const updateResponse = await axios.patch(`http://localhost:5000/api/v1/products/${id}`, formData, {
+      await axios.patch(`http://localhost:5000/api/v1/products/${id}`, formData, {
         withCredentials: true,
       });
 
@@ -119,6 +122,10 @@ const SingleProductPage = () => {
       setErrors({
         title: data.errors?.title?.message || "",
         description: data.errors?.description?.message || "",
+        excerpt: data.errors?.excerpt?.message || "",
+        price: data.errors?.price?.message || "",
+        discount: data.errors?.discount?.message || "",
+        quantity: data.errors?.quantity?.message || "",
       });
       console.error("Error updating product:", error);
       toast.current.show({
@@ -150,8 +157,7 @@ const SingleProductPage = () => {
                   type="text"
                   placeholder="Enter product title"
                   className={`w-full ${errors.title ? 'border-red-500' : ''}`}
-                  pt={inputTextStyle}
-                  unstyled={true}
+                  style={inputTextStyle}
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                 />
@@ -169,9 +175,8 @@ const SingleProductPage = () => {
                     value={price}
                     placeholder="Enter product price"
                     className={`w-full ${errors.price ? 'border-red-500' : ''}`}
-                    onChange={(e) => setPrice(e.target.value)}
-                    pt={inputTextStyle}
-                    unstyled={true}
+                    onChange={(e) => setPrice(Number(e.target.value))}
+                    style={inputTextStyle}
                   />
                   {errors.price && <small className="p-error">{errors.price}</small>}
                 </div>
@@ -187,9 +192,8 @@ const SingleProductPage = () => {
                     min={0}
                     max={100}
                     className={`w-full ${errors.discount ? 'border-red-500' : ''}`}
-                    onChange={(e) => setDiscount(e.target.value)}
-                    pt={inputTextStyle}
-                    unstyled={true}
+                    onChange={(e) => setDiscount(Number(e.target.value))}
+                    style={inputTextStyle}
                   />
                   {errors.discount && <small className="p-error">{errors.discount}</small>}
                 </div>
@@ -205,9 +209,8 @@ const SingleProductPage = () => {
                     min={1}
                     max={100}
                     className={`w-full ${errors.quantity ? 'border-red-500' : ''}`}
-                    onChange={(e) => setQuantity(e.target.value)}
-                    pt={inputTextStyle}
-                    unstyled={true}
+                    onChange={(e) => setQuantity(Number(e.target.value))}
+                    style={inputTextStyle}
                   />
                   {errors.quantity && <small className="p-error">{errors.quantity}</small>}
                 </div>
@@ -230,46 +233,38 @@ const SingleProductPage = () => {
               {/* Description Editor */}
               <div className="mb-2">
                 <label htmlFor="description" className="w-full mb-2 block text-black dark:text-white">Description</label>
-                <CustomEditor
-                  value={description}
-                  onChange={(value) => setDescription(value)}
-                />
+                <CustomEditor value={description} setValue={setDescription} />
                 {errors.description && <small className="p-error">{errors.description}</small>}
               </div>
 
-              {/* Image Upload */}
+              {/* Image Upload Section */}
               <div className="mb-2">
-                <MediaUpload
-                  onChange={handleImageChange}
-                  existingImage={existingImage}
-                  previewUrl={previewUrl}
-                />
+                <label htmlFor="image" className="w-full mb-2 block text-black dark:text-white">Product Image</label>
+                <MediaUpload existingImage={existingImage} onChange={handleImageChange} />
+                {previewUrl && <img src={previewUrl} alt="Preview" className="w-full mt-2" />}
               </div>
 
-              {/* Gallery Upload */}
+              {/* Gallery Upload Section */}
               <div className="mb-2">
-                <label htmlFor="gallery" className="w-full mb-2 block text-black dark:text-white">Gallery</label>
-                <MediaUpload
-                  onChange={handleGalleryChange}
-                  existingGallery={existingGallery}
-                  galleryPreviewUrls={galleryPreviewUrls}
-                  multiple={true}
-                />
+                <label htmlFor="gallery" className="w-full mb-2 block text-black dark:text-white">Gallery Images</label>
+                <MediaUpload existingImages={existingGallery} onChange={handleGalleryChange} multiple />
+                <div className="flex gap-2 mt-2">
+                  {galleryPreviewUrls.map((url, index) => (
+                    <img key={index} src={url} alt={`Gallery Preview ${index}`} className="w-1/4" />
+                  ))}
+                </div>
               </div>
 
               {/* Submit Button */}
               <div className="flex justify-end">
-                <Button
-                  label="Update Product"
-                  type="submit"
-                  className={buttonsStyle}
-                />
+                <Button label="Update Product" type="submit" style={buttonsStyle} />
               </div>
             </div>
           </form>
         </div>
       </div>
-      <Toast ref={toast} position="bottom-left"/>
+
+      <Toast ref={toast} position="bottom-left" />
     </Fragment>
   );
 };

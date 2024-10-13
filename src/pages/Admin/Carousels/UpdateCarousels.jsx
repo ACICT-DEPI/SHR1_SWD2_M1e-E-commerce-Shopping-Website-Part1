@@ -17,7 +17,6 @@ const UpdateCarousels = () => {
   const navigate = useNavigate(); // For redirecting after update
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState(""); // New field for category
   const [buttonText, setButtonText] = useState(""); // New field for button text
   const [existingImage, setExistingImage] = useState(null);
   const [newImage, setNewImage] = useState(null); // For new image upload
@@ -27,23 +26,9 @@ const UpdateCarousels = () => {
   const showOptions = ["Show", "Hide"];
   const [showValue, setShowValue] = useState(null);
   const [errors, setErrors] = useState({});
-  const [categories, setCategories] = useState([]);
 
   const toast = useRef(null);
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await axios.get('http://localhost:5000/api/v1/categories', {
-          withCredentials: true,
-        });
-        console.log("Response from categories:", response.data);
-        setCategories(response.data.data.categories);
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-      } 
-    };
-    fetchCategories();
-  }, []);
+  
   
   useEffect(() => {
     // Fetch carousel data on component mount
@@ -55,12 +40,11 @@ const UpdateCarousels = () => {
             withCredentials: true,
           }
         );
-        const { title, description, image , category, buttonText, banner , isBannerVisible } = response.data.data; // Access data correctly
+        const { title, description, image , buttonText, banner , isBannerVisible } = response.data.data; // Access data correctly
         setTitle(title);
         setDescription(description); // Set description as HTML
         setExistingImage(image.url); // Set existing image URL
         setButtonText(buttonText);
-        setCategory(category);
         setExistingImage(image.url);
         setExistingBanner(banner.url);
         setIsBannerVisible(isBannerVisible);
@@ -111,7 +95,6 @@ const UpdateCarousels = () => {
       formData.append("title", title);
       formData.append("description", description); // Send description as HTML
       formData.append("buttonText",buttonText);
-      formData.append("category", category);
       formData.append("isBannerVisible", isBannerVisible); // تحديث البيانات باستخدام PUT أو PATCH
 
       // Update carousel using PATCH request
@@ -263,36 +246,10 @@ const UpdateCarousels = () => {
                   value={description}
                   onTextChange={(e) => setDescription(e.htmlValue)}
                 />
-                {errors.description && <small className="p-error">{errors.description}</small>}
+              {errors.description && <small className="p-error">{errors.description}</small>}
+
               </div>
-              <div className="mb-4">
-      <label htmlFor="category" className="block text-lg font-semibold mb-2 text-black dark:text-white">
-        Category
-      </label>
-      <Dropdown
-        id="category"
-        value={category}
-        options={categories}
-        onChange={(e) => setCategory(e.value)}
-        placeholder="Select category"
-        optionLabel="title" // Display property for dropdown options
-        className={`w-full ${errors.category ? 'border-red-500' : 'border-gray-300'}`}
-        panelClassName="bg-white dark:bg-gray-800 border dark:border-gray-600" // Dropdown panel styling
-        itemTemplate={(option) => (
-          <div className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 transition duration-200">
-            {option.title}
-          </div>
-        )}
-        style={{
-          backgroundColor: 'var(--background-color)', // Custom variable for background
-          border: errors.category ? '1px solid #e3342f' : '1px solid #d1d5db', // Error handling
-          borderRadius: '0.375rem',
-        }}
-      />
-      {errors.category && <small className="text-red-500 mt-1">{errors.category}</small>}
-    </div>
-
-
+      
               <div className="mb-2">
                 <label
                   htmlFor="image-upload"

@@ -139,7 +139,7 @@ const ProductDataTabel = () => {
         outlined
         className="mr-2"
         aria-label="Edit order"
-        onClick={() => navigate(`/admin/products/update/${rowData._id}`)}
+        onClick={() => navigate(`/admin/products/${rowData._id}`)}
       />
       <Button
         icon="pi pi-trash"
@@ -156,7 +156,7 @@ const ProductDataTabel = () => {
   // First row body template for product details
   const ProductBodyTemplate = (rowData) => {
     const handleTitleClick = () => {
-      navigate(`/admin/products/update/${rowData._id}`); // Navigate to product update page
+      navigate(`/admin/products/${rowData._id}`); // Navigate to product update page
     };
    
     return (

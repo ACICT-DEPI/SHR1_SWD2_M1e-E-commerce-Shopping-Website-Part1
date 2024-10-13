@@ -10,30 +10,28 @@ import { Toast } from "primereact/toast";
 import MediaUpload from "../../../components/Admin/MediaUpload/MediaUpload";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import { SelectButton } from "primereact/selectbutton";
 import "primeicons/primeicons.css";
 import { Dropdown } from "primereact/dropdown";
+import { SelectButton } from "primereact/selectbutton";
 
 const AddCarousels = () => {
-  const { carouselId } = useParams(); // Get carousel ID from URL parameters
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState(""); 
   const [buttonText, setButtonText] = useState(""); 
   const [image, setImage] = useState(null);
-  const [banner, setBanner] = useState(null);
   const [isBannerVisible, setIsBannerVisible] = useState(false);
+
+  const [banner, setBanner] = useState(null);
   const showOptions = ["Show", "Hide"];
   const [showValue, setShowValue] = useState(showOptions[1]);
   const toast = useRef(null);
   const navigate = useNavigate();
   const [errors, setErrors] = useState({});
   const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchCategories = async () => {
-      setLoading(true);
       try {
         const response = await axios.get('http://localhost:5000/api/v1/categories', {
           withCredentials: true,
@@ -41,12 +39,26 @@ const AddCarousels = () => {
         setCategories(response.data.data.categories);
       } catch (error) {
         console.error("Error fetching categories:", error);
-      } finally {
-        setLoading(false);
-      }
+      } 
     };
     fetchCategories();
   }, []);
+// لتحديث مسار الصورة عند إلغاء المكون
+useEffect(() => {
+  return () => {
+    if (image) {
+      URL.revokeObjectURL(image); // تنظيف مسار الصورة
+    }
+    if (banner) {
+      URL.revokeObjectURL(banner); // تنظيف مسار الصورة
+    }
+    if (showValue == showOptions[0]) {
+      setIsBannerVisible(true);
+    } else {
+      setIsBannerVisible(false);
+    }
+  };
+}, [image, banner]);
 
   const handleImageChange = (file) => {
     setImage(file);
@@ -60,14 +72,15 @@ const AddCarousels = () => {
   const submitForm = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.patch(
-        `http://localhost:5000/api/v1/carousels/${carouselId}`, // Update the endpoint to use PUT
+      const response = await axios.post(
+        "http://localhost:5000/api/v1/carousels", // Update the endpoint to use PUT
         {
           title,
           description,
           category,
           buttonText,
-          isBannerVisible: showValue === "Show", // Convert showValue to boolean
+          isBannerVisible,
+
         },
         {
           headers: {
@@ -78,6 +91,8 @@ const AddCarousels = () => {
       );
 
       if (response.data.status === "success") {
+        const carouselId = response.data.data._id;
+
         if (image) {
           const formImageData = new FormData();
           formImageData.append("image", image);
@@ -101,12 +116,12 @@ const AddCarousels = () => {
         toast.current.show({
           severity: "success",
           summary: "Success",
-          detail: "Carousel updated successfully",
+          detail: "Carousel created successfully",
           life: 3000,
         });
 
         setTimeout(() => {
-          navigate(`/admin/carousels/${carouselId}`);
+          navigate("/admin/carousels");
         }, 3000);
       }
     } catch (error) {
@@ -133,7 +148,7 @@ const AddCarousels = () => {
         <div>
           <GoBackButton />
           <h1 className="inline-block ml-4 text-3xl dark:text-white">
-            Update Carousel
+            Create Carousel
           </h1>
         </div>
       </div>
@@ -181,25 +196,13 @@ const AddCarousels = () => {
                   Category
                 </label>
                 <Dropdown
-                  id="category"
-                  value={category}
-                  options={categories}
-                  onChange={(e) => setCategory(e.value)}
-                  placeholder="Select category"
-                  optionLabel="title"
-                  className={`w-full ${errors.category ? 'border-red-500' : 'border-gray-300'}`}
-                  panelClassName="bg-white dark:bg-gray-800 border dark:border-gray-600"
-                  itemTemplate={(option) => (
-                    <div className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 transition duration-200">
-                      {option.title}
-                    </div>
-                  )}
-                  style={{
-                    backgroundColor: 'var(--background-color)',
-                    border: errors.category ? '1px solid #e3342f' : '1px solid #d1d5db',
-                    borderRadius: '0.375rem',
-                  }}
-                />
+  id="category"
+  value={category} // State holding selected category ID
+  options={categories.map(cat => ({ label: cat.title, value: cat._id }))} // Mapping categories to required format
+  onChange={(e) => setCategory(e.value)} // Sets the selected category ID
+  placeholder="Select a category"
+  className={`w-full ${errors.category ? 'border-red-500' : ''}`}
+/>
                 {errors.category && <small className="text-red-500 mt-1">{errors.category}</small>}
               </div>
 
@@ -222,19 +225,19 @@ const AddCarousels = () => {
                 />
                 {errors.buttonText && <small className="p-error">{errors.buttonText}</small>}
               </div>
-
-              <div className="mb-4">
-                <span className="block mb-2 text-black dark:text-white">Show Banner</span>
+              <div className="mb-2">
+                <label
+                  htmlFor="image-upload"
+                  className="w-full mb-2 block text-black dark:text-white"
+                >
+                  Show in Home page
+                </label>
                 <SelectButton
                   value={showValue}
+                  onChange={(e) => setShowValue(e.value)}
                   options={showOptions}
-                  onChange={(e) => {
-                    setShowValue(e.value);
-                    setIsBannerVisible(e.value === "Show");
-                  }}
                 />
               </div>
-
               <MediaUpload
                 title="Image"
                 onFileChange={handleImageChange}
