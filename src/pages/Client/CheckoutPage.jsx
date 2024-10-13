@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { InputText } from "primereact/inputtext";
 import { RadioButton } from "primereact/radiobutton";
 import { Checkbox } from "primereact/checkbox";
@@ -7,13 +7,22 @@ import { inputTextStyle } from "../../layout/inputTextStyle";
 import { FaArrowLeft } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import axios from "axios"; // تأكد من استيراد axios
+import { Toast } from "primereact/toast";
 
 const CheckoutPage = () => {
   const [billingSameAsShipping, setBillingSameAsShipping] = useState(true);
   const [paymentType, setPaymentType] = useState("cod");
   const [cartProducts, setCartProducts] = useState([]);
+  const [shippingAddress1, setShippingAddress1] = useState("");
+  const [shippingAddress2, setShippingAddress2] = useState("");
+  const [city,setCity] = useState("");
+  const [zip, setZip] = useState("");
+  const [phone, setPhone] = useState("");
+  const [country, setCountry] = useState("");
+  const toast = useRef(null);
   const [subtotal, setSubtotal] = useState(0);
   const [email, setEmail] = useState(""); // حالة لحفظ البريد الإلكتروني
+  const [errorMessages, setErrorMessages] = useState({});
 
   useEffect(() => {
     const storedCartProducts = JSON.parse(localStorage.getItem("cartItems")) || [];
@@ -54,18 +63,58 @@ const CheckoutPage = () => {
 
       // استخراج مفاتيح الدفع
       const { paymentKey, frame_id } = response.data.data;
-
       // إعادة توجيه إلى iframe الدفع
       if (paymentKey) {
         window.location.href = `https://accept.paymob.com/api/acceptance/iframes/${frame_id}?payment_token=${paymentKey}`;
       }
+      if (response.status === 200) {
+        toast.current.show({
+          severity: "success",
+          summary: "Success",
+          detail: response.data.message,
+          life: 3000,
+        });
+        // Clear form fields after successful registration
+        setShippingAddress1("");
+        setShippingAddress2("");
+        setPhone("");
+        setZip("");
+        setCountry("");
+        setCity("");
+      }
+      
+      
     } catch (error) {
-      console.error("Payment initiation failed:", error.response.data);
-    }
+    // Check for error response from the server
+    const data = error.response?.data || {};
+    setErrorMessages((prev) => ({
+      ...prev,
+      shippingAddress1: data.errors?.shippingAddress1?.message || "",
+      shippingAddress2: data.errors?.shippingAddress2?.message || "",
+      city: data.errors?.city?.message || "",
+      country: data.errors?.country?.message || "",
+      phone: data.errors?.phone?.message || "",
+      zip: data.errors?.zip?.message || "",
+
+    }));
+
+    // Display generic error message
+    toast.current.show({
+      severity: "error",
+      summary: "Error",
+      detail: error.response.data.message || "An error occurred. Please try again.",
+      life: 3000,
+    });
+  }
+  };
+  const handleFocus = (field) => {
+    setErrorMessages((prev) => ({ ...prev, [field]: "" }));
   };
 
   return (
     <div className="container mx-auto p-8 flex flex-col lg:flex-row justify-between">
+       <Toast ref={toast} position="bottom-left" />
+
       {/* Form Section */}
       <div className="w-full lg:w-2/3">
         <div className="flex flex-col lg:flex-row justify-center items-start p-8">
@@ -80,25 +129,65 @@ const CheckoutPage = () => {
 
               <div className="mb-4">
                 <label htmlFor="address" className="block mb-2 dark:text-white">Address</label>
-                <InputText id="address" className="w-full" pt={inputTextStyle} />
+                <InputText id="address"
+                value={shippingAddress1}
+                onChange={(e) => setShippingAddress1(e.target.value)}
+                onFocus={() => handleFocus("address")} 
+                className={`w-full ${errorMessages.shippingAddress1 ? "border-red-500" : ""}`}
+                pt={inputTextStyle} />
+                {errorMessages.shippingAddress1 && (
+              <div className="text-red-500">{errorMessages.shippingAddress1}</div>
+            )}
               </div>
               <div className="mb-4">
                 <label htmlFor="city" className="block mb-2 dark:text-white">City</label>
-                <InputText id="city" className="w-full" pt={inputTextStyle} />
+                <InputText id="city"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                onFocus={() => handleFocus("city")}
+                className={`w-full ${errorMessages.city ? "border-red-500" : ""}`}
+                pt={inputTextStyle} />
+                {errorMessages.city && (
+              <div className="text-red-500">{errorMessages.city}</div>
+            )}
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
                   <label htmlFor="country" className="block mb-2 dark:text-white">Country</label>
-                  <InputText id="country" className="w-full" pt={inputTextStyle} />
+                  <InputText id="country"
+                  value={country}
+                  onChange={(e) => setCountry(e.target.value)}
+                  onFocus={() => handleFocus("country")} 
+                  className={`w-full ${errorMessages.country ? "border-red-500" : ""}`}
+                  pt={inputTextStyle} />
+                  {errorMessages.country && (
+              <div className="text-red-500">{errorMessages.country}</div>
+            )}
                 </div>
                 <div>
                   <label htmlFor="zip" className="block mb-2 dark:text-white">ZIP / Postal code</label>
-                  <InputText id="zip" className="w-full" pt={inputTextStyle} />
+                  <InputText id="zip"
+                  value={zip}
+                  onChange={(e) => setZip(e.target.value)}
+                  onFocus={() => handleFocus("zip")}
+                  className={`w-full ${errorMessages.zip ? "border-red-500" : ""}`}
+                  pt={inputTextStyle} />
+                  {errorMessages.zip && (
+              <div className="text-red-500">{errorMessages.zip}</div>
+            )}
                 </div>
               </div>
               <div className="mb-4">
                 <label htmlFor="phone" className="block mb-2 dark:text-white">Phone</label>
-                <InputText id="phone" className="w-full" pt={inputTextStyle} />
+                <InputText id="phone"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                onFocus={() => handleFocus("phone")}
+                className={`w-full ${errorMessages.phone ? "border-red-500" : ""}`}
+                pt={inputTextStyle} />
+                {errorMessages.phone && (
+              <div className="text-red-500">{errorMessages.phone}</div>
+            )}
               </div>
             </section>
 

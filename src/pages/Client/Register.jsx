@@ -6,7 +6,6 @@ import {
   AiOutlineLock,
 } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
-import DarkModeSwitcher from "../../components/Admin/Header/DarkModeSwitcher";
 import { Toast } from "primereact/toast";
 import axios from "axios"; // Import axios
 
