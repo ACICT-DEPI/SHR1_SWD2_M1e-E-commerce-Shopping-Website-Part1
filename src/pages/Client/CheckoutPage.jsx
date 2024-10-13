@@ -126,14 +126,13 @@ const CheckoutPage = () => {
               {cartProducts.map((product) => (
                 <div key={product._id} className="flex flex-col md:flex-row justify-between items-center mb-6">
                   {/* Product Image */}
-                  {/* <img
-                    src={product.image.url}
+                  <img
+                    src={product.gallery[0].url}
                     alt={product.title}
                     className="w-16 h-16 object-cover rounded-md mr-4"
-                  /> */}
+                  /> 
                   <div className="flex flex-col md:flex-grow">
                     <h3 className="font-semibold dark:text-white">{product.title}</h3>
-                    <p className="text-gray-600 dark:text-gray-400">{product.description}</p>
                     <p className="text-gray-800 dark:text-gray-300">
                       ${product.price} x {product.quantity} = ${(product.price * product.quantity).toFixed(2)}
                     </p>
