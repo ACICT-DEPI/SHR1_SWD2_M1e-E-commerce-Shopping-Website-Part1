@@ -15,7 +15,7 @@ const UserDropdown = ({ firstname, avatarUrl, onClose }) => {
   const handleLogout = async () => {
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/v1/users/logout", // Your API logout route
+        "https://server-esw.up.railway.app/api/v1/users/logout", // Your API logout route
         {},
         { withCredentials: true }
       );

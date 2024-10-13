@@ -26,7 +26,7 @@ export const Carousels = () => {
   useEffect(() => {
     const fetchCarousels = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/v1/carousels", {
+        const response = await axios.get("https://server-esw.up.railway.app/api/v1/carousels", {
           withCredentials: true,
         });
         if (response.data.status === "success") {
@@ -59,7 +59,7 @@ export const Carousels = () => {
 
   const deleteCarousel = async (id) => {
     try {
-      const response = await axios.delete(`http://localhost:5000/api/v1/carousels/${id}`, {
+      const response = await axios.delete(`https://server-esw.up.railway.app/api/v1/carousels/${id}`, {
         withCredentials: true,
       });
       if (response.data.status === "success") {
@@ -158,7 +158,14 @@ export const Carousels = () => {
             pt={dataTabelStyle}
           >
             <Column field="title" header="Title" body={carouselTemplate} />
-            <Column field="description" header="Description" />
+            <Column field="description" header="Description" body={(rowData) => (
+              <span
+                className="truncate overflow-hidden w-full  inline-block"
+                dangerouslySetInnerHTML={{
+                  __html: rowData.description,
+                }}
+              />
+            )} />
             <Column field="category" header="Category" />
             <Column
               body={actionBodyTemplate}

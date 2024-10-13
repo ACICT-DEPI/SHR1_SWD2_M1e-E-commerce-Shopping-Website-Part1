@@ -22,7 +22,7 @@ const CollectionTopProducts = ({
       try {
         // طلب API باستخدام pagination و category
         const response = await axios.get(
-          `http://localhost:5000/api/v1/products`,
+          `https://server-esw.up.railway.app/api/v1/products`,
           { params: { categories: productQuery } }
         );
 

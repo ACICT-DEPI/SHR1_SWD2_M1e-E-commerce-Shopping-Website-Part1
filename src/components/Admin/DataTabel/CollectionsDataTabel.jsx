@@ -34,7 +34,7 @@ const CollectionsDataTabel = () => {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const response = await axios.get("http://localhost:5000/api/v1/categories");
+      const response = await axios.get("https://server-esw.up.railway.app/api/v1/categories");
       const fetchedCategories = response.data.data.categories;
       setCategories(fetchedCategories); 
     } catch (error) {
@@ -51,7 +51,7 @@ const CollectionsDataTabel = () => {
 
   const handleDeleteCollection = async (id) => {
     try {
-      const response = await axios.delete(`http://localhost:5000/api/v1/categories/${id}`, {
+      const response = await axios.delete(`https://server-esw.up.railway.app/api/v1/categories/${id}`, {
         withCredentials: true,
         headers: {
           'Content-Type': 'application/json', 

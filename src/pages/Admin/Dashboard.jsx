@@ -20,7 +20,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/v1/products");
+        const response = await axios.get("https://server-esw.up.railway.app/api/v1/products");
         const products = response.data.data.products;
         const count = response.data.data.count; // الحصول على عدد المنتجات
 
@@ -37,7 +37,7 @@ const Dashboard = () => {
 
     const fetchOrders = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/v1/orders", {
+        const response = await axios.get("capi/v1/orders", {
           withCredentials: true,
         });
         const fetchedOrders = response.data.data.orders;
@@ -70,7 +70,7 @@ const Dashboard = () => {
 
     const fetchCustomers = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/v1/admins", {
+        const response = await axios.get("https://server-esw.up.railway.app/api/v1/admins", {
           withCredentials: true,
         });
 

@@ -30,7 +30,7 @@ const SingleProductPage = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/v1/categories', { withCredentials: true });
+        const response = await axios.get('https://server-esw.up.railway.app/api/v1/categories', { withCredentials: true });
         setCategories(response.data.data.categories);
       } catch (error) {
         toast.current.show({
@@ -48,7 +48,7 @@ const SingleProductPage = () => {
   useEffect(() => {
     const fetchProductData = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/v1/products/${id}`, {
+        const response = await axios.get(`https://server-esw.up.railway.app/api/v1/products/${id}`, {
           withCredentials: true,
         });
         const product = response.data.data;
@@ -97,7 +97,7 @@ const SingleProductPage = () => {
       formData.append("quantity", quantity); // Send as HTML
       formData.append("category", category); // Send as HTML
       // Update product details
-      const updateResponse = await axios.patch(`http://localhost:5000/api/v1/products/${id}`, formData, {
+      const updateResponse = await axios.patch(`https://server-esw.up.railway.app/api/v1/products/${id}`, formData, {
         withCredentials: true,
       });
 
@@ -108,7 +108,7 @@ const SingleProductPage = () => {
           galleryFormData.append("gallery", file);
         });
 
-        const imageResponse = await axios.patch(`http://localhost:5000/api/v1/products/product-photos-upload/${id}`, galleryFormData, {
+        const imageResponse = await axios.patch(`https://server-esw.up.railway.app/api/v1/products/product-photos-upload/${id}`, galleryFormData, {
           withCredentials: true,
         });
 

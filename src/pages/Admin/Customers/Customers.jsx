@@ -24,7 +24,7 @@ export const Customers = () => {
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/v1/admins', {
+        const response = await axios.get('https://server-esw.up.railway.app/api/v1/admins', {
           withCredentials: true,
         });
         if (response.data.status === "success") {

@@ -12,7 +12,7 @@ const TokenValidation = () => {
     const fetchUserData = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:5000/api/v1/users/password/reset-password/${userId}/${token}`,
+          `https://server-esw.up.railway.app/api/v1/users/password/reset-password/${userId}/${token}`,
           { withCredentials: true }
         );
         setLoading(false); // Set loading to false when request is complete

@@ -13,7 +13,7 @@ const OurCollectionSection = () => {
       setLoading(true); // تعيين حالة التحميل إلى true عند بدء الجلب
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/v1/categories/",
+          "https://server-esw.up.railway.app/api/v1/categories/",
           {
             params: {
               limit: 5, // تحديد الحد بـ 5 فئات
