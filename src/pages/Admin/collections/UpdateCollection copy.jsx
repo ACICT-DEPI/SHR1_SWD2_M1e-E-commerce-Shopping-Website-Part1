@@ -25,7 +25,7 @@ const UpdateCollection = () => {
     const fetchCollectionData = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:5000/api/v1/categories/${id}`
+          `https://server-esw.up.railway.app/api/v1/categories/${id}`
         );
         const { title, description, image } = response.data.data;
         setTitle(title);
@@ -55,7 +55,7 @@ const UpdateCollection = () => {
 
       // تحديث البيانات باستخدام PUT أو PATCH
       const updateResponse = await axios.patch(
-        `http://localhost:5000/api/v1/categories/${id}`,
+        `https://server-esw.up.railway.app/api/v1/categories/${id}`,
         formData,
         {
           headers: {
@@ -78,7 +78,7 @@ const UpdateCollection = () => {
 
         // رفع الصورة
         const imageResponse = await axios.patch(
-          `http://localhost:5000/api/v1/categories/category-photo-upload/${id}`,
+          `https://server-esw.up.railway.app/api/v1/categories/category-photo-upload/${id}`,
           formData,
           {
             headers: {

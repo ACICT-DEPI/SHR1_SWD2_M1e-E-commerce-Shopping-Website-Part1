@@ -3,7 +3,7 @@ import { SlArrowDown } from "react-icons/sl"; // Arrow icon
 import DropdownList from "./DropdownList"; // Import the dropdown list
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Toast } from 'primereact/toast'; // Assuming you use PrimeReact for toasts
+import { Toast } from "primereact/toast"; // Assuming you use PrimeReact for toasts
 
 const UserDropdown = ({ firstname, avatarUrl, onClose }) => {
   const [visible, setVisible] = useState(false); // State to control visibility of dropdown
@@ -15,7 +15,7 @@ const UserDropdown = ({ firstname, avatarUrl, onClose }) => {
   const handleLogout = async () => {
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/v1/users/logout", // Your API logout route
+        "https://server-esw.up.railway.app/api/v1/users/logout", // Your API logout route
         {},
         { withCredentials: true }
       );
@@ -51,19 +51,27 @@ const UserDropdown = ({ firstname, avatarUrl, onClose }) => {
     };
 
     // Add event listener for click outside when the component is mounted
-    document.addEventListener('mousedown', handleClickOutside);
-    
+    document.addEventListener("mousedown", handleClickOutside);
+
     // Clean up event listener when the component is unmounted
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [onClose]);
 
   // Dropdown items
   const items = [
-    { label: 'Profile', icon: 'pi pi-user', command: () => navigate(`/profile/${firstname}`) },
-    { label: 'Orders', icon: 'pi pi-shopping-cart', command: () => navigate('/orders') },
-    { label: 'Logout', icon: 'pi pi-sign-out', command: () => handleLogout() },
+    {
+      label: "Profile",
+      icon: "pi pi-user",
+      command: () => navigate(`/profile/${firstname}`),
+    },
+    {
+      label: "Orders",
+      icon: "pi pi-shopping-cart",
+      command: () => navigate("/orders"),
+    },
+    { label: "Logout", icon: "pi pi-sign-out", command: () => handleLogout() },
   ];
 
   return (
@@ -84,18 +92,29 @@ const UserDropdown = ({ firstname, avatarUrl, onClose }) => {
 
         {/* Display avatar */}
         <span className="h-12 w-12 rounded-full overflow-hidden">
-          <img src={avatarUrl || require("./../../../imgs/test_image.png")} alt="User" />
+          <img
+            src={
+              avatarUrl ||
+              "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+            }
+            alt="User"
+          />
         </span>
 
         {/* Arrow rotation */}
         <SlArrowDown
-          className={`fill-body dark:fill-bodydark ${visible ? "rotate-180" : ""}`}
+          className={`fill-body dark:fill-bodydark ${
+            visible ? "rotate-180" : ""
+          }`}
         />
       </div>
 
       {/* Show DropdownList only if visible */}
       {visible && (
-        <div ref={menuRef} className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-lg z-20">
+        <div
+          ref={menuRef}
+          className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-lg z-20"
+        >
           <DropdownList items={items} /> {/* Pass dropdown items */}
         </div>
       )}

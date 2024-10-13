@@ -32,7 +32,7 @@ const AddProduct = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/v1/categories', { withCredentials: true });
+        const response = await axios.get('https://server-esw.up.railway.app/api/v1/categories', { withCredentials: true });
         setCategories(response.data.data.categories);
       } catch (error) {
         showErrorToast(error.response?.data?.message || "Failed to fetch categories");
@@ -56,7 +56,7 @@ const AddProduct = () => {
     setErrors({});
 
     try {
-      const response = await axios.post("http://localhost:5000/api/v1/products", {
+      const response = await axios.post("https://server-esw.up.railway.app/api/v1/products", {
         title, description, excerpt, price, discount, quantity, category
       }, { headers: { "Content-Type": "application/json" }, withCredentials: true });
 
@@ -68,7 +68,7 @@ const AddProduct = () => {
           gallery.forEach((file) => formGalleryData.append("gallery", file));
 
           const galleryResponse = await axios.patch(
-            `http://localhost:5000/api/v1/products/product-photos-upload/${productId}`,
+            `https://server-esw.up.railway.app/api/v1/products/product-photos-upload/${productId}`,
             formGalleryData,
             { withCredentials: true }
           ); if (galleryResponse.data.status === "success") {

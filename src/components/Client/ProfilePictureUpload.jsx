@@ -12,7 +12,7 @@ const ProfilePictureUpload = () => {
   // Fetch user's current profile picture
   const fetchProfilePicture = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/v1/users/profile', {
+      const response = await axios.get('https://server-esw.up.railway.app/api/v1/users/profile', {
         withCredentials: true, // Include credentials if needed
       });
       setPreviewUrl(response.data.data.avatar.url); // Assuming the response contains the profile picture URL
@@ -48,7 +48,7 @@ const ProfilePictureUpload = () => {
 
     try {
       const response = await axios.patch(
-        'http://localhost:5000/api/v1/users/user-photo-upload',
+        'https://server-esw.up.railway.app/api/v1/users/user-photo-upload',
         formData,
         {
           headers: {

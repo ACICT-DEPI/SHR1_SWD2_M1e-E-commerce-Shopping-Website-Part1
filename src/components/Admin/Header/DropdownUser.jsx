@@ -13,7 +13,7 @@ const DropdownUser = ({ fullname, avatarUrl, role, onClose }) => {
   const handleLogout = async () => {
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/v1/users/logout", // Your API logout route
+        "https://server-esw.up.railway.app/api/v1/users/logout", // Your API logout route
         {},
         { withCredentials: true }
       );
@@ -70,21 +70,28 @@ const DropdownUser = ({ fullname, avatarUrl, role, onClose }) => {
           <span className="block text-xs">{role}</span>
         </span>
         <span className="h-12 w-12 rounded-full overflow-hidden">
-          <img src={avatarUrl || require("./../../../imgs/test_image.png")} alt="User" />
+          <img
+            src={
+              avatarUrl ||
+              "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+            }
+            alt="User"
+          />
         </span>
         <SlArrowDown
-          className={`fill-body dark:fill-bodydark ${visible ? "rotate-180" : ""}`}
+          className={`fill-body dark:fill-bodydark ${
+            visible ? "rotate-180" : ""
+          }`}
         />
         {/* Arrow rotation */}
       </div>
-
       {/* Show DropdownList only if visible */}
       {visible && (
         <div
           ref={dropdownRef} // Add ref to dropdown
           className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-lg z-20"
         >
-          <DropdownList handleSignOut={handleLogout}  />
+          <DropdownList handleSignOut={handleLogout} />
         </div>
       )}
     </li>

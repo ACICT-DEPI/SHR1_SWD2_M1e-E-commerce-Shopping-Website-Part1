@@ -22,7 +22,7 @@ const Header = (props) => {
     const checkAuth = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/v1/users/profileAdmin",
+          "https://server-esw.up.railway.app/api/v1/users/profileAdmin",
           { withCredentials: true }
         );
         setIsAuthenticated(true);

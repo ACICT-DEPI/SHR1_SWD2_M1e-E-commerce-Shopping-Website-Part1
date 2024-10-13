@@ -5,14 +5,15 @@ import { Chart, registerables } from 'chart.js';
 // Register necessary Chart.js components
 Chart.register(...registerables);
 
-const DoughnutChart = () => {
+const DoughnutChart = ({ chartdata }) => {
   // بيانات حالة الطلبات (مثال)
+  console.log(chartdata)
   const data = {
-    labels: ['Pending', 'Shipped', 'Complete', 'Cancelled'],
+    labels: ['Pending', 'Shipped', 'Completed', 'Cancelled'],
     datasets: [
       {
 
-        data: [30, 25, 35, 6], // النسب لكل حالة
+        data: chartdata, // النسب لكل حالة
         backgroundColor: [
           'rgba(255, 205, 86, 0.7)',  // لون Pending
           'rgba(54, 162, 235, 0.7)',  // لون Shipped

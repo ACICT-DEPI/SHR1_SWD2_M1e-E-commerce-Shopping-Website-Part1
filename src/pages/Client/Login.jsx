@@ -20,7 +20,7 @@ const Login = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/v1/users/login",
+        "https://server-esw.up.railway.app/api/v1/users/login",
         {
           email,
           password,

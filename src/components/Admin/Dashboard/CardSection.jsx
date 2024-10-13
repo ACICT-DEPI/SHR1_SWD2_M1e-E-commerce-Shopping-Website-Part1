@@ -3,10 +3,10 @@ import { LuUsers } from "react-icons/lu";
 import { LuScrollText } from "react-icons/lu";
 import { LuBoxes } from "react-icons/lu";
 
-const CardSection = () => {
+const CardSection = ({ productCount, ordersCount, customersCount }) => {
   return (
     <Fragment>
-      <div classNameNameName="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
+
         <div className="grid grid-cols-1 gap-4 md:grid-cols-1 md:gap-6 xl:grid-cols-3 2xl:gap-7.5">
           <div className="rounded-sm border border-stroke bg-white py-4 px-7 shadow-default dark:border-strokedark dark:bg-boxdark">
             <div className="flex w-full items-center justify-between  ">
@@ -17,7 +17,7 @@ const CardSection = () => {
             </div>
             <div className="flex items-end justify-between">
               <div>
-                <h4 className=" text-lg text-slate dark:text-white">3456</h4>
+              <h4 className=" text-lg text-slate dark:text-white">{customersCount}</h4>
                 <span className="text-sm font-medium">Total users</span>
               </div>
             </div>
@@ -31,7 +31,7 @@ const CardSection = () => {
             </div>
             <div className="flex items-end justify-between">
               <div>
-                <h4 className=" text-lg text-slate dark:text-white">2500</h4>
+              <h4 className=" text-lg text-slate dark:text-white">{ordersCount}</h4>
                 <span className="text-sm font-medium">Total Orders</span>
               </div>
             </div>
@@ -45,13 +45,13 @@ const CardSection = () => {
             </div>
             <div className="flex items-end justify-between">
               <div>
-                <h4 className=" text-lg text-slate dark:text-white">200</h4>
-                <span className="text-sm font-medium">Total users</span>
+              <h4 className=" text-lg text-slate dark:text-white">{productCount}</h4>
+              <span className="text-sm font-medium">Total Products</span>
               </div>
             </div>
           </div>
         </div>
-      </div>
+
     </Fragment>
   );
 };

@@ -20,7 +20,7 @@ const SingleCustomerDetails = () => {
     // Fetch customer data based on the ID
     const fetchCustomerData = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/v1/admins/${id}`, {
+        const response = await axios.get(`https://server-esw.up.railway.app/api/v1/admins/${id}`, {
           withCredentials: true,
         });
 

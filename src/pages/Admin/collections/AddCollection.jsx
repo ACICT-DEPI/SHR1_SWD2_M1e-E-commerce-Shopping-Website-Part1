@@ -58,7 +58,7 @@ const AddCollection = () => {
     try {
       // إرسال الطلب لإنشاء الـ category
       const response = await axios.post(
-        "http://localhost:5000/api/v1/categories",
+        "https://server-esw.up.railway.app/api/v1/categories",
         {
           title,
           description,
@@ -82,7 +82,7 @@ const AddCollection = () => {
 
           // رفع الصورة
           const imageResponse = await axios.patch(
-            `http://localhost:5000/api/v1/categories/category-photo-upload/${collectionId}`,
+            `https://server-esw.up.railway.app/api/v1/categories/category-photo-upload/${collectionId}`,
             formImageData,
             {
               withCredentials: true,
@@ -108,7 +108,7 @@ const AddCollection = () => {
 
           // رفع الصورة
           const imageResponse = await axios.patch(
-            `http://localhost:5000/api/v1/categories/category-banner-upload/${collectionId}`,
+            `https://server-esw.up.railway.app/api/v1/categories/category-banner-upload/${collectionId}`,
             formBannerData,
             {
               withCredentials: true,

@@ -5,7 +5,7 @@ import { Chart, registerables } from 'chart.js';
 // Register necessary Chart.js components
 Chart.register(...registerables);
 
-const AreaChart = () => {
+const AreaChart = ({ chartdata }) => {
 
   // البيانات الشهرية (مثال)
   const data = {
@@ -13,7 +13,7 @@ const AreaChart = () => {
     datasets: [
       {
         label: 'Total Sales',
-        data: [6000, 8000, 7500, 9000, 8500, 10000, 15000, 5000, 4000, 4300, 0, 0],
+        data: chartdata,
         fill: true,
         backgroundColor: 'rgba(153, 102, 255, 0.2)',
         borderColor: 'rgba(153, 102, 255, 1)',

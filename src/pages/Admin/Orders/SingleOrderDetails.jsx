@@ -36,7 +36,7 @@ const SingleOrderDetails = () => {
   useEffect(() => {
     const fetchOrderData = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/v1/orders/${id}`, {
+        const response = await axios.get(`https://server-esw.up.railway.app/api/v1/orders/${id}`, {
           withCredentials: true,
         });
 
@@ -66,7 +66,7 @@ const SingleOrderDetails = () => {
 
     try {
       const updateResponse = await axios.patch(
-        `http://localhost:5000/api/v1/orders/${id}`,
+        `https://server-esw.up.railway.app/api/v1/orders/${id}`,
         {
           status: orderStatus, // Only update the status
         },
