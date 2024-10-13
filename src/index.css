@@ -1,13 +1,103 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply text-body bg-whiten;
+  }
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+@layer components {
+}
+
+@layer utilities {
+  /* Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  /* Quill styles */
+  .ql-toolbar.ql-snow {
+    @apply bg-white dark:bg-slate-800 border-gray-300 dark:border-form-strokedark;
+    padding: 15px 10px !important;
+    border-bottom: none !important;
+  }
+  .ql-formats {
+    @apply flex space-x-1;
+  }
+  .ql-container.ql-snow {
+    @apply dark:bg-slate-800 dark:focus:border-primary focus:border-primary  border-1 border-gray-300 dark:border-form-strokedark;
+  }
+  .ql-editor.ql-blank::before {
+    @apply text-gray-400 dark:text-form-strokedark text-base;
+  }
+  .ql-editor {
+    @apply text-base;
+  }
+  .ql-editor div {
+    @apply px-0 w-full text-base;
+  }
+
+  /* quill buttons */
+  .ql-snow .ql-stroke,
+  .ql-snow .ql-fill {
+    @apply stroke-gray-600 dark:stroke-white/80;
+  }
+
+  .ql-toolbar.ql-snow button {
+    @apply text-gray-600 dark:text-white/80 border-1 border-solid border-form-strokedark dark:border-1 dark:border-solid dark:border-form-strokedark rounded-md  text-lg font-normal w-5 h-5; /* أنماط الزر */
+  }
+
+  .ql-snow.ql-toolbar button.ql-active {
+    @apply bg-primary dark:bg-primary border-primary dark:border-primary dark:text-whiten text-whiten;
+  }
+  .ql-snow.ql-toolbar button:hover {
+    @apply border-primary dark:border-primary text-gray-600 dark:text-white/80;
+  }
+
+  .ql-snow.ql-toolbar button.ql-active .ql-stroke,
+  .ql-snow.ql-toolbar button.ql-active .ql-fill,
+  .ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-stroke,
+  .ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-fill {
+    @apply stroke-whiten dark:stroke-whiten;
+    stroke: #f1f5f9 !important;
+  }
+
+  .ql-snow.ql-toolbar button:hover .ql-stroke,
+  .ql-snow.ql-toolbar button:hover .ql-fill,
+  .ql-snow.ql-toolbar span:hover .ql-stroke,
+  .ql-snow.ql-toolbar span:hover .ql-fill {
+    @apply stroke-gray-600 dark:stroke-white/80;
+  }
+  /* Quill alignment picker */
+  .ql-toolbar.ql-snow .ql-picker {
+    @apply text-gray-600 dark:text-white/80 border border-solid border-form-strokedark dark:border-1 dark:border-solid dark:border-form-strokedark rounded-md;
+  }
+  .ql-snow.ql-toolbar .ql-picker-label.ql-active {
+    @apply bg-primary dark:bg-primary border-primary dark:border-primary dark:text-whiten text-whiten;
+  }
+  .ql-toolbar.ql-snow .ql-picker-options {
+    @apply bg-white dark:bg-slate-800 border border-solid border-gray-300 dark:border-form-strokedark border-t-0 rounded-b-md py-0;
+  }
+
+  .ql-toolbar.ql-snow .ql-picker-item:hover {
+    @apply bg-primary text-whiten dark:bg-primary dark:text-whiten;
+  }
+
+  .ql-toolbar.ql-snow .ql-picker:hover {
+    @apply bg-primary text-whiten dark:bg-primary dark:text-whiten;
+  }
+
+  .ql-toolbar.ql-snow .ql-picker .ql-expanded {
+    @apply rounded-md;
+  }
+  .ql-toolbar.ql-snow .ql-expanded .ql-picker-label {
+    @apply text-gray-600 dark:text-white/80 border border-solid border-form-strokedark dark:border-1 dark:border-solid dark:border-form-strokedark rounded-t-md;
+  }
 }
