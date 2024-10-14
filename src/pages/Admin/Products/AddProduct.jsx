@@ -133,15 +133,15 @@ const AddProduct = () => {
         <div>
           <GoBackButton />
           <h1 className="inline-block ml-4 text-3xl dark:text-white">
-            Create Collection
+            Create Product
           </h1>
         </div>
       </div>
 
-      <div className="col-span-3 xl:col-span-2 space-y-6 p-7">
+      <div className="col-span-3 xl:col-span-2 space-y-6">
         <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
           <form onSubmit={submitForm} >
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 gap-4 p-6">
               {/* Title Field */}
               <div className="mb-2">
                 <label htmlFor="title" className="w-full mb-2 block text-black dark:text-white">Title</label>

@@ -45,12 +45,12 @@ const CheckoutPage = () => {
         product: product._id, // استخدم معرف المنتج من سلة التسوق
         quantity: product.quantity,
       })),
-      shippingAddress1: "address 1",
-      shippingAddress2: "address 2",
-      city: "Nasr",
-      zip: "452",
-      country: "Alex",
-      phone: "12313313333",
+      shippingAddress1: shippingAddress1,
+      shippingAddress2: shippingAddress2,
+      city: city,
+      zip: zip,
+      country: country,
+      phone: phone,
     };
 
     try {
@@ -67,21 +67,7 @@ const CheckoutPage = () => {
       if (paymentKey) {
         window.location.href = `https://accept.paymob.com/api/acceptance/iframes/${frame_id}?payment_token=${paymentKey}`;
       }
-      if (response.status === 200) {
-        toast.current.show({
-          severity: "success",
-          summary: "Success",
-          detail: response.data.message,
-          life: 3000,
-        });
-        // Clear form fields after successful registration
-        setShippingAddress1("");
-        setShippingAddress2("");
-        setPhone("");
-        setZip("");
-        setCountry("");
-        setCity("");
-      }
+
       
       
     } catch (error) {
@@ -90,7 +76,7 @@ const CheckoutPage = () => {
     setErrorMessages((prev) => ({
       ...prev,
       shippingAddress1: data.errors?.shippingAddress1?.message || "",
-      shippingAddress2: data.errors?.shippingAddress2?.message || "",
+      shippingAddress2: data.errors?.shippingAddress2?.message || "", 
       city: data.errors?.city?.message || "",
       country: data.errors?.country?.message || "",
       phone: data.errors?.phone?.message || "",
@@ -128,7 +114,7 @@ const CheckoutPage = () => {
               <h3 className="text-2xl font-semibold mb-4 dark:text-white">Shipping Information</h3>
 
               <div className="mb-4">
-                <label htmlFor="address" className="block mb-2 dark:text-white">Address</label>
+                <label htmlFor="address" className="block mb-2 dark:text-white">Main Address</label>
                 <InputText id="address"
                 value={shippingAddress1}
                 onChange={(e) => setShippingAddress1(e.target.value)}
@@ -138,6 +124,18 @@ const CheckoutPage = () => {
                 {errorMessages.shippingAddress1 && (
               <div className="text-red-500">{errorMessages.shippingAddress1}</div>
             )}
+              </div>
+              <div className="mb-4">
+                <label htmlFor="address" className="block mb-2 dark:text-white">Second Address</label>
+                <InputText id="address"
+                  value={shippingAddress2}
+                  onChange={(e) => setShippingAddress2(e.target.value)}
+                  onFocus={() => handleFocus("address")}
+                  className={`w-full ${errorMessages.shippingAddress2 ? "border-red-500" : ""}`}
+                  pt={inputTextStyle} />
+                {errorMessages.shippingAddress2 && (
+                  <div className="text-red-500">{errorMessages.shippingAddress2}</div>
+                )}
               </div>
               <div className="mb-4">
                 <label htmlFor="city" className="block mb-2 dark:text-white">City</label>
