@@ -15,7 +15,7 @@ const CheckoutPage = () => {
   const [cartProducts, setCartProducts] = useState([]);
   const [shippingAddress1, setShippingAddress1] = useState("");
   const [shippingAddress2, setShippingAddress2] = useState("");
-  const [city,setCity] = useState("");
+  const [city, setCity] = useState("");
   const [zip, setZip] = useState("");
   const [phone, setPhone] = useState("");
   const [country, setCountry] = useState("");
@@ -25,7 +25,8 @@ const CheckoutPage = () => {
   const [errorMessages, setErrorMessages] = useState({});
 
   useEffect(() => {
-    const storedCartProducts = JSON.parse(localStorage.getItem("cartItems")) || [];
+    const storedCartProducts =
+      JSON.parse(localStorage.getItem("cartItems")) || [];
     setCartProducts(storedCartProducts);
     calculateSubtotal(storedCartProducts);
   }, []);
@@ -34,14 +35,14 @@ const CheckoutPage = () => {
     const total = products.reduce((acc, product) => {
       const discount = product.discount || 0;
       const newPrice = product.price * (1 - discount / 100);
-      return acc + (newPrice * product.quantity);
+      return acc + newPrice * product.quantity;
     }, 0);
     setSubtotal(total);
   };
 
   const handlePayment = async () => {
     const orderData = {
-      orderItems: cartProducts.map(product => ({
+      orderItems: cartProducts.map((product) => ({
         product: product._id, // استخدم معرف المنتج من سلة التسوق
         quantity: product.quantity,
       })),
@@ -67,31 +68,28 @@ const CheckoutPage = () => {
       if (paymentKey) {
         window.location.href = `https://accept.paymob.com/api/acceptance/iframes/${frame_id}?payment_token=${paymentKey}`;
       }
-
-      
-      
     } catch (error) {
-    // Check for error response from the server
-    const data = error.response?.data || {};
-    setErrorMessages((prev) => ({
-      ...prev,
-      shippingAddress1: data.errors?.shippingAddress1?.message || "",
-      shippingAddress2: data.errors?.shippingAddress2?.message || "", 
-      city: data.errors?.city?.message || "",
-      country: data.errors?.country?.message || "",
-      phone: data.errors?.phone?.message || "",
-      zip: data.errors?.zip?.message || "",
+      // Check for error response from the server
+      const data = error.response?.data || {};
+      setErrorMessages((prev) => ({
+        ...prev,
+        shippingAddress1: data.errors?.shippingAddress1?.message || "",
+        shippingAddress2: data.errors?.shippingAddress2?.message || "",
+        city: data.errors?.city?.message || "",
+        country: data.errors?.country?.message || "",
+        phone: data.errors?.phone?.message || "",
+        zip: data.errors?.zip?.message || "",
+      }));
 
-    }));
-
-    // Display generic error message
-    toast.current.show({
-      severity: "error",
-      summary: "Error",
-      detail: error.response.data.message || "An error occurred. Please try again.",
-      life: 3000,
-    });
-  }
+      // Display generic error message
+      toast.current.show({
+        severity: "error",
+        summary: "Error",
+        detail:
+          error.response.data.message || "An error occurred. Please try again.",
+        life: 3000,
+      });
+    }
   };
   const handleFocus = (field) => {
     setErrorMessages((prev) => ({ ...prev, [field]: "" }));
@@ -99,93 +97,140 @@ const CheckoutPage = () => {
 
   return (
     <div className="container mx-auto p-8 flex flex-col lg:flex-row justify-between">
-       <Toast ref={toast} position="bottom-left" />
+      <Toast ref={toast} position="bottom-left" />
 
       {/* Form Section */}
+
       <div className="w-full lg:w-2/3">
         <div className="flex flex-col lg:flex-row justify-center items-start p-8">
           {/* Left Section */}
           <div className="w-full lg:w-2/3">
-            <h2 className="text-4xl font-bold mb-6 dark:text-white">Checkout</h2>
-
+            <h2 className="text-4xl font-bold mb-6 dark:text-white">
+              Checkout
+            </h2>
 
             {/* Shipping Information */}
             <section className="mb-8">
-              <h3 className="text-2xl font-semibold mb-4 dark:text-white">Shipping Information</h3>
+              <h3 className="text-2xl font-semibold mb-4 dark:text-white">
+                Shipping Information
+              </h3>
 
               <div className="mb-4">
-                <label htmlFor="address" className="block mb-2 dark:text-white">Main Address</label>
-                <InputText id="address"
-                value={shippingAddress1}
-                onChange={(e) => setShippingAddress1(e.target.value)}
-                onFocus={() => handleFocus("address")} 
-                className={`w-full ${errorMessages.shippingAddress1 ? "border-red-500" : ""}`}
-                pt={inputTextStyle} />
-                {errorMessages.shippingAddress1 && (
-              <div className="text-red-500">{errorMessages.shippingAddress1}</div>
-            )}
-              </div>
-              <div className="mb-4">
-                <label htmlFor="address" className="block mb-2 dark:text-white">Second Address</label>
-                <InputText id="address"
-                  value={shippingAddress2}
-                  onChange={(e) => setShippingAddress2(e.target.value)}
+                <label htmlFor="address" className="block mb-2 dark:text-white">
+                  Main Address
+                </label>
+                <InputText
+                  id="address"
+                  value={shippingAddress1}
+                  onChange={(e) => setShippingAddress1(e.target.value)}
                   onFocus={() => handleFocus("address")}
-                  className={`w-full ${errorMessages.shippingAddress2 ? "border-red-500" : ""}`}
-                  pt={inputTextStyle} />
-                {errorMessages.shippingAddress2 && (
-                  <div className="text-red-500">{errorMessages.shippingAddress2}</div>
+                  className={`w-full ${
+                    errorMessages.shippingAddress1 ? "border-red-500" : ""
+                  }`}
+                  pt={inputTextStyle}
+                />
+                {errorMessages.shippingAddress1 && (
+                  <div className="text-red-500">
+                    {errorMessages.shippingAddress1}
+                  </div>
                 )}
               </div>
               <div className="mb-4">
-                <label htmlFor="city" className="block mb-2 dark:text-white">City</label>
-                <InputText id="city"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                onFocus={() => handleFocus("city")}
-                className={`w-full ${errorMessages.city ? "border-red-500" : ""}`}
-                pt={inputTextStyle} />
+                <label htmlFor="address" className="block mb-2 dark:text-white">
+                  Second Address
+                </label>
+                <InputText
+                  id="address"
+                  value={shippingAddress2}
+                  onChange={(e) => setShippingAddress2(e.target.value)}
+                  onFocus={() => handleFocus("address")}
+                  className={`w-full ${
+                    errorMessages.shippingAddress2 ? "border-red-500" : ""
+                  }`}
+                  pt={inputTextStyle}
+                />
+                {errorMessages.shippingAddress2 && (
+                  <div className="text-red-500">
+                    {errorMessages.shippingAddress2}
+                  </div>
+                )}
+              </div>
+              <div className="mb-4">
+                <label htmlFor="city" className="block mb-2 dark:text-white">
+                  City
+                </label>
+                <InputText
+                  id="city"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  onFocus={() => handleFocus("city")}
+                  className={`w-full ${
+                    errorMessages.city ? "border-red-500" : ""
+                  }`}
+                  pt={inputTextStyle}
+                />
                 {errorMessages.city && (
-              <div className="text-red-500">{errorMessages.city}</div>
-            )}
+                  <div className="text-red-500">{errorMessages.city}</div>
+                )}
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
-                  <label htmlFor="country" className="block mb-2 dark:text-white">Country</label>
-                  <InputText id="country"
-                  value={country}
-                  onChange={(e) => setCountry(e.target.value)}
-                  onFocus={() => handleFocus("country")} 
-                  className={`w-full ${errorMessages.country ? "border-red-500" : ""}`}
-                  pt={inputTextStyle} />
+                  <label
+                    htmlFor="country"
+                    className="block mb-2 dark:text-white"
+                  >
+                    Country
+                  </label>
+                  <InputText
+                    id="country"
+                    value={country}
+                    onChange={(e) => setCountry(e.target.value)}
+                    onFocus={() => handleFocus("country")}
+                    className={`w-full ${
+                      errorMessages.country ? "border-red-500" : ""
+                    }`}
+                    pt={inputTextStyle}
+                  />
                   {errorMessages.country && (
-              <div className="text-red-500">{errorMessages.country}</div>
-            )}
+                    <div className="text-red-500">{errorMessages.country}</div>
+                  )}
                 </div>
                 <div>
-                  <label htmlFor="zip" className="block mb-2 dark:text-white">ZIP / Postal code</label>
-                  <InputText id="zip"
-                  value={zip}
-                  onChange={(e) => setZip(e.target.value)}
-                  onFocus={() => handleFocus("zip")}
-                  className={`w-full ${errorMessages.zip ? "border-red-500" : ""}`}
-                  pt={inputTextStyle} />
+                  <label htmlFor="zip" className="block mb-2 dark:text-white">
+                    ZIP / Postal code
+                  </label>
+                  <InputText
+                    id="zip"
+                    value={zip}
+                    onChange={(e) => setZip(e.target.value)}
+                    onFocus={() => handleFocus("zip")}
+                    className={`w-full ${
+                      errorMessages.zip ? "border-red-500" : ""
+                    }`}
+                    pt={inputTextStyle}
+                  />
                   {errorMessages.zip && (
-              <div className="text-red-500">{errorMessages.zip}</div>
-            )}
+                    <div className="text-red-500">{errorMessages.zip}</div>
+                  )}
                 </div>
               </div>
               <div className="mb-4">
-                <label htmlFor="phone" className="block mb-2 dark:text-white">Phone</label>
-                <InputText id="phone"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                onFocus={() => handleFocus("phone")}
-                className={`w-full ${errorMessages.phone ? "border-red-500" : ""}`}
-                pt={inputTextStyle} />
+                <label htmlFor="phone" className="block mb-2 dark:text-white">
+                  Phone
+                </label>
+                <InputText
+                  id="phone"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  onFocus={() => handleFocus("phone")}
+                  className={`w-full ${
+                    errorMessages.phone ? "border-red-500" : ""
+                  }`}
+                  pt={inputTextStyle}
+                />
                 {errorMessages.phone && (
-              <div className="text-red-500">{errorMessages.phone}</div>
-            )}
+                  <div className="text-red-500">{errorMessages.phone}</div>
+                )}
               </div>
             </section>
 
@@ -200,7 +245,6 @@ const CheckoutPage = () => {
           </div>
 
           {/* Confirm Order Button */}
-
         </div>
       </div>
 
@@ -211,28 +255,40 @@ const CheckoutPage = () => {
           {cartProducts.length > 0 ? (
             <>
               {cartProducts.map((product) => (
-                <div key={product._id} className="flex flex-col md:flex-row justify-between items-center mb-6">
+                <div
+                  key={product._id}
+                  className="flex flex-col md:flex-row justify-between items-center mb-6"
+                >
                   {/* Product Image */}
                   <img
                     src={product.gallery[0].url}
                     alt={product.title}
                     className="w-16 h-16 object-cover rounded-md mr-4"
-                  /> 
+                  />
                   <div className="flex flex-col md:flex-grow">
-                    <h3 className="font-semibold dark:text-white">{product.title}</h3>
+                    <h3 className="font-semibold dark:text-white">
+                      {product.title}
+                    </h3>
                     <p className="text-gray-800 dark:text-gray-300">
-                      ${product.price} x {product.quantity} = ${(product.price * product.quantity).toFixed(2)}
+                      ${product.price} x {product.quantity} = $
+                      {(product.price * product.quantity).toFixed(2)}
                     </p>
                   </div>
                 </div>
               ))}
               <div className="border-t border-gray-300 mt-4 pt-4">
                 <div className="flex justify-between">
-                  <span className="font-semibold dark:text-white">Subtotal:</span>
-                  <span className="font-semibold dark:text-white">${subtotal.toFixed(2)}</span>
+                  <span className="font-semibold dark:text-white">
+                    Subtotal:
+                  </span>
+                  <span className="font-semibold dark:text-white">
+                    ${subtotal.toFixed(2)}
+                  </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="font-semibold dark:text-white">Shipping:</span>
+                  <span className="font-semibold dark:text-white">
+                    Shipping:
+                  </span>
                   <span className="font-semibold dark:text-white">$0.00</span>
                 </div>
                 <div className="flex justify-between font-bold text-lg">
@@ -242,7 +298,9 @@ const CheckoutPage = () => {
               </div>
             </>
           ) : (
-            <p className="text-gray-600 dark:text-gray-400">Your cart is empty.</p>
+            <p className="text-gray-600 dark:text-gray-400">
+              Your cart is empty.
+            </p>
           )}
         </div>
       </div>
