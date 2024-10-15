@@ -69,7 +69,7 @@ const UserDropdown = ({ firstname, avatarUrl, onClose }) => {
     {
       label: "Orders",
       icon: "pi pi-shopping-cart",
-      command: () => navigate("/orders"),
+      command: () => navigate("/my-orders"),
     },
     { label: "Logout", icon: "pi pi-sign-out", command: () => handleLogout() },
   ];
