@@ -66,6 +66,21 @@ const OrderHistory = () => {
     }
   };
 
+  const getShippingStatusColor = (status) => {
+    switch (status) {
+      case 'Shipped':
+        return 'bg-blue-500 text-white';
+      case 'Pending':
+        return 'bg-purple-500 text-white';
+      case 'Completed':
+        return 'bg-green-500 text-white';
+      case 'Cancelled':
+        return 'bg-red-500 text-white';
+      default:
+        return 'bg-gray-300 text-black';
+    }
+  };
+
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 dark:bg-gray-900 p-4">
       <div className="w-full max-w-4xl p-6 bg-white dark:bg-gray-800 shadow-lg rounded-lg">
@@ -97,23 +112,28 @@ const OrderHistory = () => {
                     <p className="text-lg font-semibold text-gray-800 dark:text-gray-200">${order.totalPrice.toFixed(2)}</p>
                   </div>
                   {/* View Order button for desktop */}
-                  <button className="hidden md:block bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded" onClick={() => navigate(`/order/${order._id}`)}>
+                  <button className="hidden md:block bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded" onClick={() => navigate(`/my-orders/${order._id}`)}>
                     View Order
                   </button>
                   {/* View Order icon for mobile */}
                   <button 
                     className="md:hidden text-blue-500 hover:text-blue-600" 
-                    onClick={() => navigate(`/order/${order._id}`)} // Navigate to order details
+                    onClick={() => navigate(`/my-orders/${order._id}`)} // Navigate to order details
                   >
                     <FaEye /> {/* Eye icon for mobile */}
                   </button>
                 </div>
-                {/* Display Payment Status Only */}
-                <div className="flex justify-between mb-4">
-                  <div className={`py-1 px-2 rounded ${getStatusColor(order.payment_status)}`}>
-                    <p className="text-sm">{order.payment_status}</p> {/* Fixed property name to match response */}
+                {/* Payment Status and Shipping Status side by side */}
+                <div className="flex gap-4 justify-start mb-4">
+                  <div className={`py-1 px-2 rounded-lg text-center text-sm font-semibold shadow ${getStatusColor(order.payment_status)}`}>
+                    {order.payment_status}
+                  </div>
+                  <div className={`py-1 px-2 rounded-lg text-center text-sm font-semibold shadow ${getShippingStatusColor(order.status)}`}>
+                    {order.status || 'Unknown'}
                   </div>
                 </div>
+
+
                 {order.orderItems.length > 0 && (
                   <div className="flex flex-col space-y-4">
                     {order.orderItems.map((item, index) => (
