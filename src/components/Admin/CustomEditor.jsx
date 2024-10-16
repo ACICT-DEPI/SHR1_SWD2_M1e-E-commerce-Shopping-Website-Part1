@@ -13,6 +13,17 @@ const CustomEditor = ({ value, onTextChange }) => {
     }
   }, [value]);
 
+
+  const changeTextColor = (color) => {
+    const quill = textEditor.getEditor();
+    quill.format('color', color);
+  };
+
+  const changeBackgroundColor = (color) => {
+    const quill = textEditor.getEditor();
+    quill.format('background', color);
+  };
+
   // التعامل مع تغييرات المحرر
   const handleTextChange = (e) => {
     setTextEditor(e.htmlValue); // تحديث القيمة المحلية
@@ -44,7 +55,14 @@ const CustomEditor = ({ value, onTextChange }) => {
           <button className="ql-link" aria-label="link"></button>
           <button className="ql-blockquote" aria-label="blockquote"></button>
           <button className="ql-image" aria-label="image"></button>
+
+
+          <select className="ql-color"></select>
+          <select className="ql-background"></select>
         </span>
+
+
+
       </Fragment>
     );
   };

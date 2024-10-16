@@ -19,12 +19,13 @@ const AddProduct = () => {
     quantity: 0,
     category: null, // تحديث هنا
   });
+  const [mainImage, setMainImage] = useState([]);
   const [gallery, setGallery] = useState([]);
   const [categories, setCategories] = useState([]);
   const [errors, setErrors] = useState({});
   const toast = useRef(null);
   const navigate = useNavigate();
-
+  const [imageLoading, setImageLoading] = useState(false)
   // Fetch categories on component mount
   useEffect(() => {
     const fetchCategories = async () => {
@@ -46,6 +47,9 @@ const AddProduct = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleMainImageChange = (files) => {
+    setMainImage(files);
+  };
   const handleGalleryChange = (files) => {
     setGallery(files);
   };
@@ -79,11 +83,14 @@ const AddProduct = () => {
   };
 
   const uploadGalleryImages = async (productId) => {
-    if (gallery.length > 0) {
-      const formGalleryData = new FormData();
-      gallery.forEach((file) => formGalleryData.append("gallery", file));
+    if (gallery.length > 0 || mainImage > 0) {
 
+      const formGalleryData = new FormData();
+      mainImage.forEach((file) => formGalleryData.append("gallery", file));
+      gallery.forEach((file) => formGalleryData.append("gallery", file));
+      setImageLoading(true);
       try {
+
         const response = await axios.patch(
           `https://server-esw.up.railway.app/api/v1/products/product-photos-upload/${productId}`,
           formGalleryData,
@@ -95,12 +102,17 @@ const AddProduct = () => {
 
         if (response.data.status === "success") {
           showSuccessToast("Images uploaded successfully");
+          setImageLoading(false);
         } else {
+          setImageLoading(false);
           throw new Error(response.data.message || "Image upload failed");
         }
       } catch (uploadError) {
+        setImageLoading(false);
         showErrorToast(uploadError.message || "An error occurred during image upload");
       }
+
+
     }
   };
 
@@ -158,13 +170,6 @@ const AddProduct = () => {
                 {errors.title && <small className="p-error">{errors.title}</small>}
               </div>
 
-              {/* Description Field */}
-              <div className="mb-2">
-                <label htmlFor="description" className="w-full mb-2 block text-black dark:text-white">Description</label>
-                <CustomEditor value={formData.description} onTextChange={(e) => setFormData(prev => ({ ...prev, description: e.htmlValue }))} />
-                {errors.description && <small className="p-error">{errors.description}</small>}
-              </div>
-
               {/* Excerpt Field */}
               <div className="mb-2">
                 <label htmlFor="excerpt" className="w-full mb-2 block text-black dark:text-white">Excerpt</label>
@@ -180,6 +185,14 @@ const AddProduct = () => {
                 />
                 {errors.excerpt && <small className="p-error">{errors.excerpt}</small>}
               </div>
+
+              {/* Description Field */}
+              <div className="mb-2">
+                <label htmlFor="description" className="w-full mb-2 block text-black dark:text-white">Description</label>
+                <CustomEditor value={formData.description} onTextChange={(e) => setFormData(prev => ({ ...prev, description: e.htmlValue }))} />
+                {errors.description && <small className="p-error">{errors.description}</small>}
+              </div>
+
 
               {/* Price, Discount, and Quantity Fields */}
               <div className="mb-2 grid grid-cols-3 gap-4">
@@ -248,8 +261,12 @@ const AddProduct = () => {
 
               {/* Image Upload */}
               <div className="mb-2">
-                <label htmlFor="gallery" className="w-full mb-2 block text-black dark:text-white">Images</label>
-                <MediaUploadMultiple onChange={handleGalleryChange} />
+                <label htmlFor="gallery" className="w-full mb-2 block text-black dark:text-white">Main Image</label>
+                <MediaUploadMultiple onChange={handleMainImageChange} maxFiles={1} loading={imageLoading} />
+              </div>
+              <div className="mb-2">
+                <label htmlFor="gallery" className="w-full mb-2 block text-black dark:text-white">Gallery</label>
+                <MediaUploadMultiple onChange={handleGalleryChange} maxFiles={4} loading={imageLoading} />
               </div>
 
               {/* Submit Button */}

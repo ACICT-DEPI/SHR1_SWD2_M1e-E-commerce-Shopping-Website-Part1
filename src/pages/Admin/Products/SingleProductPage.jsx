@@ -21,12 +21,14 @@ const SingleProductPage = () => {
     quantity: 0,
     category: null, // تحديث هنا
   });
+  const [mainImage, setMainImage] = useState([]);
   const [newGallery, setNewGallery] = useState([]);
   const [categories, setCategories] = useState([]);
   const [existGallery, setExistGallary] = useState([])
   const [errors, setErrors] = useState({});
   const toast = useRef(null);
   const navigate = useNavigate();
+  const [imageLoading, setImageLoading] = useState(false)
 
   // Fetch categories on component mount
   useEffect(() => {
@@ -75,9 +77,11 @@ const SingleProductPage = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleMainImageChange = (files) => {
+    setMainImage(files);
+  };
   const handleGalleryChange = (files) => {
     setNewGallery(files);
-    setExistGallary(files)
   };
 
   const handleFocus = (field) => {
@@ -108,11 +112,13 @@ const SingleProductPage = () => {
   };
 
   const uploadGalleryImages = async (productId) => {
-    if (newGallery.length > 0) {
-      const formGalleryData = new FormData();
+    if (newGallery.length > 0 || mainImage > 0) {
+      const formGalleryData = new FormData(); 
+      mainImage.forEach((file) => formGalleryData.append("gallery", file));
       newGallery.forEach((file) => formGalleryData.append("gallery", file));
 
       try {
+        setImageLoading(true);
         const response = await axios.patch(
           `https://server-esw.up.railway.app/api/v1/products/product-photos-upload/${id}`,
           formGalleryData,
@@ -121,13 +127,17 @@ const SingleProductPage = () => {
             headers: { "Content-Type": "multipart/form-data" },
           }
         );
-
         if (response.data.status === "success") {
+          setImageLoading(false);
+
           showSuccessToast("Images uploaded successfully");
         } else {
+          setImageLoading(false);
+
           throw new Error(response.data.message || "Image upload failed");
         }
       } catch (uploadError) {
+        setImageLoading(false);
         showErrorToast(uploadError.message || "An error occurred during image upload");
       }
     }
@@ -279,11 +289,21 @@ const SingleProductPage = () => {
 
               {/* Image Upload */}
               <div className="mb-2">
-                <label htmlFor="gallery" className="w-full mb-2 block text-black dark:text-white">Images</label>
+                <label htmlFor="gallery" className="w-full mb-2 block text-black dark:text-white">Main Image</label>
+                <MediaUploadMultiple
+                  onChange={handleMainImageChange}
+                  maxFiles={1}
+                  showImages={existGallery.length > 0 ? [existGallery[0].url] : []}
+                  loading={imageLoading}
+                />
+              </div>
+              <div className="mb-2">
+                <label htmlFor="gallery" className="w-full mb-2 block text-black dark:text-white">Gallery</label>
                 <MediaUploadMultiple
                   onChange={handleGalleryChange}
-                  maxFiles={5}
-                  showImages={existGallery.map(image => image.url)}
+                  maxFiles={4}
+                  showImages={existGallery.length > 1 ? existGallery.slice(1).map(image => image.url) : []}
+                  loading={imageLoading}
                 />
               </div>
 
