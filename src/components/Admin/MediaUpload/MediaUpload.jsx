@@ -1,7 +1,8 @@
 import { Fragment, useState, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
+import { ProgressBar } from 'primereact/progressbar';
 
-const MediaUpload = ({ onChange, maxFiles, showImage }) => {
+const MediaUpload = ({ onChange, maxFiles, showImage, loading }) => {
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
 
@@ -61,6 +62,10 @@ const MediaUpload = ({ onChange, maxFiles, showImage }) => {
       {fileRejections.length > 0 && (
         <div className="text-red-500">Invalid file type or size.</div>
       )}
+      <div>
+        {loading && (<ProgressBar mode="indeterminate" style={{ height: '6px' }}></ProgressBar>)}
+      </div>
+
     </Fragment>
   );
 };

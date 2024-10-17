@@ -12,6 +12,7 @@ import { dataTabelStyle } from "../../../layout/dataTabelStyle";
 import { inputTextStyle } from "../../../layout/inputTextStyle";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
+import { ConfirmPopup, confirmPopup } from "primereact/confirmpopup";
 
 const OrderDataTable = () => {
   const [allOrders, setAllOrders] = useState([]); 
@@ -75,6 +76,56 @@ const OrderDataTable = () => {
   document.querySelector(".prevPageButton").innerHTML =
     " <i class='pi pi-angle-double-left mr-1'></i> Previous";
 }, []);
+
+const handleDeleteOrder = async (id) => {
+  try {
+    const response = await axios.delete(`https://server-esw.up.railway.app/api/v1/orders/${id}`, {
+      withCredentials: true,
+      headers: {
+        'Content-Type': 'application/json', 
+      },
+    });
+
+    if (response.status === 200) {
+      toast.current.show({
+        severity: "success",
+        summary: "Success",
+        detail: "Order deleted successfully",
+        life: 2000,
+      });
+
+      // Fetch the updated categories after deletion
+      fetchOrders();
+
+    } else {
+      throw new Error('Failed to delete the order');
+    }
+  } catch (error) {
+    toast.current.show({
+      severity: "error",
+      summary: "Error",
+      detail: error.message || 'An error occurred while deleting the order.',
+      life: 2000,
+    });
+  }
+};
+
+const confirmDeleteOrder = (event, id) => {
+  confirmPopup({
+    target: event.currentTarget,
+    message: "Are you sure you want to delete this Order?",
+    icon: "pi pi-exclamation-triangle",
+    accept: () => handleDeleteOrder(id),
+    reject: () =>
+      toast.current.show({
+        severity: "warn",
+        summary: "Canceled",
+        detail: "Order deletion was canceled",
+        life: 2000,
+      }),
+  });
+};
+
 const actionBodyTemplate = (rowData) => (
   <>
     <Button
@@ -83,12 +134,18 @@ const actionBodyTemplate = (rowData) => (
       outlined
       className="mr-2"
       aria-label="Edit order"
-      onClick={() => navigate(`/admin/orders/${rowData._id}`)}
+      onClick={() => navigate(`/admin/products/update/${rowData._id}`)}
     />
-
+    <Button
+      icon="pi pi-trash"
+      rounded
+      outlined
+      severity="danger"
+      aria-label="Delete order"
+      onClick={(e) => confirmDeleteOrder(e, rowData._id)}
+    />
   </>
 );
-
 
   const idTemplate = (rowData) => (
     <Link
@@ -180,6 +237,8 @@ const actionBodyTemplate = (rowData) => (
           style={{ minWidth: "12rem" }}
         />
       </DataTable>
+      <ConfirmPopup />
+
     </div>
   );
 };

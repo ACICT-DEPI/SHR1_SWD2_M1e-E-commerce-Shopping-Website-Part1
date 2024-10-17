@@ -5,7 +5,7 @@ import { Route, Routes } from "react-router-dom";
 import Products from "./Products/Products";
 import Orders from "./Orders/Orders";
 import Customers from "./Customers/Customers";
-import Reviews from "./Reviews";
+import Reviews from "./Reviews/Reviews";
 import Dashboard from "./Dashboard";
 import Collections from "./collections/Collections";
 import AddCollection from "./collections/AddCollection";
@@ -19,6 +19,7 @@ import { CarouselsPage } from "./Carousels/CarouselsPage";
 import  UpdateCarousels  from "./Carousels/UpdateCarousels";
 import  AddCarousels  from "./Carousels/AddCarousels";
 import SingleProductPage from "./Products/SingleProductPage";
+import  ReviewDetails from "./Reviews/ReviewDetails";
 
 const AdminPage = () => {
   const [loading, setLoading] = useState(true);
@@ -42,6 +43,7 @@ const AdminPage = () => {
         <Route path="customers" element={<Customers />} />
         <Route path="customers/:id" element={<SingleCustomerDetails />} />
         <Route path="reviews" element={<Reviews />} />
+        <Route path="reviews/:id" element={<ReviewDetails />} />
         <Route path="collections" element={<Collections />} />
         <Route path="collections/add" element={<AddCollection />} />
         <Route path="collections/:id" element={<UpdateCollection />} />

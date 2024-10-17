@@ -17,6 +17,8 @@ import TokenValidation from "../pages/Client/TokenValidation";
 import UserLayout from "../layout/UserLayout";
 import Cart from "../pages/Client/Cart";
 import CheckoutPage from "../pages/Client/CheckoutPage";
+import OrderHistory from "../pages/Client/OrderHistory";
+import  OrderDetails  from "../pages/Client/OrderDetails";
 function UserRoutes() {
   return (
     <UserLayout>
@@ -47,6 +49,12 @@ function UserRoutes() {
         <Route path="*" element={<NotFoundPage />} />
         <Route path="/Cart" element={<Cart/>} />
         <Route path="/checkOut" element={<CheckoutPage />} />
+        <Route path="/my-orders" element={<OrderHistory/>} />
+        <Route path="/my-orders/:id" element={<OrderDetails />} />
+
+
+
+        
       </Routes>
     </UserLayout> 
   );

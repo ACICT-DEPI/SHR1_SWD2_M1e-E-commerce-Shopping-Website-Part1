@@ -5,11 +5,9 @@ import { confirmPopup, ConfirmPopup } from 'primereact/confirmpopup';
 import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
-import ActionButton from '../../../components/Admin/Buttons/ActionButton';
 import { dataTabelStyle } from "../../../layout/dataTabelStyle";
 import { useParams } from 'react-router-dom'; // Import useParams to get URL parameters
 import GoBackButton from "../../../components/Admin/Buttons/GoBackButton";
-import EditButton from "../../../components/Admin/Buttons/EditButton";
 import axios from "axios"; // Import axios for API calls
 
 const SingleCustomerDetails = () => {
