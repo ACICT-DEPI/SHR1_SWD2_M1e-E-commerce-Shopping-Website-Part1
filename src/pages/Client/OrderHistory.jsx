@@ -107,10 +107,21 @@ const OrderHistory = () => {
                     <p className="font-medium">Date placed</p>
                     <p className="text-gray-800 dark:text-gray-200">{new Date(order.createdAt).toLocaleDateString()}</p>
                   </div>
-                  <div>
-                    <p className="font-medium">Total amount</p>
-                    <p className="text-lg font-semibold text-gray-800 dark:text-gray-200">${order.totalPrice.toFixed(2)}</p>
+                  <div className="flex justify-between items-center">
+                  <p className="font-medium text-gray-900 dark:text-white">
+                    Total: {/* Total label */}
+                  </p>
+                  <div className="flex items-center space-x-4">
+                  <p className="font-medium text-gray-500 line-through hidden md:block">
+                  {`EGP ${order.totalPrice.toFixed(2)}`} {/* Original price */}
+                </p>
+
+                    <p className="font-bold text-lg text-gray-900 dark:text-white">
+                      {`EGP ${order.totalPriceAfterDiscount.toFixed(2)}`} {/* Discounted price */}
+                    </p>
                   </div>
+                </div>
+
                   {/* View Order button for desktop */}
                   <button className="hidden md:block bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded" onClick={() => navigate(`/my-orders/${order._id}`)}>
                     View Order
@@ -132,42 +143,49 @@ const OrderHistory = () => {
                     {order.status || 'Unknown'}
                   </div>
                 </div>
+                {order.orderItems.map((item, index) => (
+  item.product ? (
+    <div key={index} className="flex gap-4 p-4 border rounded-lg border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
+      {item.product.gallery && Array.isArray(item.product.gallery) && item.product.gallery.length > 0 ? (
+        <img 
+          src={item.product.gallery[0].url} 
+          alt={item.product.title} 
+          className="w-24 h-24 object-cover rounded" 
+        />
+      ) : (
+        <div className="w-24 h-24 bg-gray-300 rounded" /> // Placeholder for missing image
+      )}
+      <div className="flex-1">
+        <p className="font-medium text-gray-900 dark:text-white">
+          {item.product.title || 'Unknown Product'} 
+          <span className="text-gray-500"> (x{item.quantity})</span> {/* Display quantity */}
+        </p>
+        <p className="hidden md:block text-gray-500 dark:text-gray-400">{item.product.description || 'No description available'}</p>
+        
+        {/* Display both prices */}
+        <div className="flex items-center">
+          <p className="font-medium text-gray-500 line-through mr-2">
+            EGP {item.subTotalPrice ? item.subTotalPrice.toFixed(2) : '0.00'}
+          </p>
+          <p className="font-medium text-gray-900 dark:text-white">
+            EGP {item.subTotalPriceAfterDiscount ? item.subTotalPriceAfterDiscount.toFixed(2) : '0.00'}
+          </p>
+        </div>
 
+        <div className="flex gap-4 mt-2">
+          <button 
+            className="text-blue-500 hover:underline" 
+            onClick={() => navigate(`/product/${item.product._id}`)} // Navigate to product details
+          >
+            View product
+          </button>
+          <a href="#" className="text-blue-500 hover:underline">Write a review</a>
+        </div>
+      </div>
+    </div>
+  ) : null
+))}
 
-                {order.orderItems.length > 0 && (
-                  <div className="flex flex-col space-y-4">
-                    {order.orderItems.map((item, index) => (
-                      item.product ? (
-                        <div key={index} className="flex gap-4 p-4 border rounded-lg border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
-                          {item.product.gallery && Array.isArray(item.product.gallery) && item.product.gallery.length > 0 ? (
-                            <img 
-                              src={item.product.gallery[0].url} 
-                              alt={item.product.title} 
-                              className="w-24 h-24 object-cover rounded" 
-                            />
-                          ) : (
-                            <div className="w-24 h-24 bg-gray-300 rounded" /> // Placeholder for missing image
-                          )}
-                          <div className="flex-1">
-                            <p className="font-medium text-gray-900 dark:text-white">{item.product.title || 'Unknown Product'}</p>
-                            {/* Hide the description on mobile */}
-                            <p className="hidden md:block text-gray-500 dark:text-gray-400">{item.product.description || 'No description available'}</p>
-                            <p className="font-medium text-gray-900 dark:text-white">${item.product.price ? item.product.price.toFixed(2) : '0.00'}</p>
-                            <div className="flex gap-4 mt-2">
-                              <button 
-                                className="text-blue-500 hover:underline" 
-                                onClick={() => navigate(`/product/${item.product._id}`)} // Navigate to product details
-                              >
-                                View product
-                              </button>
-                              <a href="#" className="text-blue-500 hover:underline">Write a review</a>
-                            </div>
-                          </div>
-                        </div>
-                      ) : null
-                    ))}
-                  </div>
-                )}
               </div>
             ))}
           </div>
