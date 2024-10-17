@@ -31,8 +31,9 @@ const Card = ({ product }) => {
           </p>
         </div>
         <p className="mt-4 text-base font-medium text-slate-900 dark:text-slate-100">
-          $ {product.price}
+          {(product.price * (1 - (product.discount / 100))).toFixed(2)} EGP  
         </p>
+        <span className="text-xs font-normal line-through text-start dark:text-slate-400 text-slate-600">{product.price} EGP</span>
       </div>
       {product.discount > 0 && (<div className="absolute w-9 text-center font-medium  border-2 border-red-600 text-red-600 rounded-md text-sm py-1 top-1 right-1">{product.discount}%</div>)}
 
