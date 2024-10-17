@@ -129,15 +129,15 @@ const OrderDetails = () => {
           {item.product.title || 'Unknown Product'} 
           <span className="text-gray-500"> (x{item.quantity})</span> {/* Display quantity */}
         </p>
-        <p className="hidden md:block text-gray-500 dark:text-gray-400">{item.product.description || 'No description available'}</p>
+                  <p className="hidden md:block text-gray-500 dark:text-gray-400">{item.product.excerpt || 'No description available'}</p>
         
         {/* Display both prices */}
         <div className="flex items-center">
           <p className="font-medium text-gray-500 line-through mr-2">
-            EGP {item.subTotalPrice ? item.subTotalPrice.toFixed(2) : '0.00'}
+                      {item.subTotalPrice ? item.subTotalPrice.toFixed(2) : '0.00'} EGP
           </p>
           <p className="font-medium text-gray-900 dark:text-white">
-            EGP {item.subTotalPriceAfterDiscount ? item.subTotalPriceAfterDiscount.toFixed(2) : '0.00'}
+                      {item.subTotalPriceAfterDiscount ? item.subTotalPriceAfterDiscount.toFixed(2) : '0.00'} EGP
           </p>
         </div>
 
@@ -185,11 +185,11 @@ const OrderDetails = () => {
             <h3 className="text-lg font-semibold">Summary:</h3>
             <div className="flex justify-between">
               <span>Subtotal:</span>
-              <span>${order.totalPriceAfterDiscount.toFixed(2)}</span>
+              <span>{order.totalPriceAfterDiscount.toFixed(2)} EGP</span>
             </div>
             <div className="flex justify-between font-bold">
               <span>Total:</span>
-              <span>${order.totalPrice.toFixed(2)}</span>
+              <span>{order.totalPrice.toFixed(2)} EGP</span>
             </div>
           </div>
 

@@ -52,7 +52,7 @@ const ProductDataTabel = () => {
     setFilter(_filter);
     setGlobalFilterValue(value);
   };
-  const priceBodyTemplate = (rowData) => `$${rowData.price.toFixed(2)}`;
+  const priceBodyTemplate = (rowData) => `${rowData.price.toFixed(2)} EGP`;
 
   // Table header section
   const header = () => {

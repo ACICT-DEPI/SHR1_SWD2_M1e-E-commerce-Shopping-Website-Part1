@@ -194,7 +194,7 @@ const SingleOrderDetails = () => {
 
               {/* Total Amount Display */}
               <div className="mb-2">
-                <label htmlFor="totalAmount" className="w-full mb-2 block text-black dark:text-white">Total Amount ($)</label>
+                <label htmlFor="totalAmount" className="w-full mb-2 block text-black dark:text-white">Total Amount (EGP)</label>
                 <InputText
                   id="totalAmount"
                   type="number"
