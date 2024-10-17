@@ -2,12 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Button } from 'primereact/button';
 import { Rating } from 'primereact/rating';
-import ProductTabs from './ProductTap'; 
 import ControlledDemo from './ControlledDemo';
 import styled from 'styled-components';
 import ProductPrice from './ProductPrice';
 import ShoppingCartSidebar from '../SideBar/ShoppingCartSidebar';
 import axios from 'axios';
+import ProductTap from './ProductTap';
 
 const Paragraph = styled.p`
   font-size: 1.4rem;
@@ -146,9 +146,9 @@ const SectionOne = () => {
         setSidebarOpen={setSidebarOpen} 
       />
       {/* Product Tabs */}
-      <ProductTabs
+      <ProductTap
          description={product.description}
-         reviews={product.reviews}
+         id ={id}
       />
     </div>
   );

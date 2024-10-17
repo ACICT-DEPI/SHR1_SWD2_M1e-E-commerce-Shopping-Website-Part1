@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const ProductTabs = ({ description, productId }) => {
+const ProductTap = ({ description, id }) => {
   const [activeTab, setActiveTab] = useState('description');
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -11,16 +11,11 @@ const ProductTabs = ({ description, productId }) => {
   useEffect(() => {
     if (activeTab === 'reviews') {
       setLoading(true);
-      const token = localStorage.getItem('token'); // Retrieve the token from localStorage
 
-      // استخدم معرف المنتج كخاصية بدلاً من معرف ثابت
-      const productID = productId || '670c69c30cb1e8caab9d8489'; // افتراضياً إذا لم يكن موجودًا
 
       // Make the request with the Authorization header
-      axios.get(`https://server-esw.up.railway.app/api/v1/reviews/product/${productID}`, {
-          headers: {
-            Authorization: `Bearer ${token}`, // Include the token here
-          },
+      axios.get(`https://server-esw.up.railway.app/api/v1/reviews/product/${id}`, {
+         withCredentials: true 
         })
         .then((response) => {
           if (response.data.status === "success") {
@@ -35,7 +30,7 @@ const ProductTabs = ({ description, productId }) => {
           setLoading(false);
         });
     }
-  }, [activeTab, productId]);
+  }, [activeTab, id]);
 
   // دالة لعرض النجوم بناءً على التقييم
   const renderStars = (rating) => {
@@ -109,7 +104,7 @@ const ProductTabs = ({ description, productId }) => {
   );
 };
 
-export default ProductTabs;
+export default ProductTap;
 
 
 

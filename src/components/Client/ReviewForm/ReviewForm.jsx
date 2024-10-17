@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { Rating } from 'primereact/rating';
+import { Toast } from 'primereact/toast';
 import axios from 'axios';
 
 const Tailwind = {
@@ -21,99 +22,134 @@ const ReviewForm = ({ productId, onClose }) => {
   const [reviewComment, setReviewComment] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [isEditing, setIsEditing] = useState(false); // تحديد حالة التحرير
+  const [isEditing, setIsEditing] = useState(false);
+  const [reviewId , setReviewId] = useState(null)
+  const toast = useRef(null);
 
   useEffect(() => {
-    // جلب المراجعة الحالية للمستخدم إذا كانت موجودة
     const fetchReview = async () => {
       try {
-        const response = await axios.get(`https://server-esw.up.railway.app/api/v1/reviews/product/${productId}`);
-        if (response.data.review) {
-          setRating(response.data.review.rating);
-          setReviewComment(response.data.review.comment);
-          setIsEditing(true); // إذا كانت هناك مراجعة موجودة، تغيير الحالة إلى التحرير
+        const response = await axios.get(`https://server-esw.up.railway.app/api/v1/reviews/product/${productId}/my-review`, { withCredentials: true });
+        console.log(response.data);
+        
+        const reviews = response.data.data; // Reviews is an array
+        if (reviews.length > 0) {
+          const review = reviews[0]; // Assuming the first review is yours
+          setReviewComment(review.comment);
+          setRating(review.rating);
+          setIsEditing(true); // We are in edit mode if a review exists
+          setReviewId(review._id);
+        } else {
+          setIsEditing(false); // No review found, we can post a new one
         }
       } catch (error) {
-        console.error('Error fetching review:', error);
+        console.error('Error fetching existing review:', error);
+        if (error.response?.status === 404) {
+          setIsEditing(false); // No existing review found
+        } else {
+          setError('Failed to load the review.');
+        }
       }
     };
-    
+
     fetchReview();
   }, [productId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
 
-    const reviewData = {
-      rating, 
-      comment: reviewComment 
-    };
+    const reviewData = { rating, comment: reviewComment };
 
     try {
+      let response;
       if (isEditing) {
-        // تحديث المراجعة الموجودة
-        const response = await axios.put(`https://server-esw.up.railway.app/api/v1/reviews/product/${productId}`, reviewData);
-        if (response.data.status === 'success') {
-          alert('Done processing');
-        }
+        response = await axios.patch(
+          `https://server-esw.up.railway.app/api/v1/reviews/${reviewId}`,
+          reviewData,
+          { withCredentials: true }
+        );
       } else {
-        // إضافة مراجعة جديدة
-        const response = await axios.post(`https://server-esw.up.railway.app/api/v1/reviews/product/${productId}`, reviewData);
-        if (response.data.status === 'success') {
-          alert(' Done Processing');
-          setIsEditing(true); // بعد الحفظ، التغيير إلى وضع التحرير
-        }
+        response = await axios.post(
+          `https://server-esw.up.railway.app/api/v1/reviews/product/${productId}`,
+          reviewData,
+          { withCredentials: true }
+        );
       }
-      onClose(); // إغلاق المودال بعد الحفظ
+
+      if (response.data.status === 'success') {
+        toast.current.show({ severity: 'success', summary: 'Success', detail: isEditing ? 'Review updated successfully!' : 'Review added successfully!', life: 3000 });
+        resetForm(); // Reset form after submission
+        onClose(); // Close dialog after submission
+      } else {
+        setError('Failed to process your review. Please try again.');
+      }
     } catch (error) {
-      setError('Error');
-      console.error('Error:', error);
+      const errorMessage = error.response?.data?.message || error.message;
+      console.error('Error submitting review:', errorMessage);
+      setError(errorMessage);
+      toast.current.show({ severity: 'error', summary: 'Error', detail: errorMessage, life: 3000 });
     } finally {
       setLoading(false);
     }
   };
 
+  const resetForm = () => {
+    setReviewComment('');
+    setRating(null);
+    setIsEditing(false); // Reset to new review mode after submission
+  };
+
   return (
-    <Dialog header={isEditing ? "Edit Your Review" : "Write a Review"} visible={true} onHide={onClose} style={{ width: '50vw' }}>
-      <form onSubmit={handleSubmit}>
-        <div className={Tailwind.form.fieldWrapper}>
-          <label htmlFor="rating" className={Tailwind.form.label}>Rating</label>
-          <Rating
-            id="rating"
-            value={rating}
-            onChange={(e) => setRating(e.value)}
-            stars={5}
-            cancel={false}
-          />
-        </div>
+    <>
+      <Toast ref={toast} position="bottom-left" />
+      <Dialog
+        header={isEditing ? "Edit Your Review" : "Write a Review"}
+        visible={true}
+        onHide={onClose}
+        style={{ width: '50vw' }}
+      >
+        <form onSubmit={handleSubmit}>
+          <div className={Tailwind.form.fieldWrapper}>
+            <label htmlFor="rating" className={Tailwind.form.label}>Rating</label>
+            <Rating
+              id="rating"
+              value={rating}
+              onChange={(e) => setRating(e.value)}
+              stars={5}
+              cancel={false}
+              required
+            />
+          </div>
 
-        <div className={Tailwind.form.fieldWrapper}>
-          <label htmlFor="reviewComment" className={Tailwind.form.label}>Share your thoughts</label>
-          <textarea
-            id="reviewComment"
-            value={reviewComment}
-            onChange={(e) => setReviewComment(e.target.value)}
-            className={Tailwind.form.textarea}
-            rows={5}
-            placeholder="Your thoughts on the product"
-            required
-          />
-        </div>
+          <div className={Tailwind.form.fieldWrapper}>
+            <label htmlFor="reviewComment" className={Tailwind.form.label}>Share your thoughts</label>
+            <textarea
+              id="reviewComment"
+              value={reviewComment}
+              onChange={(e) => setReviewComment(e.target.value)}
+              className={Tailwind.form.textarea}
+              rows={5}
+              placeholder="Your thoughts on the product"
+              required
+            />
+          </div>
 
-        {error && <p style={{ color: 'red' }}>{error}</p>}
+          {error && <p style={{ color: 'red' }}>{error}</p>}
 
-        <div className={Tailwind.footer.buttonsContainer}>
-          <Button label="Cancel" className="p-button-secondary" onClick={onClose} />
-          <Button
-            label={loading ? (isEditing ? "Updating..." : "Saving...") : (isEditing ? "Update" : "Save")}
-            className="p-button-success"
-            type="submit"
-            disabled={loading}
-          />
-        </div>
-      </form>
-    </Dialog>
+          <div className={Tailwind.footer.buttonsContainer}>
+            <Button label="Cancel" className="p-button-secondary" onClick={onClose} />
+            <Button
+              label={loading ? (isEditing ? "Updating..." : "Saving...") : (isEditing ? "Update" : "Save")}
+              className="p-button-success"
+              type="submit"
+              disabled={loading || rating === null || reviewComment === ''} // Disable if no rating or comment
+            />
+          </div>
+        </form>
+      </Dialog>
+    </>
   );
 };
 
