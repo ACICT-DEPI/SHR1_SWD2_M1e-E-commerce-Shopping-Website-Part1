@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { FaSearch, FaShoppingCart, FaBars } from "react-icons/fa";
+import { FaSearch, FaShoppingCart, FaBars, FaStore, FaPhone } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import SearchComponent from "./SearchComponent";
 import ClickOutside from "../ClickOutside";
@@ -69,7 +69,7 @@ const UserHeader = () => {
     <header className="bg-white dark:bg-gray-900 w-full z-[999]">
       <div className="shadow-lg">
         <div className="container mx-auto flex justify-between items-center px-4 py-3 lg:px-[6rem] xl:px-[8rem] font-sans">
-          {/* Logo and Hamburger Menu */}
+          {/* Left Side - Logo and Links */}
           <div className="flex items-center space-x-4">
             <Link to="/" className="flex items-center">
               <img
@@ -78,20 +78,32 @@ const UserHeader = () => {
                 className="h-16 w-auto"
               />
             </Link>
+            <div className="hidden lg:flex space-x-6">
+              <Link
+                to="/collections"
+                className="text-gray-700 dark:text-gray-300 hover:underline"
+              >
+                Shop
+              </Link>
+              <Link
+                to="/contact"
+                className="text-gray-700 dark:text-gray-300 hover:underline"
+              >
+                Contact Us
+              </Link>
+            </div>
             <FaBars
               className="text-gray-700 dark:text-gray-300 cursor-pointer lg:hidden"
               onClick={toggleMenu}
             />
           </div>
 
-          {/* Right Side */}
-          <div className="user-interactions flex items-center">
+          {/* Right Side - Auth, Cart, Search, DarkModeSwitcher */}
+          <div className="user-interactions flex items-center space-x-4">
             <ul className="flex gap-4 items-center lg:gap-8">
               <DarkModeSwitcher />
               {isAuthenticated ? (
-                <div>
-                  <UserDropdown firstname={firstname} avatarUrl={avatarUrl} />
-                </div>
+                <UserDropdown firstname={firstname} avatarUrl={avatarUrl} />
               ) : (
                 <AuthLinks />
               )}
@@ -116,45 +128,58 @@ const UserHeader = () => {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="bg-white dark:bg-gray-800 lg:hidden">
-          <div className="container mx-auto px-4 py-2">
-            <ul className="flex flex-col space-y-2">
-              <li>
-                <Link
-                  to="/collections"
-                  className="text-gray-700 dark:text-gray-300 hover:underline focus:outline-none"
-                  onClick={() => setIsMenuOpen(false)} 
-                >
-                  Shop
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/contact"
-                  className="text-gray-700 dark:text-gray-300 hover:underline focus:outline-none"
-                  onClick={() => setIsMenuOpen(false)} 
-                >
-                  Contact us
-                </Link>
-              </li>
-              <li>
-                <div
-                  className="text-gray-700 dark:text-gray-300 cursor-pointer"
-                  onClick={handleCartClick} 
-                >
-                  Cart ({cartCount})
-                </div>
-              </li>
-              <li>
-                <FaSearch
-                  className="text-gray-700 dark:text-gray-300 cursor-pointer"
-                  onClick={toggleSearch} 
-                />
-              </li>
-            </ul>
-          </div>
-        </div>
-      )}
+  <div className="bg-white dark:bg-gray-800 lg:hidden">
+    <div className="container mx-auto px-4 py-2">
+      <ul className="flex flex-col space-y-2">
+        {/* Shop Icon */}
+        <li className="flex items-center space-x-2">
+          <FaStore
+            className="text-gray-700 dark:text-gray-300 text-2xl cursor-pointer"
+            onClick={() => {
+              setIsMenuOpen(false);
+              navigate("/collections");
+            }} // Navigate to Shop
+          />
+          <span className="text-gray-700 dark:text-gray-300 text-lg">Shop</span>
+        </li>
+
+        {/* Contact Us Icon */}
+        <li className="flex items-center space-x-2">
+          <FaPhone
+            className="text-gray-700 dark:text-gray-300 text-2xl cursor-pointer"
+            onClick={() => {
+              setIsMenuOpen(false);
+              navigate("/contact");
+            }} // Navigate to Contact Us
+          />
+          <span className="text-gray-700 dark:text-gray-300 text-lg">Contact</span>
+        </li>
+
+        {/* Cart Icon with Count */}
+        <li className="relative flex items-center space-x-2">
+          <FaShoppingCart
+            className="text-gray-700 dark:text-gray-300 text-2xl cursor-pointer"
+            onClick={handleCartClick} // Navigate to the Cart page
+          />
+          {cartCount > 0 && (
+            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+              {cartCount}
+            </span>
+          )}
+        </li>
+
+        {/* Search Icon */}
+        <li>
+          <FaSearch
+            className="text-gray-700 dark:text-gray-300 cursor-pointer"
+            onClick={toggleSearch} 
+          />
+          
+        </li>
+      </ul>
+    </div>
+  </div>
+)}
 
       {/* Search Component */}
       {isSearchOpen && (
