@@ -32,7 +32,7 @@ const SectionOne = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { id } = useParams();
-
+  
   useEffect(() => {
     const fetchProductData = async () => {
       try {
@@ -60,7 +60,7 @@ const SectionOne = () => {
     const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
     const newItem = { ...product, quantity }; // Add quantity to the product
     const existingItemIndex = cartItems.findIndex(item => item._id === product._id);
-
+    
     if (existingItemIndex !== -1) {
       // If the item already exists, update the quantity
       cartItems[existingItemIndex].quantity = quantity; // Update quantity from input
@@ -89,7 +89,7 @@ const SectionOne = () => {
   if (!product) {
     return <p>Product not found</p>;
   }
-
+  
   return (
     <div className="relative">
       {isSidebarOpen && <Overlay onClick={() => setSidebarOpen(false)} />}
@@ -103,8 +103,21 @@ const SectionOne = () => {
               <h1 className="text-5xl font-bold mb-4 pl-4 pt-12 pb-5 dark:text-white">{product.title}</h1>
               <ProductPrice product={product} />
               <div className="flex items-center mb-4 pb-5 pl-4 dark:text-white">
-                <Rating value={product.rating} readOnly stars={5} cancel={false} />
-                <span className="ml-5 text-gray-600 dark:text-white">({product.numReviews} Reviews)</span>
+                {/* Adjust Rating to show fractional stars */}
+                <Rating 
+                  value={product.rating} 
+                  readOnly 
+                  stars={5} 
+                  cancel={false} 
+                  className="text-yellow-500" 
+                />
+                <span className="ml-5 text-gray-600 dark:text-white">
+                  ({product.numReviews} Reviews)
+                </span>
+                {/* Show the exact rating value with two decimal places */}
+                <span className="ml-3 text-gray-500 dark:text-gray-300">
+                  {product.rating.toFixed(2)}
+                </span>
               </div>
               <div className="mb-6 pl-4 dark:text-white">
                 <Paragraph>{product.excerpt}</Paragraph>
@@ -135,7 +148,7 @@ const SectionOne = () => {
       {/* Product Tabs */}
       <ProductTabs
          description={product.description}
-         reviews={product.reviews || []}
+         reviews={product.reviews}
       />
     </div>
   );
