@@ -1,38 +1,38 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { AutoComplete } from 'primereact/autocomplete';
-import axios from 'axios';  
-import { Link } from 'react-router-dom';  
+import React, { useState, useEffect, useRef, Fragment } from 'react';
+import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 const SearchComponent = ({ onClose }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [filteredItems, setFilteredItems] = useState([]);
-    const [allProducts, setAllProducts] = useState([]); // Store all products
+    const [allProducts, setAllProducts] = useState([]);
     const searchRef = useRef(null);
 
     const fetchProducts = async () => {
         try {
             const response = await axios.get('https://server-esw.up.railway.app/api/v1/products');
             const products = response.data.data.products;
+
             const formattedItems = products.map(product => ({
                 id: product._id,
                 title: product.title,
-                banner: product.category.banner.url,
+                banner: product.gallery[0].url,
                 price: product.price,
-                link: `/product/${product._id}` // Store the link as a string
+                link: `/product/${product._id}`
             }));
-            setAllProducts(formattedItems); // Save all products
+
+            setAllProducts(formattedItems);
         } catch (error) {
             console.error('Error fetching products:', error);
         }
     };
 
     useEffect(() => {
-        fetchProducts(); // Fetch products on component mount
+        fetchProducts();
     }, []);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
-            // Check if the click is outside the search component
             if (searchRef.current && !searchRef.current.contains(event.target)) {
                 onClose();
             }
@@ -44,7 +44,6 @@ const SearchComponent = ({ onClose }) => {
             }
         };
 
-        // Listen for click and keydown events
         document.addEventListener('mousedown', handleClickOutside);
         document.addEventListener('keydown', handleEscKeyPress);
 
@@ -54,63 +53,62 @@ const SearchComponent = ({ onClose }) => {
         };
     }, [onClose]);
 
-    const searchItems = (event) => {
-        const query = event.query.toLowerCase();
-        const filtered = allProducts.filter(item => 
-            item.title.toLowerCase().startsWith(query) // Filter by title starts with
+    const handleSearch = (event) => {
+        const query = event.target.value.toLowerCase();
+        setSearchTerm(query);
+
+        const filtered = allProducts.filter(item =>
+            item.title.toLowerCase().includes(query) // Use includes for more flexibility
         );
         setFilteredItems(filtered);
     };
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
-            <div ref={searchRef} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-96">
-                <h2 className="text-center text-lg font-bold mb-4 text-black dark:text-white">
-                    Search
-                </h2>
-                <AutoComplete
-                    value={searchTerm}
-                    suggestions={filteredItems}
-                    completeMethod={searchItems}
-                    field="title"
-                    onChange={(e) => setSearchTerm(e.value)}
-                    placeholder="Search for products"
-                    className="w-full dark:bg-gray-700 dark:text-white"
-                    itemTemplate={(item) => (
-                        <div className="p-2 flex items-center">
-                            <img 
-                                src={item.banner} 
-                                alt={item.title} 
-                                className="w-10 h-10 mr-4 rounded" 
-                            />
-                            <div>
-                                <Link to={item.link} className="text-blue-500 hover:underline font-bold" onClick={onClose}>
-                                    {item.title}
-                                </Link>
-                                <div className="text-gray-500 dark:text-gray-400">
-                                    ${item.price}  {/* Display the price */}
-                                </div>
-                            </div>
-                        </div>
+        <Fragment>
+            <div className="fixed inset-0  w-full bg-slate-900/50 backdrop-blur z-50 overflow-y-auto p-4 sm:p-6 md:p-20">
+                <div ref={searchRef} className="mx-auto max-w-xl w-2/5 transform divide-y divide-slate-100 overflow-hidden rounded-xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 transition-all dark:bg-slate-800 dark:divide-white/10 dark:ring-1 dark:ring-slate-700 ">
+                    <div className='relative'>
+                        <input
+                            type="text"
+                            value={searchTerm}
+                            onChange={handleSearch}
+                            placeholder="Search for products"
+                            className="h-12 w-full border-0 bg-transparent pl-11 pr-4 text-slate-900 placeholder:text-slate-400 focus:ring-0 sm:text-sm dark:text-white"
+                        />
+                    </div>
+                    {filteredItems.length > 0 && (
+                        <ul className="max-h-96 scroll-py-3 overflow-y-auto p-3">
+                            {filteredItems.map(item => (
+                                <li key={item.id} className="relative group flex items-center cursor-default select-none rounded-xl p-3 hover:bg-slate-100 dark:hover:bg-white/5">
+                                    <div className="flex h-10 w-10 flex-none items-center justify-center rounded-lg bg-slate-200 dark:bg-slate-800">
+                                        <img src={item.banner} alt={item.title} className="rounded-md" />
+                                    </div>
+                                    <div className="ml-4 flex-auto">
+                                        <Link to={item.link} className="text-sm font-medium text-slate-700 group-hover:text-slate-900 dark:text-slate-200 dark:group-hover:text-white" onClick={onClose}>
+                                            <span className="absolute inset-0"></span>
+                                            {item.title}
+                                        </Link>
+                                        <p className="text-sm text-slate-500 group-hover:text-slate-700 dark:text-slate-400 dark:group-hover:text-slate-200">
+                                            ${item.price} EGP
+                                        </p>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
                     )}
-                />
-                <div className="mt-4 flex justify-end">
-                    <button 
-                        className="bg-blue-500 dark:bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-600 dark:hover:bg-blue-700"
-                        onClick={onClose}
-                    >
-                        Close
-                    </button>
+
                 </div>
             </div>
-        </div>
+        </Fragment >
+
+
+
+
+
+
+
+
     );
 };
 
 export default SearchComponent;
-
-
-
-
-
-
