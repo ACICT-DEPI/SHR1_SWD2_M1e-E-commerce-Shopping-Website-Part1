@@ -197,7 +197,7 @@ const AddProduct = () => {
               {/* Price, Discount, and Quantity Fields */}
               <div className="mb-2 grid grid-cols-3 gap-4">
                 <div>
-                  <label htmlFor="price" className="w-full mb-2 block text-black dark:text-white">Price ($)</label>
+                  <label htmlFor="price" className="w-full mb-2 block text-black dark:text-white">Price (EGP)</label>
                   <InputText
                     id="price"
                     name="price"

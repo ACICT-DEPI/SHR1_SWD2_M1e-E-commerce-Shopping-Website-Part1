@@ -44,6 +44,7 @@ const NewOrderTable = ({ data }) => { // نقوم بتمرير البيانات 
       </div>
     );
   };
+  const totalBodyTemplate = (rowData) => `${rowData.totalPrice.toFixed(2)} EGP`;
 
   const renderStatusCell = (rowData) => {
     const status = rowData.status;
@@ -99,6 +100,7 @@ const NewOrderTable = ({ data }) => { // نقوم بتمرير البيانات 
           <Column
             field="totalPrice"
             header="Total Price"
+              body={totalBodyTemplate}
             style={{ minWidth: "10rem" }}
               sortable
           />

@@ -48,7 +48,7 @@ const OrderDataTable = () => {
     setGlobalFilterValue(value);
   };
 
-  const totalBodyTemplate = (rowData) => `$${rowData.totalPrice.toFixed(2)}`;
+  const totalBodyTemplate = (rowData) => `${rowData.totalPrice.toFixed(2)} EGP`;
 
   const header = () => {
     return (
