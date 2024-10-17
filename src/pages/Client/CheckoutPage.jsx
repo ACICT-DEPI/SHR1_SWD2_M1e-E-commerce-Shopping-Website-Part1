@@ -8,10 +8,9 @@ import { FaArrowLeft } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import axios from "axios"; // تأكد من استيراد axios
 import { Toast } from "primereact/toast";
+import { classNames } from "primereact/utils";
 
 const CheckoutPage = () => {
-  const [billingSameAsShipping, setBillingSameAsShipping] = useState(true);
-  const [paymentType, setPaymentType] = useState("cod");
   const [cartProducts, setCartProducts] = useState([]);
   const [shippingAddress1, setShippingAddress1] = useState("");
   const [shippingAddress2, setShippingAddress2] = useState("");
@@ -21,9 +20,9 @@ const CheckoutPage = () => {
   const [country, setCountry] = useState("");
   const toast = useRef(null);
   const [subtotal, setSubtotal] = useState(0);
-  const [email, setEmail] = useState(""); // حالة لحفظ البريد الإلكتروني
   const [errorMessages, setErrorMessages] = useState({});
 
+  const [paymentMethod, setPaymentMethod] = useState("")
   useEffect(() => {
     const storedCartProducts =
       JSON.parse(localStorage.getItem("cartItems")) || [];
@@ -39,6 +38,52 @@ const CheckoutPage = () => {
     }, 0);
     setSubtotal(total);
   };
+  // تغيير حالة ال paymentMethod
+  const paymentMethodHandler = (payMethod) => {
+    setPaymentMethod(payMethod)
+    console.log("payMethod", payMethod)
+
+  }
+
+
+  // cashon delivery
+  const cashPayment = async (orderData) => {
+    try {
+      const response = await axios.post(
+        "https://server-esw.up.railway.app/api/v1/orders/make-order",
+        orderData,
+        { withCredentials: true }
+      );
+      console.log(response.data.status)
+    } catch {
+
+    }
+
+  }
+
+
+  // Paymob Function
+  const paymobPayment = async (orderData) => {
+    try {
+      const response = await axios.post(
+        "https://server-esw.up.railway.app/api/v1/orders/make-order",
+        orderData,
+        { withCredentials: true }
+      );
+
+      // استخراج مفاتيح الدفع
+      const { paymentKey, frame_id } = response.data.data;
+      // إعادة توجيه إلى iframe الدفع
+      if (paymentKey) {
+        window.location.href = `https://accept.paymob.com/api/acceptance/iframes/${frame_id}?payment_token=${paymentKey}`;
+      }
+    } catch {
+
+    }
+
+  }
+
+
 
   const handlePayment = async () => {
     const orderData = {
@@ -52,21 +97,26 @@ const CheckoutPage = () => {
       zip: zip,
       country: country,
       phone: phone,
+      paymentmethod: paymentMethod
     };
 
     try {
       // إرسال الطلب لإنشاء الطلب
-      const response = await axios.post(
-        "https://server-esw.up.railway.app/api/v1/orders/make-order",
-        orderData,
-        { withCredentials: true }
-      );
-
-      // استخراج مفاتيح الدفع
-      const { paymentKey, frame_id } = response.data.data;
-      // إعادة توجيه إلى iframe الدفع
-      if (paymentKey) {
-        window.location.href = `https://accept.paymob.com/api/acceptance/iframes/${frame_id}?payment_token=${paymentKey}`;
+      switch (paymentMethod) {
+        case "unpaid": {
+          console.log("cash payment", orderData.paymentmethod)
+          console.log("Order data :", orderData)
+          cashPayment(orderData)
+          break;
+        }
+        case "paymob": {
+          console.log("Paymob payment")
+          console.log("Order data :", orderData)
+          paymobPayment(orderData)
+          break;
+        }
+        default:
+          console.log("you should choice payment method")
       }
     } catch (error) {
       // Check for error response from the server
@@ -91,12 +141,13 @@ const CheckoutPage = () => {
       });
     }
   };
+
   const handleFocus = (field) => {
     setErrorMessages((prev) => ({ ...prev, [field]: "" }));
   };
 
   return (
-    <div className="container mx-auto p-8 flex flex-col lg:flex-row justify-between">
+    <div className="container relative mx-auto p-8 flex flex-col lg:flex-row justify-between">
       <Toast ref={toast} position="bottom-left" />
 
       {/* Form Section */}
@@ -234,9 +285,57 @@ const CheckoutPage = () => {
               </div>
             </section>
 
+            <section className="mb-8">
+              <h3 className="text-2xl font-semibold mb-4 dark:text-white">
+                Shipping Information
+              </h3>
+              <div className="flex flex-wrap gap-5">
+
+                <div className="mt-4 h-20	w-56">
+                  <Button className={classNames(
+                    { "border-transparent ring-2 ring-sky-600": paymentMethod === "unpaid" },
+                    "relative block cursor-pointer rounded-lg border bg-transparent hover:bg-transparent px-6 py-4 shadow-sm focus:outline-none sm:flex sm:justify-between border-gray-300",
+                  )} onClick={() => paymentMethodHandler("unpaid")}>
+                    <span className="flex items-center">
+                      <span className="flex flex-col text-sm">
+                        <span className="font-medium text-gray-900">
+                          Cash on Delivery
+                        </span>
+                        <span className="text-gray-500">
+                          <span className="block sm:inline">
+                            Pay with cash on delivery
+                          </span>
+                        </span>
+                      </span>
+                    </span>
+                  </Button>
+                </div>
+
+                <div className="mt-4 h-20	w-56">
+                  <Button className={classNames(
+                    { "border-transparent ring-2 ring-sky-600": paymentMethod === "paymob" },
+                    "relative block cursor-pointer rounded-lg border bg-transparent hover:bg-transparent px-6 py-4 shadow-sm focus:outline-none sm:flex sm:justify-between border-gray-300",
+                  )} onClick={() => paymentMethodHandler("paymob")}>
+                    <div className="flex items-center">
+                      <div className="flex flex-col text-sm text-center">
+                        <div>
+                          <img src="https://paymob.com/images/paymobLogo.png" alt="Paymob" className="w-40" />
+                        </div>
+                        <div className="text-gray-500">
+                          <span className="block sm:inline">
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </Button>
+                </div>
+              </div>
+
+            </section>
+
             <section>
               <Link
-                className="text-white hover:underline text-base font-medium mt-8 block text-center bg-blue-500 py-3 rounded-md mt-20 dark:text-black"
+                className="text-white hover:underline text-base font-medium  block text-center bg-blue-500 py-3 rounded-md mt-20 dark:text-black"
                 onClick={handlePayment} // تأكد من استخدام دالة المعالجة الصحيحة
               >
                 Confirm order
@@ -249,11 +348,11 @@ const CheckoutPage = () => {
       </div>
 
       {/* Order Summary Section */}
-      <div className="w-full lg:w-1/3 lg:ml-8 mt-8 lg:mt-0">
-        <div className="p-4 md:p-8 lg:p-12 border border-gray-200 rounded-lg shadow-xl bg-gray-50 w-full lg:w-7/8 xl:w-10/14 lg:sticky top-16 h-auto min-h-[700px] dark:bg-gray-900 mx-auto">
+      <div className="w-full pt-8 lg:w-1/3 lg:ml-8 mt-8 lg:mt-0">
+        <div className="p-4 md:p-8 lg:p-12 border border-gray-200 rounded-lg shadow-xl bg-gray-50 w-full lg:w-7/8 xl:w-10/14 lg:sticky top-16  dark:bg-gray-900 mx-auto">
           <h2 className="text-2xl md:text-3xl font-bold mb-6">Order Summary</h2>
           {cartProducts.length > 0 ? (
-            <>
+            <div className="overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500">
               {cartProducts.map((product) => (
                 <div
                   key={product._id}
@@ -270,8 +369,14 @@ const CheckoutPage = () => {
                       {product.title}
                     </h3>
                     <p className="text-gray-800 dark:text-gray-300">
-                      ${product.price} x {product.quantity} = $
-                      {(product.price * product.quantity).toFixed(2)}
+                      Price | {(product.price * (1 - (product.discount / 100)))} EGP  <span className="ml-3  line-through text-start text-slate-600">{product.price} EGP</span>
+
+                    </p>
+                    <p className="text-gray-800 dark:text-gray-300">
+                      QTY | {product.quantity}
+                    </p>
+                    <p className="text-right font-semibold dark:text-white">
+                      {((product.price * (1 - (product.discount / 100))) * product.quantity).toFixed(2)}  EGP
                     </p>
                   </div>
                 </div>
@@ -282,21 +387,21 @@ const CheckoutPage = () => {
                     Subtotal:
                   </span>
                   <span className="font-semibold dark:text-white">
-                    ${subtotal.toFixed(2)}
+                    {subtotal.toFixed(2)} EGP
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="font-semibold dark:text-white">
                     Shipping:
                   </span>
-                  <span className="font-semibold dark:text-white">$0.00</span>
+                  <span className="font-semibold dark:text-white">0.00 EGP</span>
                 </div>
                 <div className="flex justify-between font-bold text-lg">
                   <span>Total:</span>
-                  <span>${subtotal.toFixed(2)}</span>
+                  <span>{subtotal.toFixed(2)} EGP</span>
                 </div>
               </div>
-            </>
+            </div>
           ) : (
             <p className="text-gray-600 dark:text-gray-400">
               Your cart is empty.
