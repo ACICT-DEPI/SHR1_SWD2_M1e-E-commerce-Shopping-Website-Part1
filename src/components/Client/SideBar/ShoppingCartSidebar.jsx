@@ -73,7 +73,7 @@ const ShoppingCartSidebar = ({ isSidebarOpen, setSidebarOpen }) => {
       <div className="mt-auto pt-80 dark:text-white">
         <hr className="w-full bg-gray-300 dark:text-white" />
         <p className="text-2xl font-bold pt-10 dark:text-white">
-          Subtotal: {subtotal.toFixed(2)} $
+          Subtotal: {subtotal.toFixed(2)} EGP
         </p>
         <p>Shipping and taxes will be calculated at checkout.</p>
 

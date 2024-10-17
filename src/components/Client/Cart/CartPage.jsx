@@ -59,7 +59,7 @@ const CartPage = () => {
       <div className="w-full max-w-4xl mt-10">
         <hr className="w-full bg-gray-300 dark:text-white" />
         <p className="text-2xl font-bold pt-10 dark:text-white">
-          Subtotal: {subtotal.toFixed(2)} $
+          Subtotal: {subtotal.toFixed(2)} EGP
         </p>
         <p>Shipping and taxes will be calculated at checkout.</p>
 
