@@ -68,7 +68,9 @@ const ImageSlider = () => {
           <div className="overlay" />
           <div className="slide-content">
             <h1   className='text-3xl font-bold tracking-tight text-white sm:text-4xl'>{slide.title}</h1>
-            <h2>{slide.description}</h2>
+            <h2 dangerouslySetInnerHTML={{
+              __html: slide.description,
+            }}></h2>
             <Link
   to={`/collections/${slide.category._id}`}  // Dynamic category link
   className="mb-20 block w-full rounded-md border border-transparent bg-white px-8 py-3 text-base font-medium text-slate-900 hover:bg-slate-100 sm:w-auto"
