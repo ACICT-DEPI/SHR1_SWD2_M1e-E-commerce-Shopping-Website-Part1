@@ -23,29 +23,28 @@ const ReviewForm = ({ productId, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [reviewId , setReviewId] = useState(null)
+  const [reviewId , setReviewId] = useState(null);
   const toast = useRef(null);
 
   useEffect(() => {
     const fetchReview = async () => {
       try {
         const response = await axios.get(`https://server-esw.up.railway.app/api/v1/reviews/product/${productId}/my-review`, { withCredentials: true });
-        console.log(response.data);
+        const reviews = response.data.data;
         
-        const reviews = response.data.data; // Reviews is an array
         if (reviews.length > 0) {
-          const review = reviews[0]; // Assuming the first review is yours
+          const review = reviews[0];
           setReviewComment(review.comment);
           setRating(review.rating);
-          setIsEditing(true); // We are in edit mode if a review exists
+          setIsEditing(true);
           setReviewId(review._id);
         } else {
-          setIsEditing(false); // No review found, we can post a new one
+          setIsEditing(false);
         }
       } catch (error) {
         console.error('Error fetching existing review:', error);
         if (error.response?.status === 404) {
-          setIsEditing(false); // No existing review found
+          setIsEditing(false);
         } else {
           setError('Failed to load the review.');
         }
@@ -80,8 +79,8 @@ const ReviewForm = ({ productId, onClose }) => {
 
       if (response.data.status === 'success') {
         toast.current.show({ severity: 'success', summary: 'Success', detail: isEditing ? 'Review updated successfully!' : 'Review added successfully!', life: 3000 });
-        resetForm(); // Reset form after submission
-        onClose(); // Close dialog after submission
+        resetForm();
+        onClose();
       } else {
         setError('Failed to process your review. Please try again.');
       }
@@ -95,10 +94,32 @@ const ReviewForm = ({ productId, onClose }) => {
     }
   };
 
+  const handleDelete = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.delete(`https://server-esw.up.railway.app/api/v1/reviews/${reviewId}`, { withCredentials: true });
+      
+      if (response.data.status === 'success') {
+        toast.current.show({ severity: 'success', summary: 'Success', detail: 'Review deleted successfully!', life: 3000 });
+        resetForm();
+        onClose();
+      } else {
+        setError('Failed to delete the review. Please try again.');
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || error.message;
+      console.error('Error deleting review:', errorMessage);
+      setError(errorMessage);
+      toast.current.show({ severity: 'error', summary: 'Error', detail: errorMessage, life: 3000 });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const resetForm = () => {
     setReviewComment('');
     setRating(null);
-    setIsEditing(false); // Reset to new review mode after submission
+    setIsEditing(false);
   };
 
   return (
@@ -144,8 +165,16 @@ const ReviewForm = ({ productId, onClose }) => {
               label={loading ? (isEditing ? "Updating..." : "Saving...") : (isEditing ? "Update" : "Save")}
               className="p-button-success"
               type="submit"
-              disabled={loading || rating === null || reviewComment === ''} // Disable if no rating or comment
+              disabled={loading || rating === null || reviewComment === ''} 
             />
+            {isEditing && (
+              <Button
+                label={loading ? "Deleting..." : "Delete"}
+                className="p-button-danger"
+                onClick={handleDelete}
+                disabled={loading} 
+              />
+            )}
           </div>
         </form>
       </Dialog>
