@@ -160,6 +160,25 @@ const submitForm = async (e) => {
                 />
                 {errors.title && <small className="p-error">{errors.title}</small>}
               </div>
+              <div className="mb-2">
+                <label
+                  htmlFor="buttonText"
+                  className="w-full mb-2 block text-black dark:text-white"
+                >
+                  Button Text
+                </label>
+                <InputText
+                  id="buttonText"
+                  type="text"
+                  placeholder="Enter button text"
+                  className={`w-full ${errors.buttonText ? 'border-red-500' : ''}`}
+                  pt={inputTextStyle}
+                  unstyled={true}
+                  value={buttonText}
+                  onChange={(e) => setButtonText(e.target.value)}
+                />
+                {errors.buttonText && <small className="p-error">{errors.buttonText}</small>}
+              </div>
 
               <div className="mb-2">
                 <label
@@ -190,25 +209,6 @@ const submitForm = async (e) => {
                 {errors.category && <small className="text-red-500 mt-1">{errors.category}</small>}
               </div>
 
-              <div className="mb-2">
-                <label
-                  htmlFor="buttonText"
-                  className="w-full mb-2 block text-black dark:text-white"
-                >
-                  Button Text
-                </label>
-                <InputText
-                  id="buttonText"
-                  type="text"
-                  placeholder="Enter button text"
-                  className={`w-full ${errors.buttonText ? 'border-red-500' : ''}`}
-                  pt={inputTextStyle}
-                  unstyled={true}
-                  value={buttonText}
-                  onChange={(e) => setButtonText(e.target.value)}
-                />
-                {errors.buttonText && <small className="p-error">{errors.buttonText}</small>}
-              </div>
 
               <MediaUpload
                 onChange={handleImageChange} 

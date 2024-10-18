@@ -185,7 +185,7 @@ const UpdateCarousels = () => {
                   className={`w-full ${errors.buttonText ? 'border-red-500' : ''}`}
                   pt={inputTextStyle}
                   unstyled={true}
-                  value={title}
+                  value={buttonText}
                   onChange={(e) => setButtonText(e.target.value)}
                 />
                 {errors.buttonText && <small className="p-error">{errors.buttonText}</small>}
