@@ -9,7 +9,8 @@ const OrderDetails = () => {
   const [error, setError] = useState('');
   const { id } = useParams();
   const navigate = useNavigate();
-
+  const [isReviewFormVisible, setIsReviewFormVisible] = useState(false); // State for modal visibility
+  const [selectedProductId, setSelectedProductId] = useState(null); // State for selected productId
   const fetchOrderDetails = async () => {
     try {
       const response = await axios.get(`https://server-esw.up.railway.app/api/v1/orders/${id}`, {
@@ -33,6 +34,19 @@ const OrderDetails = () => {
   useEffect(() => {
     fetchOrderDetails();
   }, [id]);
+
+
+  // Function to open the ReviewForm modal
+  const handleWriteReview = (productId) => {
+    setSelectedProductId(productId); // Set the selected productId
+    setIsReviewFormVisible(true); // Show the modal
+  };
+
+  // Function to close the ReviewForm modal
+  const handleCloseReviewForm = () => {
+    setIsReviewFormVisible(false);
+    setSelectedProductId(null); // Clear selected productId when closing the form
+  };
 
   if (loading) return <div className="text-center">Loading order details...</div>;
   if (error) return <div className="text-center text-red-600">Error: {error}</div>;
@@ -148,7 +162,9 @@ const OrderDetails = () => {
           >
             View product
           </button>
-          <a href="#" className="text-blue-500 hover:underline">Write a review</a>
+                    <button className="text-blue-500 hover:underline" onClick={() => handleWriteReview(item.product._id)}>
+                      Write a review
+                    </button>
         </div>
       </div>
     </div>
