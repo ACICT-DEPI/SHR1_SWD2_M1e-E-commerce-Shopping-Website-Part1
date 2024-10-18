@@ -42,47 +42,7 @@ const CheckoutPage = () => {
   const paymentMethodHandler = (payMethod) => {
     setPaymentMethod(payMethod)
     console.log("payMethod", payMethod)
-
   }
-
-
-  // cashon delivery
-  const cashPayment = async (orderData) => {
-    try {
-      const response = await axios.post(
-        "https://server-esw.up.railway.app/api/v1/orders/make-order",
-        orderData,
-        { withCredentials: true }
-      );
-      console.log(response.data.status)
-    } catch {
-
-    }
-
-  }
-
-
-  // Paymob Function
-  const paymobPayment = async (orderData) => {
-    try {
-      const response = await axios.post(
-        "https://server-esw.up.railway.app/api/v1/orders/make-order",
-        orderData,
-        { withCredentials: true }
-      );
-
-      // استخراج مفاتيح الدفع
-      const { paymentKey, frame_id } = response.data.data;
-      // إعادة توجيه إلى iframe الدفع
-      if (paymentKey) {
-        window.location.href = `https://accept.paymob.com/api/acceptance/iframes/${frame_id}?payment_token=${paymentKey}`;
-      }
-    } catch {
-
-    }
-
-  }
-
 
 
   const handlePayment = async () => {
@@ -97,26 +57,21 @@ const CheckoutPage = () => {
       zip: zip,
       country: country,
       phone: phone,
-      paymentmethod: paymentMethod
     };
 
     try {
       // إرسال الطلب لإنشاء الطلب
-      switch (paymentMethod) {
-        case "unpaid": {
-          console.log("cash payment", orderData.paymentmethod)
-          console.log("Order data :", orderData)
-          cashPayment(orderData)
-          break;
-        }
-        case "paymob": {
-          console.log("Paymob payment")
-          console.log("Order data :", orderData)
-          paymobPayment(orderData)
-          break;
-        }
-        default:
-          console.log("you should choice payment method")
+      const response = await axios.post(
+        "https://server-esw.up.railway.app/api/v1/orders/make-order",
+        orderData,
+        { withCredentials: true }
+      );
+
+      // استخراج مفاتيح الدفع
+      const { paymentKey, frame_id } = response.data.data;
+      // إعادة توجيه إلى iframe الدفع
+      if (paymentKey) {
+        window.location.href = `https://accept.paymob.com/api/acceptance/iframes/${frame_id}?payment_token=${paymentKey}`;
       }
     } catch (error) {
       // Check for error response from the server
@@ -293,9 +248,9 @@ const CheckoutPage = () => {
 
                 <div className="mt-4 h-20	w-56">
                   <Button className={classNames(
-                    { "border-transparent ring-2 ring-sky-600": paymentMethod === "unpaid" },
+                    { "border-transparent ring-2 ring-sky-600": paymentMethod === "cash_on_delivery" },
                     "relative block cursor-pointer rounded-lg border bg-transparent hover:bg-transparent px-6 py-4 shadow-sm focus:outline-none sm:flex sm:justify-between border-gray-300",
-                  )} onClick={() => paymentMethodHandler("unpaid")}>
+                  )} onClick={() => paymentMethodHandler("cash_on_delivery")}>
                     <span className="flex items-center">
                       <span className="flex flex-col text-sm">
                         <span className="font-medium text-gray-900">
