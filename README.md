@@ -2,6 +2,8 @@
 
 **E-commerce Shopping Website - Client** is the frontend part of a modern, responsive, and feature-rich e-commerce platform built with React and styled using Tailwind CSS. This application provides a seamless shopping experience for users.
 
+# [Watch the video for Website on YouTube](https://youtu.be/BOG4rE4gvJY)
+
 ## Table of Contents
 
 - [Features](#features)
